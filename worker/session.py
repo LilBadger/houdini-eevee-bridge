@@ -19,6 +19,8 @@ from mathutils import Matrix
 import curves
 import environment
 import instances as instance_nodes
+import light_links
+import light_shaping
 import material_pool
 import materialx_material
 import meshes
@@ -71,6 +73,9 @@ class Session:
         self.subset_bindings = {}
         self.subsets = {}
         self.display = {}
+        self.categories = {}
+        self.light_links = {}
+        self.links_dirty = False
         self.topology = {}
         self.instances = {}
         self.point_instances = {}
@@ -136,11 +141,13 @@ class Session:
             if image.get('hde_ramp') and not image.users:
                 bpy.data.images.remove(image)
         for name in ('objects', 'materials', 'material_digest', 'materialx_defs', 'bindings', 'bound',
-                     'subset_bindings', 'subsets', 'display',
+                     'subset_bindings', 'subsets', 'display', 'categories', 'light_links',
                      'topology', 'visibility', 'prim_ids', 'fields', 'volume_defs', 'motion_defs', 'domes',
                      'material_warnings', 'geometry_warnings', 'exported_attributes'):
             getattr(self, name).clear()
         self.picks.reset()
+        light_links.clear(self)
+        self.links_dirty = False
         self.environment_signature = None
         self.dirty_geometry = True
         self.dirty_environment = True
@@ -359,17 +366,25 @@ class Session:
             self.domes[key] = update
             self.dirty_environment = True
             return
-        color = params.get('color', [1, 1, 1])
+        color = light_shaping.tint(self, key, kind, params, params.get('color', [1, 1, 1]))
         intensity = params.get('intensity', 1) * 2 ** params.get('exposure', 0)
+        light_type = {'rectLight': 'AREA', 'diskLight': 'AREA', 'distantLight': 'SUN',
+                      'sphereLight': 'POINT', 'cylinderLight': 'AREA'}.get(kind, 'POINT')
+        spot = light_shaping.spot(self, key, kind, params)
+        if spot is not None:
+            light_type = 'SPOT'
         obj = self.objects.get(key)
         if obj is None:
-            light_type = {'rectLight': 'AREA', 'diskLight': 'AREA', 'distantLight': 'SUN',
-                          'sphereLight': 'POINT', 'cylinderLight': 'AREA'}.get(kind, 'POINT')
             obj = bpy.data.objects.new(key, bpy.data.lights.new(key, light_type))
             self.scene.collection.objects.link(obj)
             self.objects[key] = obj
             obj.matrix_world = self.basis
-        light = obj.data
+        assign(obj.data, 'type', light_type)
+        light = obj.data   # the RNA type follows the light type
+        link = (params.get('lightLink', ''), params.get('shadowLink', ''))
+        if self.light_links.get(key, ('', '')) != link:
+            self.light_links[key] = link
+            self.links_dirty = True
         assign(light, 'color', list(color))
         # Match Blender's USD radiance -> radiant-flux conversion. Normalize is
         # essential: USD's default is radiance independent of emitter area.
@@ -388,8 +403,11 @@ class Session:
                 assign(light, 'size', params.get('width', params.get('radius', 0.5) * 2))
                 if light.shape == 'RECTANGLE':
                     assign(light, 'size_y', params.get('height', 1))
-        if light.type == 'POINT':
+        if light.type in ('POINT', 'SPOT'):
             assign(light, 'shadow_soft_size', 0. if params.get('treatAsPoint', False) else params.get('radius', 0.5))
+        if light.type == 'SPOT':
+            assign(light, 'spot_size', spot[0])
+            assign(light, 'spot_blend', spot[1])
         if light.type == 'SUN':
             assign(light, 'angle', params.get('angle', 0.53) * 0.0174532925199433)
         if 'transform' in update:
@@ -431,6 +449,9 @@ class Session:
             for image in list(bpy.data.images):
                 if image.get('hde_ramp') and not image.users:
                     bpy.data.images.remove(image)
+        if self.links_dirty:
+            light_links.sync(self)
+            self.links_dirty = False
         return errors
 
     def apply_change(self, change):
@@ -442,6 +463,11 @@ class Session:
                 animation = self.motion_defs.setdefault(change['id'], {})
                 for name in names:
                     animation[name] = change[name]
+            if 'categories' in change and self.categories.get(change['id']) != change['categories']:
+                self.categories[change['id']] = change['categories']
+                self.links_dirty = True
+            elif kind != 'light' and 'instances' in change and self.light_links:
+                self.links_dirty = True   # instance copies must join their prototype's link collections
         if kind == 'material':
             self.material(change)
         elif kind == 'mesh':
@@ -493,6 +519,8 @@ class Session:
         for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings',
                      'subsets', 'display'):
             getattr(self, name).pop(key, None)
+        if self.categories.pop(key, None) is not None or self.light_links.pop(key, None) is not None:
+            self.links_dirty = True
         self.dirty_geometry = True
 
     # ------------------------------------------------------------------ render

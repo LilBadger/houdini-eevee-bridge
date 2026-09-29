@@ -282,6 +282,13 @@ std::vector<std::pair<SdfPath, VtIntArray>> FaceSubsets(HdSceneDelegate *d, cons
     return result;
 }
 
+/// Light-link collections that include this prim (Hydra "categories").
+Json CategoriesJson(HdSceneDelegate *d, const SdfPath &id) {
+    Json result = Json::array();
+    for (const TfToken &category : d->GetCategories(id)) result.push_back(category.GetString());
+    return result;
+}
+
 const std::set<std::string> kMeshSkip = {"points", "normals", "velocities", "accelerations", "v", "accel"};
 const std::set<std::string> kPointsSkip = {"points", "widths", "normals", "velocities", "accelerations", "v", "accel"};
 
@@ -548,6 +555,7 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
     }
     if (first || (*bits & HdChangeTracker::DirtyVisibility)) change.json["visible"] = d->GetVisible(id);
     if (first || (*bits & HdChangeTracker::DirtyMaterialId)) change.json["material"] = d->GetMaterialId(id).GetString();
+    if (first || (*bits & HdChangeTracker::DirtyCategories)) change.json["categories"] = CategoriesJson(d, id);
     _synced = true;
     if (change.json.size() > 2) _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;
@@ -572,7 +580,8 @@ void EeveeCurves::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"type", topology.GetCurveType().GetString()},
         {"wrap", topology.GetCurveWrap().GetString()},
         {"transform", MatrixJson(d->GetTransform(id))},
-        {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()}};
+        {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()},
+        {"categories", CategoriesJson(d, id)}};
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
     // Curves are re-sent whole, so every primvar is sent with them.
@@ -597,7 +606,8 @@ void EeveePoints::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
     if (!points) points = CopyBlob(std::vector<float>{}, "f4", {0, 3});
     change.json = {{"kind", "points"}, {"id", id.GetString()}, {"prim_id", GetPrimId()},
         {"points", change.Ref(points)}, {"transform", MatrixJson(d->GetTransform(id))},
-        {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()}};
+        {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()},
+        {"categories", CategoriesJson(d, id)}};
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
     SentArrays sent;
@@ -616,9 +626,18 @@ void EeveeLight::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits) {
     Json params = Json::object();
     for (const char *key : {"intensity", "exposure", "color", "width", "height", "radius", "length", "angle", "normalize",
                             "diffuse", "specular", "treatAsPoint", "texture:file", "texture:format", "domeOffset",
-                            "enableColorTemperature", "colorTemperature", "poleAxis"}) {
+                            "enableColorTemperature", "colorTemperature", "poleAxis",
+                            "shaping:cone:angle", "shaping:cone:softness", "shaping:focus",
+                            "shaping:ies:file", "shaping:ies:angleScale", "shaping:ies:normalize"}) {
         auto v = ValueJson(d->GetLightParamValue(id, TfToken(key)));
         if (!v.is_null()) params[key] = v;
+    }
+    // Light and shadow linking: the collection each link uses. Prims list the
+    // collections that include them as categories (see CategoriesJson).
+    for (const TfToken &key : {HdTokens->lightLink, HdTokens->shadowLink}) {
+        const VtValue link = d->GetLightParamValue(id, key);
+        if (link.IsHolding<TfToken>() && !link.UncheckedGet<TfToken>().IsEmpty())
+            params[key.GetString()] = link.UncheckedGet<TfToken>().GetString();
     }
     Change change;
     change.json = {{"kind", "light"}, {"id", id.GetString()}, {"type", _type.GetString()},
@@ -727,6 +746,7 @@ void EeveeVolume::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
     Change change;
     change.json = {{"kind", "volume"}, {"id", GetId().GetString()}, {"prim_id", GetPrimId()}, {"fields", fields},
         {"visible", d->GetVisible(GetId())}, {"material", d->GetMaterialId(GetId()).GetString()},
+        {"categories", CategoriesJson(d, GetId())},
         {"transform", MatrixJson(d->GetTransform(GetId()))},
         {"transform_samples", TransformSamples(d, GetId(), _state->MotionExtent())}};
     _state->Queue(std::move(change));

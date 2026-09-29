@@ -9,6 +9,10 @@
       "HdEevee_ImplicitSurfaceSceneIndexPlugin": {
         "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
         "priority": 0, "displayName": "EEVEE implicit surfaces to meshes"
+      },
+      "HdEevee_LightLinkingSceneIndexPlugin": {
+        "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
+        "priority": 0, "displayName": "EEVEE light and shadow linking"
       }
     }}
   }]
