@@ -119,10 +119,11 @@ class Worker:
                           'backend': gpu.platform.backend_type_get()}), flush=True)
 
     def set_texture_limit(self, pixels):
-        """Viewport texture size limit (worker-wide; disk renders use their own workers)."""
-        choices = {0: 'CLAMP_OFF', 8192: 'CLAMP_8192', 4096: 'CLAMP_4096', 2048: 'CLAMP_2048',
-                   1024: 'CLAMP_1024', 512: 'CLAMP_512'}
-        wanted = choices.get(pixels, 'CLAMP_OFF')
+        """Longest texture side on the GPU; aspect ratios are kept. Worker-wide: disk
+        renders use their own workers. Blender applies it to viewport and final renders."""
+        # Blender offers fixed sizes; a studio value such as 3000 uses the next smaller one.
+        sizes = (8192, 4096, 2048, 1024, 512)
+        wanted = 'CLAMP_OFF' if pixels <= 0 else 'CLAMP_%d' % next((s for s in sizes if s <= pixels), 512)
         system = bpy.context.preferences.system
         if system.gl_texture_limit == wanted:
             return
