@@ -60,7 +60,7 @@ def sync(worker, configuration):
             if projection not in ('automatic','latlong','mirroredBall'):
                 raise ValueError('Dome Light '+definition['id']+': unsupported HDRI format '+projection+'; use latlong or mirroredBall.')
             texture.projection='MIRROR_BALL' if projection=='mirroredBall' else 'EQUIRECTANGULAR'
-            texture.image=image_file(filename,params.get('colorSpace:texture:file','auto'))
+            texture.image=image_file(filename,params.get('colorSpace:texture:file','auto'),half=False)
             coordinate=tree.nodes.new('ShaderNodeTexCoord')
             direction=matrix_vector(tree,direction_matrix(definition,worker.basis,worker.up_axis),coordinate.outputs['Generated'])
             feed(tree,texture.inputs['Vector'],direction)

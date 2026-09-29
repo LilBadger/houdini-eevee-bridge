@@ -756,8 +756,14 @@ class Session:
         if self.dirty_environment:
             environment.sync(self, config.get('environment', {}))
             self.dirty_environment = False
-        if not final:
-            self.worker.set_texture_limit(int(request.get('texture_limit', 0) or 0))
+        # EEVEE Render Settings limit textures in the viewport and/or final renders;
+        # without it, the viewport uses the delegate's limit and final renders full size.
+        limits = config.get('texture_limit')
+        if isinstance(limits, dict):
+            limit = int(limits.get('size', 0)) if limits.get('render' if final else 'viewport') else 0
+        else:
+            limit = 0 if final else int(request.get('texture_limit', 0) or 0)
+        self.worker.set_texture_limit(limit)
         with bpy.context.temp_override(window=self.worker.window, area=self.worker.eevee_area,
                                        region=self.worker.eevee_region):
             self.view_layer.depsgraph.update()

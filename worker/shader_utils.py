@@ -9,8 +9,14 @@ class Channels(tuple):
     """Four independent shader values; Blender color sockets discard alpha."""
 
 
-def image_file(filename, color_space='auto'):
-    """Load a texture without changing the color space of another material's image."""
+# Float textures use 16-bit floats on the GPU: half the memory of 32-bit, with no
+# visible difference in a texture. HDEEVEE_FULL_PRECISION_TEXTURES=1 keeps 32-bit.
+HALF_PRECISION = os.environ.get('HDEEVEE_FULL_PRECISION_TEXTURES') != '1'
+
+
+def image_file(filename, color_space='auto', half=True):
+    """Load a texture without changing the color space of another material's image.
+    half=False keeps 32-bit floats, for HDRIs whose sun can exceed the 16-bit range."""
     filename = os.path.normpath(filename)
     udim = '<UDIM>' in filename or '%(UDIM)d' in filename
     if udim:
@@ -26,7 +32,7 @@ def image_file(filename, color_space='auto'):
                'srgb_texture':'sRGB', 'srgb_rec709_scene':'sRGB', 'sRGB':'sRGB'}
     wanted = aliases.get(color_space,color_space)
     for image in bpy.data.images:
-        if image.get('hde_file') == filename and image.get('hde_color_space') == wanted:
+        if image.get('hde_file') == filename and image.get('hde_color_space') == wanted and image.get('hde_half', True) == half:
             return image
     try:
         image = bpy.data.images.load(first, check_existing=False)
@@ -44,7 +50,8 @@ def image_file(filename, color_space='auto'):
             for path in matches:
                 number = int(pattern.fullmatch(path)[1])
                 if number not in {tile.number for tile in image.tiles}: image.tiles.new(number)
-        image['hde_file'], image['hde_color_space'] = filename, wanted or 'auto'
+        image.use_half_precision = half and HALF_PRECISION
+        image['hde_file'], image['hde_color_space'], image['hde_half'] = filename, wanted or 'auto', half
         return image
     except Exception:
         bpy.data.images.remove(image)

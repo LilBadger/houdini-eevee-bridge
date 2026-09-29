@@ -87,6 +87,12 @@ def is_running(worker):
     return process is not None and process.poll() is None
 
 
+def exit_code(worker):
+    """The exit code of a worker this caller started, or None while it runs."""
+    process = _processes.get(worker['pid'])
+    return None if process is None else process.poll()
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--socket', help='Optional legacy development socket')

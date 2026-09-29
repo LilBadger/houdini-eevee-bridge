@@ -35,12 +35,12 @@ OpenEXR currently publishes wheels up to Python 3.13. Some Linux distributions b
 
 ### From the prebuilt release (any Houdini 22.0 build)
 
-1. Download `houdini-eevee-0.7.1-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.7.2-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it and run the installer:
 
    ```bash
-   unzip houdini-eevee-0.7.1-linux-x86_64.zip
-   cd houdini-eevee-0.7.1-linux-x86_64
+   unzip houdini-eevee-0.7.2-linux-x86_64.zip
+   cd houdini-eevee-0.7.2-linux-x86_64
    bash install.sh
    ```
 
@@ -56,7 +56,7 @@ cd houdini-eevee-bridge
 bash install.sh
 ```
 
-With no prebuilt plugin in the folder, the installer compiles one. You can also run `install.sh` from the extracted source archive, `houdini-eevee-0.7.1-source.zip`.
+With no prebuilt plugin in the folder, the installer compiles one. You can also run `install.sh` from the extracted source archive, `houdini-eevee-0.7.2-source.zip`.
 
 ### When Houdini or Blender are not found
 
@@ -70,14 +70,24 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 > Tested on Windows 11 with Houdini 22.0.368, Blender 5.2.0 LTS and Visual Studio 2022 Build Tools (MSVC 19.44). The plugin builds, and the doctor passes, including an EEVEE render on the GPU. Interactive use in a Houdini viewport on Windows hasn't been confirmed yet, so please report what you find.
 
-### From the prebuilt release (any Houdini 22.0 build)
+### With the setup program (any Houdini 22.0 build)
 
-1. Download `houdini-eevee-0.7.1-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
+1. Close Houdini.
+2. Download `houdini-eevee-0.7.2-windows-x86_64-setup.exe` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases) and run it. It needs no administrator rights. The setup is not code-signed, so Windows SmartScreen may warn about an unknown publisher; choose *More info › Run anyway*.
+3. The setup runs the installer described below and shows its progress. Once the new version has passed its checks, it removes older EEVEE Bridge versions.
+
+To uninstall, use Settings › Apps › *EEVEE Bridge for Houdini*. It removes every installed version, the Houdini package registration, logs and caches.
+
+### From the prebuilt zip (any Houdini 22.0 build)
+
+1. Download `houdini-eevee-0.7.2-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it, and in the extracted folder run:
 
    ```bat
    install.cmd
    ```
+
+   To replace older versions in the same step, run `install.cmd --remove-old`.
 
 3. Restart Houdini.
 
@@ -89,7 +99,7 @@ The prebuilt plugin is compiled for **Houdini 22.0.368** with MSVC 19.42, the sa
 ### From source (any Houdini 22.0 build)
 
 1. Install Houdini 22.0, Blender 5.2, and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. A separate [CMake](https://cmake.org/download/) is optional.
-2. Download `houdini-eevee-0.7.1-source.zip` (or clone the repository) and extract it.
+2. Download `houdini-eevee-0.7.2-source.zip` (or clone the repository) and extract it.
 3. In the extracted folder, run:
 
    ```bat
@@ -120,8 +130,8 @@ Adjust the path to Houdini's bundled Python for your version. The resulting arch
 2. It finds Blender 5.2 and checks for EEVEE, OpenVDB, NumPy and OpenEXR. If Python modules are missing, it installs them privately.
 3. It uses the prebuilt plugin when it was compiled for your Houdini build. For another 22.0 build it compiles the plugin if build tools are available, and otherwise uses the prebuilt plugin only if the test render in step 5 succeeds.
 4. It copies everything to a new, versioned folder:
-   - Linux: `~/.local/share/houdini-eevee/0.7.1-h22.0.368`
-   - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.7.1-h22.0.368`
+   - Linux: `~/.local/share/houdini-eevee/0.7.2-h22.0.368`
+   - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.7.2-h22.0.368`
 5. It starts a Blender worker and renders a small test image with EEVEE on your GPU, then renders a test scene with `husk` through the EEVEE plugin in your Houdini, ignoring other installed packages. Use `--no-gpu-check` to skip this on a machine without a GPU.
 6. It writes `houdini_eevee.json` to your Houdini packages folder:
    - Linux: `~/houdini22.0/packages`
@@ -147,7 +157,7 @@ The installed startup hook, `scripts/python/uiready.py`, only adds to Houdini's 
 From the **installed** folder, run the doctor:
 
 ```bash
-cd ~/.local/share/houdini-eevee/0.7.1-h22.0.368
+cd ~/.local/share/houdini-eevee/0.7.2-h22.0.368
 python3 install.py --doctor
 ```
 
@@ -180,7 +190,11 @@ Each run writes a log to `~/.cache/houdini-eevee/logs/doctor-*.log`.
 | `--dry-run` | Show what would be installed, and where, without doing it. |
 | `--doctor` | Check this installed copy (run it from the installed folder). |
 | `--uninstall` | Remove this copy's package registration (run it from the installed folder). |
-| `--rollback [VERSION]` | Restore the registration that the last install replaced, or a specific earlier one such as `0.7.0-h22.0.368`. |
+| `--uninstall-all` | Remove every installed version, the package registration and its backups, logs and caches. `uninstall.cmd` and `uninstall.sh` run this. |
+| `--remove-old` | After a successful install, delete the previously installed versions. |
+| `--reinstall` | Replace an existing install of the same version (Houdini must be closed). |
+| `--yes` | Do not ask before removing files. |
+| `--rollback [VERSION]` | Restore the registration that the last install replaced, or a specific earlier one such as `0.7.1-h22.0.368`. |
 
 ## 8. Choosing the GPU
 
@@ -198,24 +212,28 @@ To list devices yourself, run `blender --background --gpu-backend vulkan --gpu-d
 
 **Updating.** Run the new release's installer. Each version installs into its own folder, and existing installs are never overwritten, because a running Houdini may have their plugin loaded. The package registration switches to the new version only after the new copy passes its checks. Restart Houdini to use it.
 
-**Reinstalling the same version.** The installer refuses to overwrite an existing folder. Either remove the old folder first (with Houdini closed), or pass a different `--prefix`.
+**Reinstalling the same version.** The installer refuses to overwrite an existing folder, because a running Houdini may be using it. Close Houdini and pass `--reinstall`, or pass a different `--prefix`.
+
+**Removing old versions.** `--remove-old` deletes the previously installed versions once the new one is installed and registered. It also deletes their rollback registrations. The Windows setup program does this automatically.
 
 **Rolling back.** Every replaced registration is kept next to the package as `houdini_eevee.json.<version>` and `houdini_eevee.json.previous`:
 
 ```bash
 python3 install.py --rollback                   # the registration the last install replaced
-python3 install.py --rollback 0.7.0-h22.0.368   # a specific earlier version
+python3 install.py --rollback 0.7.1-h22.0.368   # a specific earlier version
 ```
 
 Restart Houdini afterwards.
 
-**Uninstalling.** Run this from the installed folder:
+**Uninstalling.** With Houdini closed, run `uninstall.cmd` on Windows or `bash uninstall.sh` on Linux, from a release folder or an installed copy. If you used the setup program, use Settings › Apps instead. It lists what it removes and asks first:
 
-```bash
-python3 install.py --uninstall
-```
+- every installed EEVEE Bridge version: folders written by this installer only, including ones installed with `--prefix`
+- the Houdini package registration and its rollback copies
+- logs and session caches
 
-It removes the package registration and leaves the files in place. After restarting Houdini, you can delete the install folder, and optionally `~/.cache/houdini-eevee` (on Windows, `%LOCALAPPDATA%\HoudiniEEVEE`). `--uninstall` does not remove a registration that now belongs to another install.
+Other files and Houdini packages are never touched. `--dry-run` only lists, and `--yes` skips the question.
+
+To unregister a single copy but keep its files, run `python3 install.py --uninstall` from that installed folder. It does not remove a registration that now belongs to another install.
 
 ## 10. Render farms
 
@@ -244,7 +262,10 @@ Set these in Houdini's environment, for example in the shell that launches Houdi
 | `HDEEVEE_GPU_BACKEND` | `vulkan` (default) or `opengl`. |
 | `HDEEVEE_GPU_SUBDIVISION` | `1` uses Blender's GPU subdivision in the viewport. |
 | `HDEEVEE_CACHE_ROOT` | Folder for logs and per-session files, for example a local scratch disk on render nodes. |
+| `HDEEVEE_TEXTURE_LIMIT` | Largest texture side, in pixels, in viewports whose stage has no EEVEE Render Settings (default 2048; `0` is full resolution). Set it studio-wide in `houdini.env` or a package. |
+| `HDEEVEE_FULL_PRECISION_TEXTURES` | `1` keeps float textures in 32-bit instead of half precision, which uses twice the video memory. |
 | `HDEEVEE_IDLE_TARGET_SECONDS` | Seconds before idle viewport render targets release their video memory (default 60). |
+| `HDEEVEE_IDLE_EXIT_SECONDS` | Seconds after the last EEVEE viewport closes (for example, when you switch to Karma) before the worker exits and frees all its video memory (default 2). It starts again when a viewport uses EEVEE. `0` keeps it running for the whole Houdini session, which avoids the restart and shader compilation when you switch back. |
 | `HDEEVEE_COLOR_FORMAT` | `float` sends 32-bit viewport color instead of 16-bit half floats. |
 | `HDEEVEE_PYTHON_DEPS` | Folder with OpenEXR, Imath and NumPy modules for Blender's Python. |
 | `HDEEVEE_KEEP_SESSION_DAYS` | Days before an unused session folder is removed (default 7). |
