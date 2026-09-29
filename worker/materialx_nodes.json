@@ -1,0 +1,10233 @@
+{
+  "ND_surface_unlit": {
+    "inputs": {
+      "emission": {
+        "type": "float",
+        "value": 1.0
+      },
+      "emission_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "transmission": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "opacity": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "surface_unlit"
+  },
+  "ND_image_float": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "layer": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "vaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "image"
+  },
+  "ND_image_color3": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "layer": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "vaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "image"
+  },
+  "ND_image_color4": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "layer": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "vaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "image"
+  },
+  "ND_image_vector2": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "layer": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "vaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "image"
+  },
+  "ND_image_vector3": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "layer": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "vaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "image"
+  },
+  "ND_image_vector4": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "layer": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "vaddressmode": {
+        "type": "string",
+        "value": "periodic"
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "image"
+  },
+  "ND_tiledimage_float": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "default": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uvtiling": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "uvoffset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "realworldimagesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "realworldtilesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "tiledimage"
+  },
+  "ND_tiledimage_color3": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "default": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uvtiling": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "uvoffset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "realworldimagesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "realworldtilesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "tiledimage"
+  },
+  "ND_tiledimage_color4": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "default": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uvtiling": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "uvoffset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "realworldimagesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "realworldtilesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "tiledimage"
+  },
+  "ND_tiledimage_vector2": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "default": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uvtiling": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "uvoffset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "realworldimagesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "realworldtilesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "tiledimage"
+  },
+  "ND_tiledimage_vector3": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "default": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uvtiling": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "uvoffset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "realworldimagesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "realworldtilesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "tiledimage"
+  },
+  "ND_tiledimage_vector4": {
+    "inputs": {
+      "file": {
+        "type": "filename",
+        "value": ""
+      },
+      "default": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "uvtiling": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "uvoffset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "realworldimagesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "realworldtilesize": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "filtertype": {
+        "type": "string",
+        "value": "linear"
+      },
+      "framerange": {
+        "type": "string",
+        "value": ""
+      },
+      "frameoffset": {
+        "type": "integer",
+        "value": 0
+      },
+      "frameendaction": {
+        "type": "string",
+        "value": "constant"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "tiledimage"
+  },
+  "ND_constant_float": {
+    "inputs": {
+      "value": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_color3": {
+    "inputs": {
+      "value": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_color4": {
+    "inputs": {
+      "value": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_vector2": {
+    "inputs": {
+      "value": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_vector3": {
+    "inputs": {
+      "value": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_vector4": {
+    "inputs": {
+      "value": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_boolean": {
+    "inputs": {
+      "value": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "boolean"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_integer": {
+    "inputs": {
+      "value": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_string": {
+    "inputs": {
+      "value": {
+        "type": "string",
+        "value": ""
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "string"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_constant_filename": {
+    "inputs": {
+      "value": {
+        "type": "filename",
+        "value": ""
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "filename"
+      }
+    },
+    "node": "constant"
+  },
+  "ND_noise2d_float": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_color3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_color4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_vector2": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_vector3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_vector4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_color3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_color4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_vector2FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_vector3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise2d_vector4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "noise2d"
+  },
+  "ND_noise3d_float": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_color3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_color4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_vector2": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_vector3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_vector4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_color3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_color4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_vector2FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_vector3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_noise3d_vector4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "pivot": {
+        "type": "float",
+        "value": 0.0
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "noise3d"
+  },
+  "ND_fractal2d_float": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_color3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_color4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_vector2": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_vector3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_vector4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_color3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_color4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_vector2FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_vector3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal2d_vector4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "fractal2d"
+  },
+  "ND_fractal3d_float": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_color3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_color4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_vector2": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_vector3": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_vector4": {
+    "inputs": {
+      "amplitude": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_color3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_color4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_vector2FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_vector3FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_fractal3d_vector4FA": {
+    "inputs": {
+      "amplitude": {
+        "type": "float",
+        "value": 1.0
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "fractal3d"
+  },
+  "ND_cellnoise2d_float": {
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "cellnoise2d"
+  },
+  "ND_cellnoise3d_float": {
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "cellnoise3d"
+  },
+  "ND_worleynoise2d_float": {
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "worleynoise2d"
+  },
+  "ND_worleynoise2d_vector2": {
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "worleynoise2d"
+  },
+  "ND_worleynoise2d_vector3": {
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "worleynoise2d"
+  },
+  "ND_worleynoise3d_float": {
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "worleynoise3d"
+  },
+  "ND_worleynoise3d_vector2": {
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "worleynoise3d"
+  },
+  "ND_worleynoise3d_vector3": {
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "worleynoise3d"
+  },
+  "ND_unifiednoise2d_float": {
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "freq": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outmin": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outmax": {
+        "type": "float",
+        "value": 1.0
+      },
+      "clampoutput": {
+        "type": "boolean",
+        "value": true
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "type": {
+        "type": "integer",
+        "value": 0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "unifiednoise2d"
+  },
+  "ND_unifiednoise3d_float": {
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "freq": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outmin": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outmax": {
+        "type": "float",
+        "value": 1.0
+      },
+      "clampoutput": {
+        "type": "boolean",
+        "value": true
+      },
+      "octaves": {
+        "type": "integer",
+        "value": 3
+      },
+      "lacunarity": {
+        "type": "float",
+        "value": 2.0
+      },
+      "diminish": {
+        "type": "float",
+        "value": 0.5
+      },
+      "type": {
+        "type": "integer",
+        "value": 0
+      },
+      "style": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "unifiednoise3d"
+  },
+  "ND_position_vector3": {
+    "inputs": {
+      "space": {
+        "type": "string",
+        "value": "object"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "position"
+  },
+  "ND_normal_vector3": {
+    "inputs": {
+      "space": {
+        "type": "string",
+        "value": "object"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "normal"
+  },
+  "ND_texcoord_vector2": {
+    "inputs": {
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "texcoord"
+  },
+  "ND_texcoord_vector3": {
+    "inputs": {
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "texcoord"
+  },
+  "ND_geompropvalue_integer": {
+    "inputs": {
+      "geomprop": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "geompropvalue"
+  },
+  "ND_geompropvalue_boolean": {
+    "inputs": {
+      "geomprop": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "boolean"
+      }
+    },
+    "node": "geompropvalue"
+  },
+  "ND_geompropvalue_float": {
+    "inputs": {
+      "geomprop": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "geompropvalue"
+  },
+  "ND_geompropvalue_color3": {
+    "inputs": {
+      "geomprop": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "geompropvalue"
+  },
+  "ND_geompropvalue_vector2": {
+    "inputs": {
+      "geomprop": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "geompropvalue"
+  },
+  "ND_geompropvalue_vector3": {
+    "inputs": {
+      "geomprop": {
+        "type": "string",
+        "value": ""
+      },
+      "default": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "geompropvalue"
+  },
+  "ND_bump_vector3": {
+    "inputs": {
+      "height": {
+        "type": "float",
+        "value": 0.0
+      },
+      "scale": {
+        "type": "float",
+        "value": 1.0
+      },
+      "normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "tangent": {
+        "type": "vector3",
+        "geomprop": "Tworld"
+      },
+      "bitangent": {
+        "type": "vector3",
+        "geomprop": "Bworld"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "bump"
+  },
+  "ND_add_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_integer": {
+    "inputs": {
+      "in1": {
+        "type": "integer",
+        "value": 0
+      },
+      "in2": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "add"
+  },
+  "ND_add_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "add"
+  },
+  "ND_subtract_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_integer": {
+    "inputs": {
+      "in1": {
+        "type": "integer",
+        "value": 0
+      },
+      "in2": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_subtract_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "subtract"
+  },
+  "ND_multiply_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_multiply_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "multiply"
+  },
+  "ND_divide_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_divide_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "divide"
+  },
+  "ND_invert_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      },
+      "amount": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_color3FA": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_color4FA": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_vector2FA": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_vector3FA": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_invert_vector4FA": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "invert"
+  },
+  "ND_absval_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "absval"
+  },
+  "ND_absval_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "absval"
+  },
+  "ND_absval_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "absval"
+  },
+  "ND_absval_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "absval"
+  },
+  "ND_absval_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "absval"
+  },
+  "ND_absval_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "absval"
+  },
+  "ND_floor_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_floor_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_floor_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_floor_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_floor_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_floor_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_floor_integer": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "floor"
+  },
+  "ND_ceil_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_ceil_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_ceil_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_ceil_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_ceil_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_ceil_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_ceil_integer": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "ceil"
+  },
+  "ND_round_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "round"
+  },
+  "ND_round_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "round"
+  },
+  "ND_round_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "round"
+  },
+  "ND_round_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "round"
+  },
+  "ND_round_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "round"
+  },
+  "ND_round_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "round"
+  },
+  "ND_round_integer": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "round"
+  },
+  "ND_power_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "power"
+  },
+  "ND_power_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "power"
+  },
+  "ND_sin_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "sin"
+  },
+  "ND_cos_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "cos"
+  },
+  "ND_tan_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "tan"
+  },
+  "ND_asin_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "asin"
+  },
+  "ND_acos_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "acos"
+  },
+  "ND_atan2_float": {
+    "inputs": {
+      "iny": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inx": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "atan2"
+  },
+  "ND_sin_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "sin"
+  },
+  "ND_cos_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "cos"
+  },
+  "ND_tan_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "tan"
+  },
+  "ND_asin_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "asin"
+  },
+  "ND_acos_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "acos"
+  },
+  "ND_atan2_vector2": {
+    "inputs": {
+      "iny": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inx": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "atan2"
+  },
+  "ND_sin_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "sin"
+  },
+  "ND_cos_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "cos"
+  },
+  "ND_tan_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "tan"
+  },
+  "ND_asin_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "asin"
+  },
+  "ND_acos_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "acos"
+  },
+  "ND_atan2_vector3": {
+    "inputs": {
+      "iny": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inx": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "atan2"
+  },
+  "ND_sin_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "sin"
+  },
+  "ND_cos_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "cos"
+  },
+  "ND_tan_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "tan"
+  },
+  "ND_asin_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "asin"
+  },
+  "ND_acos_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "acos"
+  },
+  "ND_atan2_vector4": {
+    "inputs": {
+      "iny": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inx": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "atan2"
+  },
+  "ND_sqrt_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "sqrt"
+  },
+  "ND_ln_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "ln"
+  },
+  "ND_exp_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "exp"
+  },
+  "ND_sqrt_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "sqrt"
+  },
+  "ND_ln_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "ln"
+  },
+  "ND_exp_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "exp"
+  },
+  "ND_sqrt_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "sqrt"
+  },
+  "ND_ln_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "ln"
+  },
+  "ND_exp_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "exp"
+  },
+  "ND_sqrt_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "sqrt"
+  },
+  "ND_ln_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "ln"
+  },
+  "ND_exp_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "exp"
+  },
+  "ND_sign_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "sign"
+  },
+  "ND_sign_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "sign"
+  },
+  "ND_sign_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "sign"
+  },
+  "ND_sign_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "sign"
+  },
+  "ND_sign_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "sign"
+  },
+  "ND_sign_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "sign"
+  },
+  "ND_clamp_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      },
+      "low": {
+        "type": "float",
+        "value": 0.0
+      },
+      "high": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "high": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "high": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "high": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "high": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "high": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_color3FA": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "float",
+        "value": 0.0
+      },
+      "high": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_color4FA": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "float",
+        "value": 0.0
+      },
+      "high": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_vector2FA": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "float",
+        "value": 0.0
+      },
+      "high": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_vector3FA": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "float",
+        "value": 0.0
+      },
+      "high": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_clamp_vector4FA": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "low": {
+        "type": "float",
+        "value": 0.0
+      },
+      "high": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "clamp"
+  },
+  "ND_min_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "min"
+  },
+  "ND_min_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "min"
+  },
+  "ND_max_float": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_color3": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_color4": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_color3FA": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_color4FA": {
+    "inputs": {
+      "in1": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_vector2FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_vector3FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "max"
+  },
+  "ND_max_vector4FA": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "max"
+  },
+  "ND_normalize_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "normalize"
+  },
+  "ND_normalize_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "normalize"
+  },
+  "ND_normalize_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "normalize"
+  },
+  "ND_magnitude_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "magnitude"
+  },
+  "ND_magnitude_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "magnitude"
+  },
+  "ND_magnitude_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "magnitude"
+  },
+  "ND_dotproduct_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "dotproduct"
+  },
+  "ND_dotproduct_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "dotproduct"
+  },
+  "ND_dotproduct_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "dotproduct"
+  },
+  "ND_crossproduct_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "crossproduct"
+  },
+  "ND_transformpoint_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "fromspace": {
+        "type": "string",
+        "value": ""
+      },
+      "tospace": {
+        "type": "string",
+        "value": ""
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "transformpoint"
+  },
+  "ND_transformvector_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "fromspace": {
+        "type": "string",
+        "value": ""
+      },
+      "tospace": {
+        "type": "string",
+        "value": ""
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "transformvector"
+  },
+  "ND_normalmap_float": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.5,
+          0.5,
+          1.0
+        ]
+      },
+      "scale": {
+        "type": "float",
+        "value": 1.0
+      },
+      "normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "tangent": {
+        "type": "vector3",
+        "geomprop": "Tworld"
+      },
+      "bitangent": {
+        "type": "vector3",
+        "geomprop": "Bworld"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "normalmap"
+  },
+  "ND_normalmap_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.5,
+          0.5,
+          1.0
+        ]
+      },
+      "scale": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "tangent": {
+        "type": "vector3",
+        "geomprop": "Tworld"
+      },
+      "bitangent": {
+        "type": "vector3",
+        "geomprop": "Bworld"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "normalmap"
+  },
+  "ND_rotate2d_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "rotate2d"
+  },
+  "ND_rotate3d_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "amount": {
+        "type": "float",
+        "value": 0.0
+      },
+      "axis": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "rotate3d"
+  },
+  "ND_place2d_vector2": {
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "pivot": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "scale": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "rotate": {
+        "type": "float",
+        "value": 0.0
+      },
+      "offset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "operationorder": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "place2d"
+  },
+  "ND_remap_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_color3FA": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_color4FA": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_vector2FA": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_vector3FA": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_remap_vector4FA": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "remap"
+  },
+  "ND_luminance_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "lumacoeffs": {
+        "type": "color3",
+        "value": [
+          0.2722287,
+          0.6740818,
+          0.0536895
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "luminance"
+  },
+  "ND_luminance_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "lumacoeffs": {
+        "type": "color3",
+        "value": [
+          0.2722287,
+          0.6740818,
+          0.0536895
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "luminance"
+  },
+  "ND_range_float": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "gamma": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "gamma": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "gamma": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "gamma": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inhigh": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "gamma": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "outlow": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "outhigh": {
+        "type": "vector4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_color3FA": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_color4FA": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_vector2FA": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_vector3FA": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "range"
+  },
+  "ND_range_vector4FA": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "inlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "inhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "outlow": {
+        "type": "float",
+        "value": 0.0
+      },
+      "outhigh": {
+        "type": "float",
+        "value": 1.0
+      },
+      "doclamp": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "range"
+  },
+  "ND_colorcorrect_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "hue": {
+        "type": "float",
+        "value": 0.0
+      },
+      "saturation": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "lift": {
+        "type": "float",
+        "value": 0.0
+      },
+      "gain": {
+        "type": "float",
+        "value": 1.0
+      },
+      "contrast": {
+        "type": "float",
+        "value": 1.0
+      },
+      "contrastpivot": {
+        "type": "float",
+        "value": 0.5
+      },
+      "exposure": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "colorcorrect"
+  },
+  "ND_colorcorrect_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          1.0,
+          1.0,
+          1.0,
+          0.0
+        ]
+      },
+      "hue": {
+        "type": "float",
+        "value": 0.0
+      },
+      "saturation": {
+        "type": "float",
+        "value": 1.0
+      },
+      "gamma": {
+        "type": "float",
+        "value": 1.0
+      },
+      "lift": {
+        "type": "float",
+        "value": 0.0
+      },
+      "gain": {
+        "type": "float",
+        "value": 1.0
+      },
+      "contrast": {
+        "type": "float",
+        "value": 1.0
+      },
+      "contrastpivot": {
+        "type": "float",
+        "value": 0.5
+      },
+      "exposure": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "colorcorrect"
+  },
+  "ND_mix_float": {
+    "inputs": {
+      "fg": {
+        "type": "float",
+        "value": 0.0
+      },
+      "bg": {
+        "type": "float",
+        "value": 0.0
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_color3": {
+    "inputs": {
+      "fg": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_color3_color3": {
+    "inputs": {
+      "fg": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_color4": {
+    "inputs": {
+      "fg": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_color4_color4": {
+    "inputs": {
+      "fg": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_vector2": {
+    "inputs": {
+      "fg": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_vector2_vector2": {
+    "inputs": {
+      "fg": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_vector3": {
+    "inputs": {
+      "fg": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_vector3_vector3": {
+    "inputs": {
+      "fg": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_vector4": {
+    "inputs": {
+      "fg": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_vector4_vector4": {
+    "inputs": {
+      "fg": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "bg": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mix": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_mix_surfaceshader": {
+    "inputs": {
+      "fg": {
+        "type": "surfaceshader",
+        "value": null
+      },
+      "bg": {
+        "type": "surfaceshader",
+        "value": null
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "mix"
+  },
+  "ND_convert_float_color3": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_float_color4": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_float_vector2": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_float_vector3": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_float_vector4": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color3_color4": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color3_vector2": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color3_vector3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color3_vector4": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color4_color3": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color4_vector2": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color4_vector3": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color4_vector4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector2_color3": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector2_color4": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector2_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector2_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector3_color3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector3_color4": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector3_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector3_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector4_color3": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector4_color4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector4_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector4_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_float": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_color3": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_color4": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_vector2": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_vector3": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_vector4": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_integer": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "integer"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_float": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_color3": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_color4": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_vector2": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_vector3": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_vector4": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_boolean": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "boolean"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color3_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_color4_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_float_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector2_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector3_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_vector4_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_integer_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_convert_boolean_surfaceshader": {
+    "inputs": {
+      "in": {
+        "type": "boolean",
+        "value": false
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "convert"
+  },
+  "ND_combine2_vector2": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector2"
+      }
+    },
+    "node": "combine2"
+  },
+  "ND_combine2_color4CF": {
+    "inputs": {
+      "in1": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "combine2"
+  },
+  "ND_combine2_vector4VF": {
+    "inputs": {
+      "in1": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "combine2"
+  },
+  "ND_combine2_vector4VV": {
+    "inputs": {
+      "in1": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "in2": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "combine2"
+  },
+  "ND_combine3_color3": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in3": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    },
+    "node": "combine3"
+  },
+  "ND_combine3_vector3": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in3": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector3"
+      }
+    },
+    "node": "combine3"
+  },
+  "ND_combine4_color4": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in3": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in4": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color4"
+      }
+    },
+    "node": "combine4"
+  },
+  "ND_combine4_vector4": {
+    "inputs": {
+      "in1": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in2": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in3": {
+        "type": "float",
+        "value": 0.0
+      },
+      "in4": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "vector4"
+      }
+    },
+    "node": "combine4"
+  },
+  "ND_extract_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "extract"
+  },
+  "ND_extract_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "extract"
+  },
+  "ND_extract_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      },
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "extract"
+  },
+  "ND_extract_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "extract"
+  },
+  "ND_extract_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "index": {
+        "type": "integer",
+        "value": 0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    },
+    "node": "extract"
+  },
+  "ND_separate2_vector2": {
+    "inputs": {
+      "in": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "outx": {
+        "type": "float"
+      },
+      "outy": {
+        "type": "float"
+      }
+    },
+    "node": "separate2"
+  },
+  "ND_separate3_color3": {
+    "inputs": {
+      "in": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "outr": {
+        "type": "float"
+      },
+      "outg": {
+        "type": "float"
+      },
+      "outb": {
+        "type": "float"
+      }
+    },
+    "node": "separate3"
+  },
+  "ND_separate3_vector3": {
+    "inputs": {
+      "in": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "outx": {
+        "type": "float"
+      },
+      "outy": {
+        "type": "float"
+      },
+      "outz": {
+        "type": "float"
+      }
+    },
+    "node": "separate3"
+  },
+  "ND_separate4_color4": {
+    "inputs": {
+      "in": {
+        "type": "color4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "outr": {
+        "type": "float"
+      },
+      "outg": {
+        "type": "float"
+      },
+      "outb": {
+        "type": "float"
+      },
+      "outa": {
+        "type": "float"
+      }
+    },
+    "node": "separate4"
+  },
+  "ND_separate4_vector4": {
+    "inputs": {
+      "in": {
+        "type": "vector4",
+        "value": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "outx": {
+        "type": "float"
+      },
+      "outy": {
+        "type": "float"
+      },
+      "outz": {
+        "type": "float"
+      },
+      "outw": {
+        "type": "float"
+      }
+    },
+    "node": "separate4"
+  },
+  "ND_standard_surface_surfaceshader": {
+    "inputs": {
+      "base": {
+        "type": "float",
+        "value": 1.0
+      },
+      "base_color": {
+        "type": "color3",
+        "value": [
+          0.8,
+          0.8,
+          0.8
+        ]
+      },
+      "diffuse_roughness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "metalness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "specular": {
+        "type": "float",
+        "value": 1.0
+      },
+      "specular_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "specular_roughness": {
+        "type": "float",
+        "value": 0.2
+      },
+      "specular_IOR": {
+        "type": "float",
+        "value": 1.5
+      },
+      "specular_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "specular_rotation": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "transmission_depth": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_scatter": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "transmission_scatter_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_dispersion": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_extra_roughness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "subsurface": {
+        "type": "float",
+        "value": 0.0
+      },
+      "subsurface_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "subsurface_radius": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "subsurface_scale": {
+        "type": "float",
+        "value": 1.0
+      },
+      "subsurface_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "sheen": {
+        "type": "float",
+        "value": 0.0
+      },
+      "sheen_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "sheen_roughness": {
+        "type": "float",
+        "value": 0.3
+      },
+      "coat": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "coat_roughness": {
+        "type": "float",
+        "value": 0.1
+      },
+      "coat_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_rotation": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_IOR": {
+        "type": "float",
+        "value": 1.5
+      },
+      "coat_normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "coat_affect_color": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_affect_roughness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "thin_film_thickness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "thin_film_IOR": {
+        "type": "float",
+        "value": 1.5
+      },
+      "emission": {
+        "type": "float",
+        "value": 0.0
+      },
+      "emission_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "opacity": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "thin_walled": {
+        "type": "boolean",
+        "value": false
+      },
+      "normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "tangent": {
+        "type": "vector3",
+        "geomprop": "Tworld"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "standard_surface"
+  },
+  "ND_standard_surface_surfaceshader_100": {
+    "inputs": {
+      "base": {
+        "type": "float",
+        "value": 0.8
+      },
+      "base_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "diffuse_roughness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "metalness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "specular": {
+        "type": "float",
+        "value": 1.0
+      },
+      "specular_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "specular_roughness": {
+        "type": "float",
+        "value": 0.2
+      },
+      "specular_IOR": {
+        "type": "float",
+        "value": 1.5
+      },
+      "specular_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "specular_rotation": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "transmission_depth": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_scatter": {
+        "type": "color3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "transmission_scatter_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_dispersion": {
+        "type": "float",
+        "value": 0.0
+      },
+      "transmission_extra_roughness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "subsurface": {
+        "type": "float",
+        "value": 0.0
+      },
+      "subsurface_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "subsurface_radius": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "subsurface_scale": {
+        "type": "float",
+        "value": 1.0
+      },
+      "subsurface_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "sheen": {
+        "type": "float",
+        "value": 0.0
+      },
+      "sheen_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "sheen_roughness": {
+        "type": "float",
+        "value": 0.3
+      },
+      "coat": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "coat_roughness": {
+        "type": "float",
+        "value": 0.1
+      },
+      "coat_anisotropy": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_rotation": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_IOR": {
+        "type": "float",
+        "value": 1.5
+      },
+      "coat_normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "coat_affect_color": {
+        "type": "float",
+        "value": 0.0
+      },
+      "coat_affect_roughness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "thin_film_thickness": {
+        "type": "float",
+        "value": 0.0
+      },
+      "thin_film_IOR": {
+        "type": "float",
+        "value": 1.5
+      },
+      "emission": {
+        "type": "float",
+        "value": 0.0
+      },
+      "emission_color": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "opacity": {
+        "type": "color3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "thin_walled": {
+        "type": "boolean",
+        "value": false
+      },
+      "normal": {
+        "type": "vector3",
+        "geomprop": "Nworld"
+      },
+      "tangent": {
+        "type": "vector3",
+        "geomprop": "Tworld"
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    },
+    "node": "standard_surface"
+  },
+  "kma_voronoinoise2d_float": {
+    "node": "karma_voronoi2d",
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "metric": {
+        "type": "integer",
+        "value": 0
+      },
+      "freq": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "distance": {
+        "type": "float"
+      },
+      "p1": {
+        "type": "vector2"
+      },
+      "p2": {
+        "type": "vector2"
+      },
+      "p3": {
+        "type": "vector2"
+      }
+    }
+  },
+  "kma_voronoinoise2d_vector2": {
+    "node": "karma_voronoi2d",
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "metric": {
+        "type": "integer",
+        "value": 0
+      },
+      "freq": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "distance": {
+        "type": "vector2"
+      },
+      "p1": {
+        "type": "vector2"
+      },
+      "p2": {
+        "type": "vector2"
+      },
+      "p3": {
+        "type": "vector2"
+      }
+    }
+  },
+  "kma_voronoinoise2d_vector3": {
+    "node": "karma_voronoi2d",
+    "inputs": {
+      "texcoord": {
+        "type": "vector2",
+        "geomprop": "UV0"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "metric": {
+        "type": "integer",
+        "value": 0
+      },
+      "freq": {
+        "type": "vector2",
+        "value": [
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector2",
+        "value": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "distance": {
+        "type": "vector3"
+      },
+      "p1": {
+        "type": "vector2"
+      },
+      "p2": {
+        "type": "vector2"
+      },
+      "p3": {
+        "type": "vector2"
+      }
+    }
+  },
+  "kma_voronoinoise3d_float": {
+    "node": "karma_voronoi3d",
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "metric": {
+        "type": "integer",
+        "value": 0
+      },
+      "freq": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "distance": {
+        "type": "float"
+      },
+      "p1": {
+        "type": "vector3"
+      },
+      "p2": {
+        "type": "vector3"
+      },
+      "p3": {
+        "type": "vector3"
+      }
+    }
+  },
+  "kma_voronoinoise3d_vector2": {
+    "node": "karma_voronoi3d",
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "metric": {
+        "type": "integer",
+        "value": 0
+      },
+      "freq": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "distance": {
+        "type": "vector2"
+      },
+      "p1": {
+        "type": "vector3"
+      },
+      "p2": {
+        "type": "vector3"
+      },
+      "p3": {
+        "type": "vector3"
+      }
+    }
+  },
+  "kma_voronoinoise3d_vector3": {
+    "node": "karma_voronoi3d",
+    "inputs": {
+      "position": {
+        "type": "vector3",
+        "geomprop": "Pobject"
+      },
+      "jitter": {
+        "type": "float",
+        "value": 1.0
+      },
+      "metric": {
+        "type": "integer",
+        "value": 0
+      },
+      "freq": {
+        "type": "vector3",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "offset": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "outputs": {
+      "distance": {
+        "type": "vector3"
+      },
+      "p1": {
+        "type": "vector3"
+      },
+      "p2": {
+        "type": "vector3"
+      },
+      "p3": {
+        "type": "vector3"
+      }
+    }
+  },
+  "kma_rampconst_float": {
+    "node": "karma_ramp",
+    "inputs": {
+      "t": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "float"
+      }
+    }
+  },
+  "kma_rampconst_color": {
+    "node": "karma_ramp",
+    "inputs": {
+      "t": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "color3"
+      }
+    }
+  },
+  "kma_hair": {
+    "node": "karma_hair",
+    "inputs": {},
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    }
+  },
+  "kma_fur_2": {
+    "node": "karma_hair",
+    "inputs": {},
+    "outputs": {
+      "out": {
+        "type": "surfaceshader"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+The node signatures/defaults in worker/materialx_nodes.json are extracted from the MaterialX 1.39 standard libraries distributed with Houdini 22.0.368.
+Source: https://github.com/AcademySoftwareFoundation/MaterialX
+Modified into a compact JSON subset by tools/generate_materialx_schema.py. No shader compiler or MaterialX runtime is bundled.
+TM & (c) Lucasfilm Entertainment Company Ltd. and Lucasfilm Ltd. All rights reserved.

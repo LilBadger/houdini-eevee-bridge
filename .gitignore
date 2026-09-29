@@ -1,0 +1,13 @@
+build/
+build-*/
+dist/
+installation.json
+dependencies/
+plugin/
+bin/
+doctor-install.log
+houdini_eevee.json
+artifacts/
+runtime/
+__pycache__/
+*.pyc

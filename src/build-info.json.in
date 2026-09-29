@@ -1,0 +1,7 @@
+{
+  "bridge_version": "@PROJECT_VERSION@",
+  "houdini_version": "@Houdini_VERSION@",
+  "system": "@CMAKE_SYSTEM_NAME@",
+  "architecture": "@CMAKE_SYSTEM_PROCESSOR@",
+  "compiler": "@CMAKE_CXX_COMPILER_ID@ @CMAKE_CXX_COMPILER_VERSION@"
+}

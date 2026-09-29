@@ -1,0 +1,59 @@
+{
+    name "EEVEE"
+    label "EEVEE Bridge"
+    parm {
+        name "eeveeUpAxis"
+        label "Scene Up Axis"
+        type ordinal
+        size 1
+        default { 0 }
+        menu { "0" "Y Up (Houdini)" "1" "Z Up" }
+        parmtag { "uiscope" "viewport" }
+    }
+    parm {
+        name "eeveeSamples"
+        label "EEVEE Samples"
+        type int
+        default { 16 }
+        range { 1! 256 }
+        help "Viewport samples when the Stage has no EEVEE Render Settings. With EEVEE Render Settings, its Viewport Samples value is used."
+        parmtag { "uiscope" "viewport toolbar" }
+    }
+    parm {
+        name "eeveeRaytracing"
+        label "EEVEE Ray Tracing"
+        type toggle
+        default { 1 }
+        parmtag { "uiscope" "viewport toolbar" }
+    }
+    parm {
+        name "eeveeNavigationScale"
+        label "Navigation Resolution"
+        type ordinal
+        size 1
+        default { 1 }
+        menu { "0" "Full" "1" "Half" "2" "Third" "3" "Quarter" }
+        help "While the camera or scene changes, EEVEE draws one sample at this fraction of the viewport resolution, then refines at full resolution once the view is still. Full disables the reduced-resolution frames."
+        parmtag { "uiscope" "viewport toolbar" }
+    }
+    parm {
+        name "eeveeTextureLimit"
+        label "Texture Size Limit"
+        type ordinal
+        size 1
+        default { 0 }
+        menu { "0" "Full Resolution" "1" "8192" "2" "4096" "3" "2048" "4" "1024" }
+        help "Largest texture size the viewport uploads to the GPU. Lower values save video memory; disk renders always use full-resolution textures."
+        parmtag { "uiscope" "viewport" }
+    }
+    parm {
+        name "eeveeSubdivisionAccuracy"
+        label "Subdivision Surfaces"
+        type ordinal
+        size 1
+        default { 0 }
+        menu { "0" "Fast (Refined Cage)" "1" "Exact (Limit Surface)" }
+        help "Fast shows the subdivided cage at the EEVEE Render Settings viewport level, like Houdini's GL viewport. Exact evaluates Blender's limit surface: identical to disk renders but far slower to build (30 s instead of under 1 s for a production shot). Disk renders always use the limit surface."
+        parmtag { "uiscope" "viewport" }
+    }
+}

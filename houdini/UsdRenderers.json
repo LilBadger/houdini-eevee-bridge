@@ -1,0 +1,23 @@
+{
+  "HdEeveeRendererPlugin": {
+    "valid": true,
+    "menulabel": "EEVEE Bridge",
+    "allowbackgroundupdate": false,
+    "pauseonupdate": false,
+    "aovsupport": true,
+    "needsdepth": false,
+    "needsselection": true,
+    "depthstyle": "opengl",
+    "defaultpurposes": ["render"],
+    "drawmodesupport": false,
+    "viewstats": ["status", "samples", "bridge_ms", "draw_ms", "readback_ms", "gpu"],
+    "statsdatapaths": {
+      "status": "status",
+      "samples": "samples",
+      "bridge_ms": "bridge_ms",
+      "draw_ms": "draw_ms",
+      "readback_ms": "readback_ms",
+      "gpu": "gpu"
+    }
+  }
+}

@@ -1,0 +1,1502 @@
+{
+  "blender": "5.2.0 LTS",
+  "groups": {
+    "eevee": [
+      {
+        "name": "gi_diffuse_bounces",
+        "label": "Diffuse Bounces",
+        "description": "Number of times the light is reinjected inside light grids, 0 disable indirect diffuse light",
+        "type": "INT",
+        "default": 3,
+        "subtype": "NONE",
+        "min": 0,
+        "max": 2147483647,
+        "soft_min": 0,
+        "soft_max": 2147483647
+      },
+      {
+        "name": "gi_cubemap_resolution",
+        "label": "Cubemap Size",
+        "description": "Size of every cubemaps",
+        "type": "ENUM",
+        "default": "512",
+        "subtype": "NONE",
+        "items": [
+          [
+            "128",
+            "128 px",
+            ""
+          ],
+          [
+            "256",
+            "256 px",
+            ""
+          ],
+          [
+            "512",
+            "512 px",
+            ""
+          ],
+          [
+            "1024",
+            "1024 px",
+            ""
+          ],
+          [
+            "2048",
+            "2048 px",
+            ""
+          ],
+          [
+            "4096",
+            "4096 px",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "gi_visibility_resolution",
+        "label": "Irradiance Visibility Size",
+        "description": "Size of the shadow map applied to each irradiance sample",
+        "type": "ENUM",
+        "default": "32",
+        "subtype": "NONE",
+        "items": [
+          [
+            "8",
+            "8 px",
+            ""
+          ],
+          [
+            "16",
+            "16 px",
+            ""
+          ],
+          [
+            "32",
+            "32 px",
+            ""
+          ],
+          [
+            "64",
+            "64 px",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "gi_glossy_clamp",
+        "label": "Clamp Glossy",
+        "description": "Clamp pixel intensity to reduce noise inside glossy reflections from reflection cubemaps (0 to disable)",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "gi_irradiance_pool_size",
+        "label": "Irradiance Pool Size",
+        "description": "Size of the irradiance pool, a bigger pool size allows for more irradiance grid in the scene but might not fit into GPU memory and decrease performance",
+        "type": "ENUM",
+        "default": "16",
+        "subtype": "NONE",
+        "items": [
+          [
+            "16",
+            "16 MB",
+            ""
+          ],
+          [
+            "32",
+            "32 MB",
+            ""
+          ],
+          [
+            "64",
+            "64 MB",
+            ""
+          ],
+          [
+            "128",
+            "128 MB",
+            ""
+          ],
+          [
+            "256",
+            "256 MB",
+            ""
+          ],
+          [
+            "512",
+            "512 MB",
+            ""
+          ],
+          [
+            "1024",
+            "1 GB",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "taa_samples",
+        "label": "Viewport Samples",
+        "description": "Number of samples, unlimited if 0",
+        "type": "INT",
+        "default": 16,
+        "subtype": "NONE",
+        "min": 0,
+        "max": 2147483647,
+        "soft_min": 0,
+        "soft_max": 2147483647
+      },
+      {
+        "name": "taa_render_samples",
+        "label": "Render Samples",
+        "description": "Number of samples per pixel for rendering",
+        "type": "INT",
+        "default": 64,
+        "subtype": "NONE",
+        "min": 1,
+        "max": 2147483647,
+        "soft_min": 1,
+        "soft_max": 2147483647
+      },
+      {
+        "name": "use_taa_reprojection",
+        "label": "Viewport Denoising",
+        "description": "Denoise image using temporal reprojection (can leave some ghosting)",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "ray_tracing_method",
+        "label": "Tracing Method",
+        "description": "Select the tracing method used to find scene-ray intersections",
+        "type": "ENUM",
+        "default": "SCREEN",
+        "subtype": "NONE",
+        "items": [
+          [
+            "PROBE",
+            "Light Probe",
+            "Use light probes to find scene intersection"
+          ],
+          [
+            "SCREEN",
+            "Screen-Trace",
+            "Raytrace against the depth buffer. Fallback to light probes for invalid rays."
+          ]
+        ]
+      },
+      {
+        "name": "use_shadow_jitter_viewport",
+        "label": "Jittered Shadows (Viewport)",
+        "description": "Enable jittered shadows on the viewport. (Jittered shadows are always enabled for final renders).",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "clamp_surface_direct",
+        "label": "Clamp Surface Direct",
+        "description": "If non-zero, the maximum value for lights contribution on a surface. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by light objects.",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "clamp_surface_indirect",
+        "label": "Clamp Surface Indirect",
+        "description": "If non-zero, the maximum value for indirect lighting on surface. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by ray-tracing and light-probes.",
+        "type": "FLOAT",
+        "default": 10.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "clamp_volume_direct",
+        "label": "Clamp Volume Direct",
+        "description": "If non-zero, the maximum value for lights contribution in volumes. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by light objects.",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "clamp_volume_indirect",
+        "label": "Clamp Volume Indirect",
+        "description": "If non-zero, the maximum value for indirect lighting in volumes. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by light-probes.",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "direct_light_intensity",
+        "label": "Direct Light Strength",
+        "description": "Scale the contribution of direct lighting",
+        "type": "FLOAT",
+        "default": 1.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.0
+      },
+      {
+        "name": "indirect_light_intensity",
+        "label": "Indirect Light Strength",
+        "description": "Scale the contribution of indirect lighting",
+        "type": "FLOAT",
+        "default": 1.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.0
+      },
+      {
+        "name": "volumetric_start",
+        "label": "Start",
+        "description": "Start distance of the volumetric effect",
+        "type": "FLOAT",
+        "default": 0.10000000149011612,
+        "subtype": "DISTANCE",
+        "min": 9.999999974752427e-07,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0010000000474974513,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "volumetric_end",
+        "label": "End",
+        "description": "End distance of the volumetric effect",
+        "type": "FLOAT",
+        "default": 100.0,
+        "subtype": "DISTANCE",
+        "min": 9.999999974752427e-07,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0010000000474974513,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "volumetric_tile_size",
+        "label": "Resolution",
+        "description": "Control the quality of the volumetric effects. Higher resolution uses more memory.",
+        "type": "ENUM",
+        "default": "8",
+        "subtype": "NONE",
+        "items": [
+          [
+            "1",
+            "1:1",
+            "Full resolution"
+          ],
+          [
+            "2",
+            "1:2",
+            "Render this effect at 50% render resolution"
+          ],
+          [
+            "4",
+            "1:4",
+            "Render this effect at 25% render resolution"
+          ],
+          [
+            "8",
+            "1:8",
+            "Render this effect at 12.5% render resolution"
+          ],
+          [
+            "16",
+            "1:16",
+            "Render this effect at 6.25% render resolution"
+          ]
+        ]
+      },
+      {
+        "name": "volumetric_samples",
+        "label": "Steps",
+        "description": "Number of steps to compute volumetric effects. Higher step count increase VRAM usage and quality.",
+        "type": "INT",
+        "default": 64,
+        "subtype": "NONE",
+        "min": 1,
+        "max": 256,
+        "soft_min": 1,
+        "soft_max": 256
+      },
+      {
+        "name": "volumetric_sample_distribution",
+        "label": "Exponential Sampling",
+        "description": "Distribute more samples closer to the camera",
+        "type": "FLOAT",
+        "default": 0.800000011920929,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      },
+      {
+        "name": "volumetric_ray_depth",
+        "label": "Volume Max Ray Depth",
+        "description": "Maximum surface intersection count used by the accurate volume intersection method. Will create artifact if it is exceeded. Higher count increases VRAM usage.",
+        "type": "INT",
+        "default": 16,
+        "subtype": "NONE",
+        "min": 1,
+        "max": 16,
+        "soft_min": 1,
+        "soft_max": 16
+      },
+      {
+        "name": "volumetric_light_clamp",
+        "label": "Clamp",
+        "description": "Maximum light contribution, reducing noise",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "use_volumetric_shadows",
+        "label": "Volumetric Shadows",
+        "description": "Cast shadows from volumetric materials onto volumetric materials (Very expensive)",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "volumetric_shadow_samples",
+        "label": "Volumetric Shadow Samples",
+        "description": "Number of samples to compute volumetric shadowing",
+        "type": "INT",
+        "default": 16,
+        "subtype": "NONE",
+        "min": 1,
+        "max": 128,
+        "soft_min": 1,
+        "soft_max": 128
+      },
+      {
+        "name": "use_volume_custom_range",
+        "label": "Volume Custom Range",
+        "description": "Enable custom start and end clip distances for volume computation",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "use_fast_gi",
+        "label": "Fast GI Approximation",
+        "description": "Use faster global illumination technique for high roughness surfaces",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "fast_gi_thickness_near",
+        "label": "Thickness",
+        "description": "Geometric thickness of the surfaces when computing fast GI and ambient occlusion. Reduces light leaking and missing contact occlusion.",
+        "type": "FLOAT",
+        "default": 0.10000000149011612,
+        "subtype": "DISTANCE",
+        "min": 0.0,
+        "max": 100000.0,
+        "soft_min": 0.0,
+        "soft_max": 100.0
+      },
+      {
+        "name": "fast_gi_quality",
+        "label": "Trace Precision",
+        "description": "Precision of the fast GI ray marching",
+        "type": "FLOAT",
+        "default": 0.25,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      },
+      {
+        "name": "fast_gi_step_count",
+        "label": "Step Count",
+        "description": "Amount of screen sample per GI ray",
+        "type": "INT",
+        "default": 8,
+        "subtype": "UNSIGNED",
+        "min": 1,
+        "max": 64,
+        "soft_min": 1,
+        "soft_max": 64
+      },
+      {
+        "name": "fast_gi_ray_count",
+        "label": "Ray Count",
+        "description": "Amount of GI ray to trace for each pixel",
+        "type": "INT",
+        "default": 2,
+        "subtype": "UNSIGNED",
+        "min": 1,
+        "max": 16,
+        "soft_min": 1,
+        "soft_max": 16
+      },
+      {
+        "name": "fast_gi_method",
+        "label": "Method",
+        "description": "Fast GI approximation method",
+        "type": "ENUM",
+        "default": "GLOBAL_ILLUMINATION",
+        "subtype": "NONE",
+        "items": [
+          [
+            "AMBIENT_OCCLUSION_ONLY",
+            "Ambient Occlusion",
+            "Use ambient occlusion instead of full global illumination"
+          ],
+          [
+            "GLOBAL_ILLUMINATION",
+            "Global Illumination",
+            "Compute global illumination taking into account light bouncing off surrounding objects"
+          ]
+        ]
+      },
+      {
+        "name": "fast_gi_distance",
+        "label": "Distance",
+        "description": "If non-zero, the maximum distance at which other surfaces will contribute to the fast GI approximation",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "DISTANCE",
+        "min": 0.0,
+        "max": 100000.0,
+        "soft_min": 0.0,
+        "soft_max": 100.0
+      },
+      {
+        "name": "fast_gi_bias",
+        "label": "Bias",
+        "description": "Bias the shading normal to reduce self intersection artifacts",
+        "type": "FLOAT",
+        "default": 0.05000000074505806,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 0.5
+      },
+      {
+        "name": "fast_gi_resolution",
+        "label": "Resolution",
+        "description": "Control the quality of the fast GI lighting. Higher resolution uses more memory.",
+        "type": "ENUM",
+        "default": "2",
+        "subtype": "NONE",
+        "items": [
+          [
+            "1",
+            "1:1",
+            "Full resolution"
+          ],
+          [
+            "2",
+            "1:2",
+            "Render this effect at 50% render resolution"
+          ],
+          [
+            "4",
+            "1:4",
+            "Render this effect at 25% render resolution"
+          ],
+          [
+            "8",
+            "1:8",
+            "Render this effect at 12.5% render resolution"
+          ],
+          [
+            "16",
+            "1:16",
+            "Render this effect at 6.25% render resolution"
+          ]
+        ]
+      },
+      {
+        "name": "bokeh_max_size",
+        "label": "Max Size",
+        "description": "Max size of the bokeh shape for the depth of field (lower is faster)",
+        "type": "FLOAT",
+        "default": 100.0,
+        "subtype": "PIXEL",
+        "min": 0.0,
+        "max": 2000.0,
+        "soft_min": 0.0,
+        "soft_max": 200.0
+      },
+      {
+        "name": "bokeh_threshold",
+        "label": "Sprite Threshold",
+        "description": "Brightness threshold for using sprite base depth of field",
+        "type": "FLOAT",
+        "default": 1.0,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 100000.0,
+        "soft_min": 0.0,
+        "soft_max": 10.0
+      },
+      {
+        "name": "bokeh_neighbor_max",
+        "label": "Neighbor Rejection",
+        "description": "Maximum brightness to consider when rejecting bokeh sprites based on neighborhood (lower is faster)",
+        "type": "FLOAT",
+        "default": 10.0,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 100000.0,
+        "soft_min": 0.0,
+        "soft_max": 40.0
+      },
+      {
+        "name": "use_bokeh_jittered",
+        "label": "Jitter Camera",
+        "description": "Jitter camera position to create accurate blurring using render samples (only for final render)",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "bokeh_overblur",
+        "label": "Over-blur",
+        "description": "Apply blur to each jittered sample to reduce under-sampling artifacts",
+        "type": "FLOAT",
+        "default": 5.0,
+        "subtype": "PERCENTAGE",
+        "min": 0.0,
+        "max": 100.0,
+        "soft_min": 0.0,
+        "soft_max": 20.0
+      },
+      {
+        "name": "motion_blur_depth_scale",
+        "label": "Bleeding Bias",
+        "description": "Lower values will reduce background bleeding onto foreground elements",
+        "type": "FLOAT",
+        "default": 100.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.009999999776482582,
+        "soft_max": 1000.0
+      },
+      {
+        "name": "motion_blur_max",
+        "label": "Max Blur",
+        "description": "Maximum blur distance a pixel can spread over",
+        "type": "INT",
+        "default": 32,
+        "subtype": "PIXEL",
+        "min": 0,
+        "max": 2048,
+        "soft_min": 0,
+        "soft_max": 512
+      },
+      {
+        "name": "motion_blur_steps",
+        "label": "Motion steps",
+        "description": "Controls accuracy of motion blur, more steps means longer render time",
+        "type": "INT",
+        "default": 1,
+        "subtype": "NONE",
+        "min": 1,
+        "max": 2147483647,
+        "soft_min": 1,
+        "soft_max": 64
+      },
+      {
+        "name": "use_shadows",
+        "label": "Shadows",
+        "description": "Enable shadow casting from lights",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "shadow_pool_size",
+        "label": "Shadow Pool Size",
+        "description": "Size of the shadow pool, a bigger pool size allows for more shadows in the scene but might not fit into GPU memory",
+        "type": "ENUM",
+        "default": "512",
+        "subtype": "NONE",
+        "items": [
+          [
+            "16",
+            "16 MB",
+            ""
+          ],
+          [
+            "32",
+            "32 MB",
+            ""
+          ],
+          [
+            "64",
+            "64 MB",
+            ""
+          ],
+          [
+            "128",
+            "128 MB",
+            ""
+          ],
+          [
+            "256",
+            "256 MB",
+            ""
+          ],
+          [
+            "512",
+            "512 MB",
+            ""
+          ],
+          [
+            "1024",
+            "1 GB",
+            ""
+          ],
+          [
+            "1536",
+            "1.5 GB",
+            ""
+          ],
+          [
+            "2048",
+            "2 GB",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "shadow_ray_count",
+        "label": "Shadow Ray Count",
+        "description": "Amount of shadow ray to trace for each light",
+        "type": "INT",
+        "default": 1,
+        "subtype": "UNSIGNED",
+        "min": 1,
+        "max": 4,
+        "soft_min": 1,
+        "soft_max": 4
+      },
+      {
+        "name": "shadow_step_count",
+        "label": "Shadow Step Count",
+        "description": "Amount of shadow map sample per shadow ray",
+        "type": "INT",
+        "default": 6,
+        "subtype": "UNSIGNED",
+        "min": 1,
+        "max": 16,
+        "soft_min": 1,
+        "soft_max": 16
+      },
+      {
+        "name": "light_threshold",
+        "label": "Light Threshold",
+        "description": "Minimum light intensity for a light to contribute to the lighting",
+        "type": "FLOAT",
+        "default": 0.009999999776482582,
+        "subtype": "UNSIGNED",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      },
+      {
+        "name": "use_overscan",
+        "label": "Overscan",
+        "description": "Internally render past the image border to avoid screen-space effects disappearing",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "overscan_size",
+        "label": "Overscan Size",
+        "description": "Percentage of render size to add as overscan to the internal render buffers",
+        "type": "FLOAT",
+        "default": 3.0,
+        "subtype": "PERCENTAGE",
+        "min": 0.0,
+        "max": 50.0,
+        "soft_min": 0.0,
+        "soft_max": 10.0
+      },
+      {
+        "name": "use_raytracing",
+        "label": "Use Ray-Tracing",
+        "description": "Enable the ray-tracing module",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "shadow_resolution_scale",
+        "label": "Shadows Resolution Scale",
+        "description": "Resolution percentage of shadow maps",
+        "type": "FLOAT",
+        "default": 1.0,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      }
+    ],
+    "ray_tracing_options": [
+      {
+        "name": "resolution_scale",
+        "label": "Resolution",
+        "description": "Determines the number of rays per pixel. Higher resolution uses more memory.",
+        "type": "ENUM",
+        "default": "2",
+        "subtype": "NONE",
+        "items": [
+          [
+            "1",
+            "1:1",
+            "Full resolution"
+          ],
+          [
+            "2",
+            "1:2",
+            "Render this effect at 50% render resolution"
+          ],
+          [
+            "4",
+            "1:4",
+            "Render this effect at 25% render resolution"
+          ],
+          [
+            "8",
+            "1:8",
+            "Render this effect at 12.5% render resolution"
+          ],
+          [
+            "16",
+            "1:16",
+            "Render this effect at 6.25% render resolution"
+          ]
+        ]
+      },
+      {
+        "name": "use_backface_hit",
+        "label": "Hit Backfaces",
+        "description": "Consider rays hitting backfaces as valid",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "backface_radiance_scale",
+        "label": "Backface Radiance Scale",
+        "description": "Amount of the front face lighting to reuse for backface lighting approximation",
+        "type": "FLOAT",
+        "default": 0.25,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      },
+      {
+        "name": "use_denoise",
+        "label": "Denoise",
+        "description": "Enable noise reduction techniques for raytraced effects",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "denoise_spatial",
+        "label": "Spatial Reuse",
+        "description": "Reuse neighbor pixels' rays",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "denoise_temporal",
+        "label": "Temporal Accumulation",
+        "description": "Accumulate samples by reprojecting last tracing results",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "denoise_bilateral",
+        "label": "Bilateral Filter",
+        "description": "Blur the resolved radiance using a bilateral filter",
+        "type": "BOOLEAN",
+        "default": true,
+        "subtype": "NONE"
+      },
+      {
+        "name": "screen_trace_thickness",
+        "label": "Screen-Trace Thickness",
+        "description": "Surface thickness used to detect intersection when using screen-tracing",
+        "type": "FLOAT",
+        "default": 0.10000000149011612,
+        "subtype": "DISTANCE",
+        "min": 9.999999974752427e-07,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0010000000474974513,
+        "soft_max": 3.4028234663852886e+38
+      },
+      {
+        "name": "trace_max_roughness",
+        "label": "Raytrace Max Roughness",
+        "description": "Maximum roughness to use the tracing pipeline for. Higher roughness surfaces will use fast GI approximation. A value of 1 will disable fast GI approximation.",
+        "type": "FLOAT",
+        "default": 0.5,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      },
+      {
+        "name": "screen_trace_quality",
+        "label": "Screen-Trace Precision",
+        "description": "Precision of the screen space ray-tracing",
+        "type": "FLOAT",
+        "default": 0.25,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 1.0,
+        "soft_min": 0.0,
+        "soft_max": 1.0
+      }
+    ],
+    "render": [
+      {
+        "name": "dither_intensity",
+        "label": "Dither Intensity",
+        "description": "Amount of dithering noise added to the rendered image to break up banding",
+        "type": "FLOAT",
+        "default": 1.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.0,
+        "soft_max": 2.0
+      },
+      {
+        "name": "filter_size",
+        "label": "Filter Size",
+        "description": "Width over which the reconstruction filter combines samples",
+        "type": "FLOAT",
+        "default": 1.5,
+        "subtype": "PIXEL",
+        "min": 0.0,
+        "max": 500.0,
+        "soft_min": 0.009999999776482582,
+        "soft_max": 10.0
+      },
+      {
+        "name": "film_transparent",
+        "label": "Transparent",
+        "description": "World background is transparent, for compositing the render over another background",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "use_motion_blur",
+        "label": "Motion Blur",
+        "description": "Use multi-sampled 3D scene motion blur",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "motion_blur_shutter",
+        "label": "Shutter",
+        "description": "Time taken in frames between shutter open and close",
+        "type": "FLOAT",
+        "default": 0.5,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 3.4028234663852886e+38,
+        "soft_min": 0.009999999776482582,
+        "soft_max": 1.0
+      },
+      {
+        "name": "motion_blur_position",
+        "label": "Motion Blur Position",
+        "description": "Offset for the shutter's time interval, allows to change the motion blur trails",
+        "type": "ENUM",
+        "default": "CENTER",
+        "subtype": "NONE",
+        "items": [
+          [
+            "START",
+            "Start on Frame",
+            "The shutter opens at the current frame"
+          ],
+          [
+            "CENTER",
+            "Center on Frame",
+            "The shutter is open during the current frame"
+          ],
+          [
+            "END",
+            "End on Frame",
+            "The shutter closes at the current frame"
+          ]
+        ]
+      },
+      {
+        "name": "hair_type",
+        "label": "Curves Shape Type",
+        "description": "Curves shape type",
+        "type": "ENUM",
+        "default": "STRAND",
+        "subtype": "NONE",
+        "items": [
+          [
+            "STRAND",
+            "Strand",
+            ""
+          ],
+          [
+            "STRIP",
+            "Strip",
+            ""
+          ],
+          [
+            "CYLINDER",
+            "Cylinder",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "hair_subdiv",
+        "label": "Additional Subdivision",
+        "description": "Additional subdivision along the curves",
+        "type": "INT",
+        "default": 0,
+        "subtype": "NONE",
+        "min": 0,
+        "max": 3,
+        "soft_min": 0,
+        "soft_max": 3
+      },
+      {
+        "name": "use_high_quality_normals",
+        "label": "High Quality Normals",
+        "description": "Use high quality tangent space at the cost of lower performance",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "anisotropic_filter",
+        "label": "Anisotropic Filtering",
+        "description": "Quality of anisotropic filtering in materials",
+        "type": "ENUM",
+        "default": "FILTER_2",
+        "subtype": "NONE",
+        "items": [
+          [
+            "FILTER_0",
+            "Off",
+            "Turn off anisotropic filtering"
+          ],
+          [
+            "FILTER_2",
+            "2\u00d7",
+            "Use 2 samples for anisotropic filtering"
+          ],
+          [
+            "FILTER_4",
+            "4\u00d7",
+            "Use 4 samples for anisotropic filtering"
+          ],
+          [
+            "FILTER_8",
+            "8\u00d7",
+            "Use 8 samples for anisotropic filtering"
+          ],
+          [
+            "FILTER_16",
+            "16\u00d7",
+            "Use 16 samples for anisotropic filtering"
+          ]
+        ]
+      }
+    ],
+    "image_settings": [
+      {
+        "name": "file_format",
+        "label": "File Format",
+        "description": "File format to save the rendered images as",
+        "type": "ENUM",
+        "default": "PNG",
+        "subtype": "NONE",
+        "items": [
+          [
+            "AVIF",
+            "AVIF (.avif)",
+            "Output image in AVIF format"
+          ],
+          [
+            "JPEG",
+            "JPEG (.jpg)",
+            "Output image in JPEG format"
+          ],
+          [
+            "OPEN_EXR",
+            "OpenEXR (.exr)",
+            "Output image in OpenEXR format"
+          ],
+          [
+            "PNG",
+            "PNG (.png)",
+            "Output image in PNG format"
+          ],
+          [
+            "WEBP",
+            "WebP (.webp)",
+            "Output image in WebP format"
+          ],
+          [
+            "BMP",
+            "Bitmap (.bmp)",
+            "Output image in bitmap format"
+          ],
+          [
+            "CINEON",
+            "Cineon (.cin)",
+            "Output image in Cineon format"
+          ],
+          [
+            "DPX",
+            "DPX (.dpx)",
+            "Output image in DPX format"
+          ],
+          [
+            "IRIS",
+            "Iris (.rgb)",
+            "Output image in SGI IRIS format"
+          ],
+          [
+            "JPEG2000",
+            "JPEG 2000 (.jp2)",
+            "Output image in JPEG 2000 format"
+          ],
+          [
+            "HDR",
+            "Radiance HDR (.hdr)",
+            "Output image in Radiance HDR format"
+          ],
+          [
+            "TARGA",
+            "Targa (.tga)",
+            "Output image in Targa format"
+          ],
+          [
+            "TARGA_RAW",
+            "Targa Raw (.tga)",
+            "Output image in uncompressed Targa format"
+          ],
+          [
+            "TIFF",
+            "TIFF (.tif)",
+            "Output image in TIFF format"
+          ]
+        ]
+      },
+      {
+        "name": "color_mode",
+        "label": "Color Mode",
+        "description": "Choose BW for saving grayscale images, RGB for saving red, green and blue channels, and RGBA for saving red, green, blue and alpha channels",
+        "type": "ENUM",
+        "default": "RGBA",
+        "subtype": "NONE",
+        "items": [
+          [
+            "BW",
+            "BW",
+            "Images get saved in 8-bit grayscale (only PNG, JPEG, TGA, TIF)"
+          ],
+          [
+            "RGB",
+            "RGB",
+            "Images are saved with RGB (color) data"
+          ],
+          [
+            "RGBA",
+            "RGBA",
+            "Images are saved with RGB and Alpha data (if supported)"
+          ]
+        ]
+      },
+      {
+        "name": "color_depth",
+        "label": "Color Depth",
+        "description": "Bit depth per channel",
+        "type": "ENUM",
+        "default": "8",
+        "subtype": "NONE",
+        "items": [
+          [
+            "8",
+            "8",
+            "8-bit color channels"
+          ],
+          [
+            "10",
+            "10",
+            "10-bit color channels"
+          ],
+          [
+            "12",
+            "12",
+            "12-bit color channels"
+          ],
+          [
+            "16",
+            "16",
+            "16-bit color channels"
+          ],
+          [
+            "32",
+            "32",
+            "32-bit color channels"
+          ]
+        ]
+      },
+      {
+        "name": "quality",
+        "label": "Quality",
+        "description": "Quality for image formats that support lossy compression",
+        "type": "INT",
+        "default": 90,
+        "subtype": "PERCENTAGE",
+        "min": 0,
+        "max": 100,
+        "soft_min": 0,
+        "soft_max": 100
+      },
+      {
+        "name": "compression",
+        "label": "Compression",
+        "description": "Amount of time to determine best compression: 0 = no compression with fast file output, 100 = maximum lossless compression with slow file output",
+        "type": "INT",
+        "default": 15,
+        "subtype": "PERCENTAGE",
+        "min": 0,
+        "max": 100,
+        "soft_min": 0,
+        "soft_max": 100
+      },
+      {
+        "name": "use_preview",
+        "label": "Preview",
+        "description": "When rendering animations, save JPG preview images in same directory",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "exr_codec",
+        "label": "Codec",
+        "description": "Compression codec settings for OpenEXR",
+        "type": "ENUM",
+        "default": "ZIP",
+        "subtype": "NONE",
+        "items": [
+          [
+            "NONE",
+            "None",
+            "No compression"
+          ],
+          [
+            "ZIP",
+            "ZIP",
+            "Lossless zip compression of 16 row image blocks"
+          ],
+          [
+            "PIZ",
+            "PIZ",
+            "Lossless wavelet compression, effective for noisy/grainy images"
+          ],
+          [
+            "DWAA",
+            "DWAA (lossy)",
+            "JPEG-like lossy compression on 32 row image blocks"
+          ],
+          [
+            "DWAB",
+            "DWAB (lossy)",
+            "JPEG-like lossy compression on 256 row image blocks"
+          ],
+          [
+            "HTJ2K",
+            "HTJ2K",
+            "Lossless compression based on high throughput JPEG 2000 encoding. It produces smaller files, but it is new and not widely supported by other software yet."
+          ],
+          [
+            "ZIPS",
+            "ZIPS",
+            "Lossless zip compression, each image row compressed separately"
+          ],
+          [
+            "RLE",
+            "RLE",
+            "Lossless run length encoding compression"
+          ],
+          [
+            "PXR24",
+            "Pxr24 (lossy)",
+            "Lossy compression for 32 bit float images (stores 24 bits of each float)"
+          ],
+          [
+            "B44",
+            "B44 (lossy)",
+            "Lossy compression for 16 bit float images, at fixed 2.3:1 ratio"
+          ],
+          [
+            "B44A",
+            "B44A (lossy)",
+            "Lossy compression for 16 bit float images, at fixed 2.3:1 ratio"
+          ]
+        ]
+      },
+      {
+        "name": "use_exr_interleave",
+        "label": "Interleave",
+        "description": "Use legacy interleaved storage of views, layers and passes for compatibility with applications that do not support more efficient multi-part OpenEXR files.",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "use_jpeg2k_ycc",
+        "label": "YCC",
+        "description": "Save luminance-chrominance-chrominance channels instead of RGB colors",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "use_jpeg2k_cinema_preset",
+        "label": "Cinema",
+        "description": "Use OpenJPEG Cinema Preset",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "use_jpeg2k_cinema_48",
+        "label": "Cinema (48)",
+        "description": "Use OpenJPEG Cinema Preset (48fps)",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "jpeg2k_codec",
+        "label": "Codec",
+        "description": "Codec settings for JPEG 2000",
+        "type": "ENUM",
+        "default": "JP2",
+        "subtype": "NONE",
+        "items": [
+          [
+            "JP2",
+            "JP2",
+            ""
+          ],
+          [
+            "J2K",
+            "J2K",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "tiff_codec",
+        "label": "Compression",
+        "description": "Compression mode for TIFF",
+        "type": "ENUM",
+        "default": "DEFLATE",
+        "subtype": "NONE",
+        "items": [
+          [
+            "NONE",
+            "None",
+            ""
+          ],
+          [
+            "DEFLATE",
+            "Deflate",
+            ""
+          ],
+          [
+            "LZW",
+            "LZW",
+            ""
+          ],
+          [
+            "PACKBITS",
+            "Pack Bits",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "use_cineon_log",
+        "label": "Log",
+        "description": "Convert to logarithmic color space",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "cineon_black",
+        "label": "Black",
+        "description": "Log conversion reference blackpoint",
+        "type": "INT",
+        "default": 0,
+        "subtype": "NONE",
+        "min": 0,
+        "max": 1024,
+        "soft_min": 0,
+        "soft_max": 1024
+      },
+      {
+        "name": "cineon_white",
+        "label": "White",
+        "description": "Log conversion reference whitepoint",
+        "type": "INT",
+        "default": 0,
+        "subtype": "NONE",
+        "min": 0,
+        "max": 1024,
+        "soft_min": 0,
+        "soft_max": 1024
+      },
+      {
+        "name": "cineon_gamma",
+        "label": "Gamma",
+        "description": "Log conversion gamma",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "NONE",
+        "min": 0.0,
+        "max": 10.0,
+        "soft_min": 0.0,
+        "soft_max": 10.0
+      }
+    ],
+    "view_settings": [
+      {
+        "name": "look",
+        "label": "Look",
+        "description": "Additional transform applied before view transform for artistic needs",
+        "type": "STRING",
+        "default": "None",
+        "subtype": "NONE"
+      },
+      {
+        "name": "view_transform",
+        "label": "View",
+        "description": "View used when converting image to a display space",
+        "type": "STRING",
+        "default": "AgX",
+        "subtype": "NONE"
+      },
+      {
+        "name": "exposure",
+        "label": "Exposure",
+        "description": "Exposure (stops) applied before display transform, multiplying by 2^exposure",
+        "type": "FLOAT",
+        "default": 0.0,
+        "subtype": "FACTOR",
+        "min": -32.0,
+        "max": 32.0,
+        "soft_min": -10.0,
+        "soft_max": 10.0
+      },
+      {
+        "name": "gamma",
+        "label": "Gamma",
+        "description": "Additional gamma encoding after display transform, for output with custom gamma",
+        "type": "FLOAT",
+        "default": 1.0,
+        "subtype": "FACTOR",
+        "min": 0.0,
+        "max": 5.0,
+        "soft_min": 0.0,
+        "soft_max": 5.0
+      },
+      {
+        "name": "use_white_balance",
+        "label": "Use White Balance",
+        "description": "Perform chromatic adaption from a different white point",
+        "type": "BOOLEAN",
+        "default": false,
+        "subtype": "NONE"
+      },
+      {
+        "name": "white_balance_temperature",
+        "label": "Temperature",
+        "description": "Color temperature of the scene's white point",
+        "type": "FLOAT",
+        "default": 6500.0,
+        "subtype": "COLOR_TEMPERATURE",
+        "min": 1800.0,
+        "max": 100000.0,
+        "soft_min": 2000.0,
+        "soft_max": 11000.0
+      },
+      {
+        "name": "white_balance_tint",
+        "label": "Tint",
+        "description": "Color tint of the scene's white point (the default of 10 matches daylight)",
+        "type": "FLOAT",
+        "default": 10.0,
+        "subtype": "FACTOR",
+        "min": -500.0,
+        "max": 500.0,
+        "soft_min": -150.0,
+        "soft_max": 150.0
+      }
+    ]
+  }
+}
