@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1
+
+### Installer
+
+- **Any Houdini 22.0 build.** The installer no longer requires the build the prebuilt plugin was compiled for (22.0.368). On another 22.0 build it compiles the plugin itself when a C++ compiler is installed. On Windows the Visual Studio 2022 Build Tools are enough: the CMake bundled with them is found automatically, with no Developer Command Prompt. Without a compiler, or if the build fails, it uses the prebuilt plugin only if a test render through it in that Houdini succeeds. `--no-build` never builds.
+- **Several Houdini 22.0 builds.** The installer uses the one in `HFS`, or else the newest installed build, instead of stopping. `--houdini` still picks one.
+- **A real render test.** The install check and `--doctor` render a small scene with `husk` through the EEVEE plugin, with other installed Houdini packages ignored. Before, they only listed renderers, which another registered EEVEE install could satisfy.
+- Windows builds no longer print hundreds of C++20 deprecation warnings from Houdini's USD headers.
+
 ## 0.7.0
 
 ### Scene compatibility

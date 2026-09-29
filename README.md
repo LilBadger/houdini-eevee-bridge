@@ -51,41 +51,31 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 
 | | |
 | --- | --- |
-| **Houdini** | 22.0 (tested: 22.0.368). The plugin binary must match your exact Houdini build. The installer can rebuild it with the HDK that ships with Houdini. |
+| **Houdini** | Any 22.0 build (tested: 22.0.368). The prebuilt plugin is compiled for 22.0.368; for another build the installer compiles it with the HDK that ships with Houdini. |
 | **Blender** | 5.2 LTS. The installer checks for EEVEE and OpenVDB support, and adds NumPy and OpenEXR privately if Blender lacks them. |
 | **GPU** | A Vulkan-capable GPU and driver (tested on NVIDIA). OpenGL is available as a fallback. |
 | **OS** | Linux x86-64, or Windows 11 x86-64. |
-| **Build tools** | Only for source builds: CMake 3.22 or later and the C++ compiler your Houdini HDK expects (Visual Studio 2022 on Windows). |
+| **Build tools** | Only for Houdini builds other than the prebuilt one's: the C++ compiler your Houdini HDK expects and CMake 3.22 or later. On Windows, the Visual Studio 2022 Build Tools with *Desktop development with C++* are enough; the installer uses their bundled CMake. |
 
 ## Quick start
 
-**Linux, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.7.0-linux-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), then run:
-
-```bash
-unzip houdini-eevee-0.7.0-linux-x86_64.zip
-cd houdini-eevee-0.7.0-linux-x86_64
-bash install.sh
-```
-
-**Linux, any other Houdini 22 build, or a clone of this repository.** Build the plugin against your Houdini:
+**Linux, any Houdini 22.0 build.** With CMake and the compiler your Houdini HDK expects installed, run this in a clone of this repository or the extracted source zip; it compiles the plugin against your Houdini:
 
 ```bash
 git clone https://github.com/badgerz42/houdini-eevee-bridge.git
 cd houdini-eevee-bridge
-bash install.sh --build
+bash install.sh
 ```
 
-**Windows, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.7.0-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
+If a release includes a prebuilt `houdini-eevee-<version>-linux-x86_64.zip`, run `bash install.sh` in its extracted folder instead. It uses the prebuilt plugin on the Houdini build it names, and on other builds works like the Windows installer below.
+
+**Windows, any Houdini 22.0 build.** Download `houdini-eevee-0.7.1-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
 
 ```bat
 install.cmd
 ```
 
-**Windows, any other Houdini 22 build.** Install [CMake](https://cmake.org/download/) and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. Download `houdini-eevee-0.7.0-source.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), or clone the repository. Then run this in its folder:
-
-```bat
-install.cmd --build
-```
+The prebuilt plugin is compiled for Houdini 22.0.368. On another 22.0 build, the installer compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with *Desktop development with C++* are installed. Without them, it tries the prebuilt plugin and registers it only if a test render through it in your Houdini succeeds. The same command works in the source zip or a clone of this repository.
 
 If the installer cannot find Houdini or Blender, pass `--houdini PATH --blender PATH`. For example, on Linux: `--houdini /opt/hfs22.0.368 --blender /path/to/blender`.
 
@@ -186,7 +176,7 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 ## Limitations
 
 - **Windows.** On Windows 11 the plugin builds and passes the installer's checks, but interactive use in a Houdini viewport on Windows hasn't been confirmed yet.
-- **Houdini version.** The plugin binary must match your exact Houdini build. Use `--build` for any build other than 22.0.368.
+- **Houdini version.** Any Houdini 22.0 build works, but the prebuilt plugin is compiled for 22.0.368. On another build without a compiler, the installer keeps the prebuilt plugin only after a test render in that build succeeds; if anything then misbehaves, install the build tools and run the installer again, so it compiles the plugin for your build.
 - **Material fidelity.** Karma and MaterialX materials are approximated with Blender's BSDFs. VEX shaders are not supported.
 - **Picking.** Point instances drawn through Geometry Nodes pick as their prototype prim. Face and point picking is not provided.
 - **Not translated yet.** Probe baking and arbitrary world shader graphs.

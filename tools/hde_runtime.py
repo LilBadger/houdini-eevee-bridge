@@ -13,7 +13,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.7.0'
+VERSION = '0.7.1'
 
 
 def settings(environment=None):
@@ -112,6 +112,25 @@ def houdini_root():
     return path
 
 
+def houdini_build(root):
+    """The exact build of a Houdini installation, for example '22.0.368', from its HDK."""
+    file = Path(root) / 'toolkit/cmake/HoudiniConfigVersion.cmake'
+    match = re.search(r'set\(\s*PACKAGE_VERSION\s+(\d+\.\d+\.\d+)', file.read_text()) if file.is_file() else None
+    return match[1] if match else None
+
+
+def native_supports(info, build, configuration=None):
+    """Whether a native plugin, described by its build-info.json, may run in Houdini
+    `build`: the build it was compiled for, or another build on which the installer
+    verified it with a test render (installation.json native_houdini_version)."""
+    configuration = settings() if configuration is None else configuration
+    if info.get('system') != platform.system():
+        return False
+    return info.get('houdini_version') == build or (
+        configuration.get('houdini_version') == build and
+        configuration.get('native_houdini_version') == info.get('houdini_version'))
+
+
 def houdini_program(name):
     return houdini_root() / 'bin' / (name + ('.exe' if os.name == 'nt' else ''))
 
@@ -170,9 +189,7 @@ def renderer_environment(base=None):
     manifest = plugin/'build-info.json'
     if manifest.is_file():
         info = json.loads(manifest.read_text(encoding='utf-8'))
-        config = (Path(env['HFS'])/'toolkit/cmake/HoudiniConfigVersion.cmake').read_text()
-        version = re.search(r'set\(\s*PACKAGE_VERSION\s+(\d+\.\d+\.\d+)',config)
-        if not version or info.get('houdini_version') != version[1] or info.get('system') != platform.system():
+        if not native_supports(info, houdini_build(env['HFS'])):
             raise RuntimeError('EEVEE native plugin does not match this Houdini build/OS. Reinstall or rebuild for '+env['HFS'])
     env['HDEEVEE_ROOT'] = str(ROOT)
     env['HDEEVEE_PROJECT'] = str(ROOT)  # Compatibility with development tools.
