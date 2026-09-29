@@ -106,3 +106,45 @@ def component_math(tree, operation, size, *values):
 
 def matrix_vector(tree, matrix, value):
     return combine(tree,[vector(tree,'DOT_PRODUCT',value,list(row)) for row in matrix])
+
+
+# Per-instance primvars are stored under this prefix as RGBA instance attributes
+# (Geometry Nodes instances) or object custom properties (instance objects),
+# with alpha 1. A missing Instancer attribute reads as alpha 0.
+INSTANCE_PREFIX = 'hde:i:'
+
+
+class Primvar:
+    """A primvar lookup: outputs Color, Vector, Fac and present (0 or 1)."""
+    def __init__(self, outputs, node):
+        self.outputs, self.node = outputs, node
+
+    @property
+    def label(self):
+        return self.node.label
+
+    @label.setter
+    def label(self, value):
+        self.node.label = value
+
+
+def primvar(tree, name):
+    """Read a primvar from the geometry, or from the instance when only its instancer
+    provides it. As in Karma, a value authored on the prototype wins. Unused outputs
+    are pruned when Blender compiles the shader."""
+    geometry = tree.nodes.new('ShaderNodeAttribute'); geometry.attribute_name = name
+    instance = tree.nodes.new('ShaderNodeAttribute'); instance.attribute_type = 'INSTANCER'
+    instance.attribute_name = INSTANCE_PREFIX + name
+    # Geometry attributes carry an explicit presence marker (see meshes.mark_present).
+    marker = tree.nodes.new('ShaderNodeAttribute'); marker.attribute_name = 'hde:present:' + name
+    weight = scalar(tree, 'MULTIPLY', instance.outputs['Alpha'], scalar(tree, 'SUBTRACT', 1., marker.outputs['Fac']))
+    outputs = {}
+    for socket, data_type, suffix in (('Color', 'RGBA', 'Color'), ('Vector', 'VECTOR', 'Vector'), ('Fac', 'FLOAT', 'Float')):
+        mix = tree.nodes.new('ShaderNodeMix'); mix.data_type = data_type
+        sockets = {s.identifier: s for s in mix.inputs}
+        tree.links.new(weight, sockets['Factor_Float'])
+        tree.links.new(geometry.outputs[socket], sockets['A_' + suffix])
+        tree.links.new(instance.outputs[socket], sockets['B_' + suffix])
+        outputs[socket] = next(s for s in mix.outputs if s.identifier == 'Result_' + suffix)
+    outputs['present'] = scalar(tree, 'MAXIMUM', marker.outputs['Fac'], instance.outputs['Alpha'])
+    return Primvar(outputs, geometry)

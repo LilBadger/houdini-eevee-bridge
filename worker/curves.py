@@ -10,6 +10,7 @@ import bpy
 import numpy as np
 from mathutils import Matrix
 
+import instances as instance_nodes
 from protocol import array
 
 DEFAULT_WIDTH = .01
@@ -185,6 +186,15 @@ def write(data, name, data_type, domain, values):
     attribute.data.foreach_set(prop, np.ascontiguousarray(values).ravel())
 
 
+def mark_present(data, names, write_marker, count):
+    """Presence markers for MaterialX geompropvalue defaults (see meshes.mark_present)."""
+    for attribute in [a.name for a in data.attributes if a.name.startswith('hde:present:') and a.name[12:] not in names]:
+        data.attributes.remove(data.attributes[attribute])
+    ones = np.ones(count, dtype=np.float32)
+    for name in names:
+        write_marker('hde:present:' + name, ones)
+
+
 def sync(session, update):
     key = update['id']
     counts = array(update['counts'], np.int64).reshape(-1)
@@ -257,13 +267,7 @@ def sync(session, update):
         if attribute is not None:
             data.attributes.remove(attribute)
     session.exported_attributes[key] = written
+    mark_present(data, written, lambda name, values: write(data, name, 'FLOAT', 'POINT', values), len(data.points))
     obj.matrix_world = session.basis @ Matrix(update['transform']).transposed()
-    obj.hide_render = not update.get('visible', True)
-    obj.hide_set(obj.hide_render, view_layer=session.view_layer)
-    if 'prim_id' in update:
-        session.prim_ids[key] = int(update['prim_id'])
-    session.picks.assign(obj, session.prim_ids.get(key, -1))
-    session.bind(key, update.get('material', ''))
-    if 'color' in update and not session.bindings.get(key):
-        session.display_material(key, update['color'], update.get('color_varying', False))
+    instance_nodes.finish(session, key, obj, update)
     data.update_tag()

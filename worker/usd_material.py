@@ -2,7 +2,7 @@
 import math
 import bpy
 
-from shader_utils import image_file
+from shader_utils import image_file, primvar
 
 INPUTS = {'diffuseColor': 'Base Color', 'base_color': 'Base Color',
           'metallic': 'Metallic', 'roughness': 'Roughness', 'opacity': 'Alpha',
@@ -139,7 +139,7 @@ def network(tree, definition):
             outs['result'] = node.outputs['UV']
         elif kind.startswith('UsdPrimvarReader_'):
             varname = p.get('varname', '')
-            node = tree.nodes.new('ShaderNodeAttribute'); node.attribute_name = varname
+            node = primvar(tree, varname)
             outs['result'] = node.outputs['Fac' if kind.endswith('_float') else 'Vector']
         else:
             raise ValueError('Unsupported USD shader node: ' + kind)

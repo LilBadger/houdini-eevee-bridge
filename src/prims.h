@@ -23,11 +23,17 @@ Json ValueJson(const VtValue &v);
 
 class EeveeInstancer final : public HdInstancer {
 public:
+    /// One per-instance primvar: `size` floats per instance.
+    struct Primvar { std::vector<float> values; int size = 0; };
+    using Primvars = std::map<std::string, Primvar>;
+
     EeveeInstancer(HdSceneDelegate *d, const SdfPath &id, BridgeState *state) : HdInstancer(d, id), _state(state) {}
     void Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits) override;
     void SampleTimes(std::set<float> &times, int depth = 0);
     VtMatrix4dArray Transforms(const SdfPath &prototype, int depth = 0,
                                float time = std::numeric_limits<float>::quiet_NaN());
+    /// Instance-rate primvars in the order of Transforms(); count is the number of instances.
+    Primvars InstancePrimvars(const SdfPath &prototype, size_t &count, int depth = 0);
 private:
     BridgeState *_state;
 };
@@ -58,7 +64,6 @@ protected:
     HdDirtyBits _PropagateDirtyBits(HdDirtyBits bits) const override { return bits; }
     void _InitRepr(const TfToken &repr, HdDirtyBits*) override;
 private:
-    void SyncInstances(HdSceneDelegate *d, Change &change);
     bool SyncPrimvars(HdSceneDelegate *d, Change &change, bool force);
     BridgeState *_state;
     bool _synced = false, _instanced = false;

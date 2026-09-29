@@ -411,33 +411,146 @@ VtMatrix4dArray EeveeInstancer::Transforms(const SdfPath &prototype, int depth, 
     return result;
 }
 
-// --------------------------------------------------------------------- mesh
-EeveeMesh::~EeveeMesh() { QueueDelete(_state, GetId(), "delete"); }
+namespace {
+double Component(float v, int) { return v; }
+double Component(double v, int) { return v; }
+double Component(int v, int) { return v; }
+template <class V> double Component(const V &v, int c) { return v[c]; }
 
-void EeveeMesh::_InitRepr(const TfToken &repr, HdDirtyBits*) { AddRepr(_reprs, repr); }
+template <class T, int N>
+int CopyComponents(const VtValue &value, std::vector<float> &out) {
+    const auto &a = value.UncheckedGet<VtArray<T>>();
+    out.resize(a.size() * N);
+    for (size_t i = 0; i < a.size(); ++i)
+        for (int c = 0; c < N; ++c) out[i * N + c] = float(Component(a[i], c));
+    return N;
+}
 
-void EeveeMesh::SyncInstances(HdSceneDelegate *d, Change &change) {
-    HdInstancer::_SyncInstancerAndParents(d->GetRenderIndex(), GetInstancerId());
-    auto *instancer = dynamic_cast<EeveeInstancer*>(d->GetRenderIndex().GetInstancer(GetInstancerId()));
-    const GfMatrix4d prototype = d->GetTransform(GetId());
-    VtMatrix4dArray transforms = instancer ? instancer->Transforms(GetId()) : VtMatrix4dArray();
+/// Flattens a primvar array to floats. Returns the components per element, 0 if unsupported.
+int PrimvarComponents(const VtValue &value, std::vector<float> &out) {
+    if (value.IsHolding<VtFloatArray>()) return CopyComponents<float, 1>(value, out);
+    if (value.IsHolding<VtDoubleArray>()) return CopyComponents<double, 1>(value, out);
+    if (value.IsHolding<VtIntArray>()) return CopyComponents<int, 1>(value, out);
+    if (value.IsHolding<VtVec2fArray>()) return CopyComponents<GfVec2f, 2>(value, out);
+    if (value.IsHolding<VtVec3fArray>()) return CopyComponents<GfVec3f, 3>(value, out);
+    if (value.IsHolding<VtVec3dArray>()) return CopyComponents<GfVec3d, 3>(value, out);
+    if (value.IsHolding<VtVec4fArray>()) return CopyComponents<GfVec4f, 4>(value, out);
+    return 0;
+}
+
+// Instancer data that is not a shading primvar.
+const std::set<std::string> kInstanceSkip = {"velocities", "accelerations", "angularVelocities", "v", "accel", "w",
+                                             "ids", "invisibleIds", "protoIndices", "orientations", "scales", "positions"};
+} // namespace
+
+// Like Transforms(), instances are ordered outermost-major. The primvars of the
+// instancer nearest the prototype take precedence over its parents'.
+EeveeInstancer::Primvars EeveeInstancer::InstancePrimvars(const SdfPath &prototype, size_t &count, int depth) {
+    if (depth > 32) throw std::runtime_error("EEVEE instancer nesting exceeds 32 levels");
+    auto *d = GetDelegate();
+    Primvars result;
+    count = 0;
+    if (!d->GetVisible(GetId())) return result;
+    const auto indices = d->GetInstanceIndices(GetId(), prototype);
+    count = indices.size();
+    for (const auto &desc : d->GetPrimvarDescriptors(GetId(), HdInterpolationInstance)) {
+        const std::string name = desc.name.GetString();
+        if (name.rfind("hydra:", 0) == 0 || kInstanceSkip.count(name) ||
+            desc.name == HdInstancerTokens->instanceTranslations || desc.name == HdInstancerTokens->instanceRotations ||
+            desc.name == HdInstancerTokens->instanceScales || desc.name == HdInstancerTokens->instanceTransforms)
+            continue;
+        std::vector<float> values;
+        const int size = PrimvarComponents(d->Get(GetId(), desc.name), values);
+        if (!size) continue;
+        const size_t available = values.size() / size;
+        Primvar &primvar = result[name];
+        primvar.size = size;
+        primvar.values.assign(count * size, 0.f);
+        for (size_t i = 0; i < count; ++i)
+            if (indices[i] >= 0 && size_t(indices[i]) < available)
+                std::copy_n(values.begin() + size_t(indices[i]) * size, size, primvar.values.begin() + i * size);
+    }
+    if (GetParentId().IsEmpty()) return result;
+    auto *parent = dynamic_cast<EeveeInstancer*>(d->GetRenderIndex().GetInstancer(GetParentId()));
+    if (!parent) throw std::runtime_error("Missing EEVEE parent instancer");
+    size_t outer = 0;
+    const Primvars inherited = parent->InstancePrimvars(GetId(), outer, depth + 1);
+    const size_t inner = count;
+    for (auto &[name, primvar] : result) {
+        std::vector<float> tiled;
+        tiled.reserve(outer * primvar.values.size());
+        for (size_t o = 0; o < outer; ++o) tiled.insert(tiled.end(), primvar.values.begin(), primvar.values.end());
+        primvar.values = std::move(tiled);
+    }
+    for (const auto &[name, primvar] : inherited) {
+        if (result.count(name)) continue;
+        Primvar &spread = result[name];
+        spread.size = primvar.size;
+        spread.values.reserve(outer * inner * primvar.size);
+        for (size_t o = 0; o < outer; ++o)
+            for (size_t i = 0; i < inner; ++i)
+                spread.values.insert(spread.values.end(), primvar.values.begin() + o * primvar.size,
+                                     primvar.values.begin() + (o + 1) * primvar.size);
+    }
+    count = inner * outer;
+    return result;
+}
+
+namespace {
+/// Instance transforms (with motion samples) and per-instance primvars of an
+/// instanced rprim. Arrays whose hashes are unchanged in `sent` are skipped.
+void SyncInstancesTo(HdSceneDelegate *d, BridgeState *state, const SdfPath &id, const SdfPath &instancerId,
+                     SentArrays &sent, Change &change) {
+    HdInstancer::_SyncInstancerAndParents(d->GetRenderIndex(), instancerId);
+    auto *instancer = dynamic_cast<EeveeInstancer*>(d->GetRenderIndex().GetInstancer(instancerId));
+    const GfMatrix4d prototype = d->GetTransform(id);
+    VtMatrix4dArray transforms = instancer ? instancer->Transforms(id) : VtMatrix4dArray();
     BlobPtr blob = MatricesBlob(transforms, &prototype);
-    if (_sent.Changed("instances", blob->hash)) change.json["instances"] = change.Ref(blob);
-    const float extent = _state->MotionExtent();
+    if (sent.Changed("instances", blob->hash)) change.json["instances"] = change.Ref(blob);
+    if (instancer) {
+        size_t count = 0;
+        Json primvars = Json::object();
+        uint64_t hash = 0;
+        for (const auto &[name, primvar] : instancer->InstancePrimvars(id, count)) {
+            if (count != transforms.size()) break;
+            BlobPtr values = CopyBlob(primvar.values, "f4", {int64_t(count), primvar.size});
+            hash = hash * 1099511628211ull ^ values->hash ^ std::hash<std::string>{}(name);
+            primvars[name] = change.Ref(values);
+        }
+        if (sent.Changed("instance_primvars", hash)) change.json["instance_primvars"] = std::move(primvars);
+    }
+    const float extent = state->MotionExtent();
     if (!instancer || extent <= 0.f) return;
     std::set<float> times;
     instancer->SampleTimes(times);
     HdTimeSampleArray<GfMatrix4d, 4> samples;
-    d->SampleTransform(GetId(), -extent, extent, &samples);
+    d->SampleTransform(id, -extent, extent, &samples);
     for (size_t i = 0; i < samples.count; ++i) times.insert(samples.times[i]);
     Json values = Json::array();
     for (float time : times) {
         const GfMatrix4d transform = samples.count ? samples.Resample(time) : prototype;
-        values.push_back({{"time", time}, {"value", change.Ref(MatricesBlob(instancer->Transforms(GetId(), 0, time), &transform))}});
+        values.push_back({{"time", time}, {"value", change.Ref(MatricesBlob(instancer->Transforms(id, 0, time), &transform))}});
     }
     change.json["instance_samples"] = std::move(values);
     if (!change.json.contains("instances")) change.json["instances"] = change.Ref(blob);
 }
+
+/// For prims that are re-sent whole: their instances, or null when not instanced.
+void SyncWholeInstances(HdSceneDelegate *d, BridgeState *state, const SdfPath &id, const SdfPath &instancerId,
+                        Change &change) {
+    if (instancerId.IsEmpty()) {
+        change.json["instances"] = nullptr;
+        return;
+    }
+    SentArrays sent;
+    SyncInstancesTo(d, state, id, instancerId, sent, change);
+}
+} // namespace
+
+// --------------------------------------------------------------------- mesh
+EeveeMesh::~EeveeMesh() { QueueDelete(_state, GetId(), "delete"); }
+
+void EeveeMesh::_InitRepr(const TfToken &repr, HdDirtyBits*) { AddRepr(_reprs, repr); }
 
 bool EeveeMesh::SyncPrimvars(HdSceneDelegate *d, Change &change, bool force) {
     return SyncPrimvarsTo(d, GetId(), _sent, _primvars, change, force, kMeshSkip);
@@ -454,11 +567,12 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
     const bool instanced = !GetInstancerId().IsEmpty();
     if (instanced) {
         if (first || !_instanced || (*bits & (HdChangeTracker::DirtyInstancer | HdChangeTracker::DirtyInstanceIndex |
-                                               HdChangeTracker::DirtyTransform)))
-            SyncInstances(d, change);
+                                               HdChangeTracker::DirtyTransform | HdChangeTracker::DirtyPrimvar)))
+            SyncInstancesTo(d, _state, id, GetInstancerId(), _sent, change);
     } else if (_instanced) {
         change.json["instances"] = nullptr;
         _sent.Forget("instances");
+        _sent.Forget("instance_primvars");
     }
     _instanced = instanced;
 
@@ -589,6 +703,8 @@ void EeveeCurves::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
     std::set<std::string> names;
     SyncPrimvarsTo(d, id, sent, names, change, true, kPointsSkip);
     change.json["transform_samples"] = TransformSamples(d, id, _state->MotionExtent());
+    _UpdateInstancer(d, bits);
+    SyncWholeInstances(d, _state, id, GetInstancerId(), change);
     _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;
 }
@@ -614,6 +730,8 @@ void EeveePoints::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
     std::set<std::string> names;
     SyncPrimvarsTo(d, id, sent, names, change, true, kPointsSkip);
     change.json["transform_samples"] = TransformSamples(d, id, _state->MotionExtent());
+    _UpdateInstancer(d, bits);
+    SyncWholeInstances(d, _state, id, GetInstancerId(), change);
     _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;
 }
@@ -749,6 +867,8 @@ void EeveeVolume::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"categories", CategoriesJson(d, GetId())},
         {"transform", MatrixJson(d->GetTransform(GetId()))},
         {"transform_samples", TransformSamples(d, GetId(), _state->MotionExtent())}};
+    _UpdateInstancer(d, bits);
+    SyncWholeInstances(d, _state, GetId(), GetInstancerId(), change);
     _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;
 }

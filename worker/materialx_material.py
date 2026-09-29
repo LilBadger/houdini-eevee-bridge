@@ -9,7 +9,7 @@ import math
 from pathlib import Path
 import bpy
 from mathutils import Matrix
-from shader_utils import feed, scalar, vector, components, combine, component_math, image_file, matrix_vector
+from shader_utils import feed, scalar, vector, components, combine, component_math, image_file, matrix_vector, primvar, Primvar
 import materialx_noise
 import karma_material
 
@@ -173,14 +173,15 @@ class Builder:
                 node=tree.nodes.new('ShaderNodeUVMap'); node.uv_map=name
                 out=node.outputs['UV']
             else:
-                node=tree.nodes.new('ShaderNodeAttribute'); node.attribute_name=name
+                node=primvar(tree,name)
                 out=node.outputs['Fac' if size==1 else 'Color' if dtype=='color3' else 'Vector']
             # Attribute Alpha is 1 even when a Blender attribute is missing.
             # Import an independent presence marker, so authored zero stays
             # distinct from an absent USD primvar with a nonzero default.
-            present=tree.nodes.new('ShaderNodeAttribute');present.attribute_name='hde:present:'+name
+            if isinstance(node,Primvar): present=node.outputs['present']
+            else: marker=tree.nodes.new('ShaderNodeAttribute');marker.attribute_name='hde:present:'+name;present=marker.outputs['Fac']
             default=v('default',0. if size==1 else [0.]*size)
-            out=component_math(tree,'ADD',size,default,component_math(tree,'MULTIPLY',size,component_math(tree,'SUBTRACT',size,out,default),present.outputs['Fac']))
+            out=component_math(tree,'ADD',size,default,component_math(tree,'MULTIPLY',size,component_math(tree,'SUBTRACT',size,out,default),present))
             return {'out':out}
         if kind in MATH:
             values=[v(n) for n in schema['inputs']]

@@ -223,34 +223,14 @@ def sync(session, update):
         session.visibility[key] = update['visible']
     if 'prim_id' in update:
         session.prim_ids[key] = int(update['prim_id'])
-    if 'instances' in update:
-        sync_instances(session, key, obj, update['instances'])
-    visible = session.visibility.get(key, True)
-    # Prototypes remain data owners but are hidden beside their instances.
-    hidden = not visible or key in session.instances or key in session.point_instances
-    if obj.hide_render != hidden:
-        obj.hide_render = hidden
-    if obj.hide_get(view_layer=session.view_layer) != hidden:
-        obj.hide_set(hidden, view_layer=session.view_layer)
-    for instance in session.instances.get(key, []):
-        if instance.hide_render == visible:
-            instance.hide_render = not visible
-            instance.hide_set(not visible, view_layer=session.view_layer)
-    if key in session.point_instances:
-        points_object = session.point_instances[key]
-        if points_object.hide_render == visible:
-            points_object.hide_render = not visible
-            points_object.hide_set(not visible, view_layer=session.view_layer)
-    prim_id = session.prim_ids.get(key, -1)
-    session.picks.assign(obj, prim_id)
-    for index, instance in enumerate(session.instances.get(key, [])):
-        session.picks.assign(instance, prim_id, index)
-    if key in session.point_instances:
-        session.picks.assign(session.point_instances[key], prim_id)
+    if 'instances' in update or 'instance_primvars' in update:
+        instance_nodes.sync_objects(session, key, obj, update['instances'] if 'instances' in update else
+                                    session.instance_state.get(key), update.get('instance_primvars'))
+    instance_nodes.refresh(session, key, obj, session.visibility.get(key, True))
     if 'material' in update:
         session.bind(key, update['material'])
-    if 'color' in update and not session.bindings.get(key):
-        session.display_material(key, update['color'], update.get('color_varying', False))
+    if any(k in update for k in ('color', 'material', 'instance_primvars')):
+        session.display_color(key, update)
 
 
 def set_face_materials(mesh, topology, subsets):
@@ -337,36 +317,3 @@ def mark_present(session, key, mesh):
         if ones is None:
             ones = np.ones(len(mesh.vertices), dtype=np.float32)
         write_attribute(mesh, marker, 'FLOAT', 'POINT', ones)
-
-
-def sync_instances(session, key, obj, transforms):
-    if transforms is None:
-        session.instance_state.pop(key, None)
-        instance_nodes.remove(session, key)
-        for instance in session.instances.pop(key, []):
-            session.picks.release(instance)
-            bpy.data.objects.remove(instance, do_unlink=True)
-        return
-    transforms = array(transforms, np.float32).reshape(-1, 4, 4)
-    session.instance_state[key] = transforms
-    session.dirty_geometry = True
-    # Matrix attributes avoid creating tens of thousands of Blender objects.
-    # Shutter motion blur needs individually animated objects instead.
-    if len(transforms) > 256 and not session.instancing_motion:
-        for instance in session.instances.pop(key, []):
-            session.picks.release(instance)
-            bpy.data.objects.remove(instance, do_unlink=True)
-        instance_nodes.sync(session, key, obj, transforms, session.visibility.get(key, True))
-        return
-    instance_nodes.remove(session, key)
-    objects = session.instances.setdefault(key, [])
-    while len(objects) > len(transforms):
-        extra = objects.pop()
-        session.picks.release(extra)
-        bpy.data.objects.remove(extra, do_unlink=True)
-    while len(objects) < len(transforms):
-        instance = bpy.data.objects.new(key + '/instance_' + str(len(objects)), obj.data)
-        session.scene.collection.objects.link(instance)
-        objects.append(instance)
-    for instance, transform in zip(objects, transforms):
-        instance.matrix_world = session.basis @ Matrix(transform.tolist()).transposed()

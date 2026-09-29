@@ -1,6 +1,12 @@
-"""USD point instancers as Geometry Nodes instances, retaining full matrices."""
+"""USD instancing: Blender objects sharing a prototype's data, or Geometry Nodes
+instances with full matrices when there are many. Per-instance primvars become
+instance attributes or object custom properties (see shader_utils.primvar)."""
 import bpy
 import numpy as np
+from mathutils import Matrix
+
+from protocol import array
+from shader_utils import INSTANCE_PREFIX
 
 def remove(worker,key):
     obj=worker.point_instances.pop(key,None)
@@ -11,6 +17,105 @@ def remove(worker,key):
     if not data.users:bpy.data.meshes.remove(data)
     for group in groups:
         if group and not group.users:bpy.data.node_groups.remove(group)
+
+def sync_objects(session, key, obj, transforms, primvars=None):
+    """Instances of the prototype obj. transforms None removes them; primvars
+    None keeps the previous per-instance primvars."""
+    if primvars is not None:
+        session.instance_primvars[key] = {name: array(values, np.float32).reshape(len(values), -1) if len(values) else
+                                          np.zeros((0, 1), np.float32) for name, values in primvars.items()}
+    if transforms is None:
+        session.instance_state.pop(key, None)
+        session.instance_primvars.pop(key, None)
+        remove(session, key)
+        for instance in session.instances.pop(key, []):
+            session.picks.release(instance)
+            bpy.data.objects.remove(instance, do_unlink=True)
+        return
+    transforms = array(transforms, np.float32).reshape(-1, 4, 4)
+    session.instance_state[key] = transforms
+    session.dirty_geometry = True
+    # Matrix attributes avoid creating tens of thousands of Blender objects.
+    # Shutter motion blur needs individually animated objects instead.
+    if len(transforms) > 256 and not session.instancing_motion:
+        for instance in session.instances.pop(key, []):
+            session.picks.release(instance)
+            bpy.data.objects.remove(instance, do_unlink=True)
+        sync(session, key, obj, transforms, session.visibility.get(key, True))
+        return
+    remove(session, key)
+    objects = session.instances.setdefault(key, [])
+    while len(objects) > len(transforms):
+        extra = objects.pop()
+        session.picks.release(extra)
+        bpy.data.objects.remove(extra, do_unlink=True)
+    while len(objects) < len(transforms):
+        instance = bpy.data.objects.new(key + '/instance_' + str(len(objects)), obj.data)
+        session.scene.collection.objects.link(instance)
+        objects.append(instance)
+    for instance, transform in zip(objects, transforms):
+        instance.matrix_world = session.basis @ Matrix(transform.tolist()).transposed()
+    primvars = rgba_primvars(session, key, len(objects))
+    for index, instance in enumerate(objects):
+        for name in [k for k in instance.keys() if k.startswith(INSTANCE_PREFIX) and k not in primvars]:
+            del instance[name]
+        for name, values in primvars.items():
+            instance[name] = values[index].tolist()
+
+
+def rgba_primvars(session, key, count):
+    """Per-instance primvars as RGBA with alpha 1, by attribute name."""
+    result = {}
+    for name, values in session.instance_primvars.get(key, {}).items():
+        if len(values) != count:
+            session.warn(key, 'Instance primvar ' + name + ' has ' + str(len(values)) + ' values for ' +
+                         str(count) + ' instances')
+            continue
+        rgba = np.zeros((count, 4), np.float32)
+        rgba[:, 3] = 1.
+        if values.shape[1] == 1:
+            rgba[:, :3] = values        # a scalar reads the same as Fac, Color or Vector
+        else:
+            size = min(values.shape[1], 3)
+            rgba[:, :size] = values[:, :size]
+        result[INSTANCE_PREFIX + name] = rgba
+    return result
+
+
+def refresh(session, key, obj, visible):
+    """Prototypes stay data owners but are hidden beside their instances, which
+    follow the prim's visibility. Also assigns picking ids."""
+    hidden = not visible or key in session.instances or key in session.point_instances
+    if obj.hide_render != hidden:
+        obj.hide_render = hidden
+    if obj.hide_get(view_layer=session.view_layer) != hidden:
+        obj.hide_set(hidden, view_layer=session.view_layer)
+    others = list(session.instances.get(key, []))
+    if key in session.point_instances:
+        others.append(session.point_instances[key])
+    for other in others:
+        if other.hide_render == visible:
+            other.hide_render = not visible
+            other.hide_set(not visible, view_layer=session.view_layer)
+    prim_id = session.prim_ids.get(key, -1)
+    session.picks.assign(obj, prim_id)
+    for index, instance in enumerate(session.instances.get(key, [])):
+        session.picks.assign(instance, prim_id, index)
+    if key in session.point_instances:
+        session.picks.assign(session.point_instances[key], prim_id)
+
+
+def finish(session, key, obj, update):
+    """Visibility, instances, picking and material of a prim that is sent whole
+    (curves, points, volumes)."""
+    session.visibility[key] = update.get('visible', True)
+    if 'prim_id' in update:
+        session.prim_ids[key] = int(update['prim_id'])
+    sync_objects(session, key, obj, update.get('instances'), update.get('instance_primvars', {}))
+    refresh(session, key, obj, session.visibility[key])
+    session.bind(key, update.get('material', ''))
+    session.display_color(key, update)
+
 
 def sync(worker,key,prototype,transforms,visible):
     obj=worker.point_instances.get(key)
@@ -45,6 +150,12 @@ def sync(worker,key,prototype,transforms,visible):
     # USD row-major matrix storage equals Blender's column-major attribute
     # storage for the equivalent transposed (column-vector) transform.
     attr.data.foreach_set('value',np.asarray(transforms,dtype=np.float32).ravel())
+    primvars=rgba_primvars(worker,key,len(transforms))
+    for name in [a.name for a in data.attributes if a.name.startswith(INSTANCE_PREFIX) and a.name not in primvars]:
+        data.attributes.remove(data.attributes[name])
+    for name,values in primvars.items():
+        attribute=data.attributes.get(name) or data.attributes.new(name,'FLOAT_COLOR','POINT')
+        attribute.data.foreach_set('color',values.ravel())
     data.update();obj.matrix_world=worker.basis
     obj.hide_render=not visible;obj.hide_set(not visible,view_layer=worker.view_layer)
     obj['usd_instance_count']=len(transforms)

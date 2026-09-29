@@ -8,6 +8,8 @@ import numpy as np
 from mathutils import Matrix
 
 from protocol import array
+import curves
+import instances as instance_nodes
 
 DEFAULT_WIDTH = 1.0   # USD/Hydra fallback when widths is not authored
 COLUMNS = {'FLOAT': None, 'FLOAT2': 2, 'FLOAT_VECTOR': 3}
@@ -72,16 +74,7 @@ def sync(session, update):
         if attribute is not None:
             cloud.attributes.remove(attribute)
     session.exported_attributes[key] = written
+    curves.mark_present(cloud, written, lambda name, values: write(cloud, name, 'FLOAT', values), count)
     obj.matrix_world = session.basis @ Matrix(update['transform']).transposed()
-    session.visibility[key] = update.get('visible', True)
-    hidden = not session.visibility[key]
-    if obj.hide_render != hidden:
-        obj.hide_render = hidden
-        obj.hide_set(hidden, view_layer=session.view_layer)
-    if 'prim_id' in update:
-        session.prim_ids[key] = int(update['prim_id'])
-    session.picks.assign(obj, session.prim_ids.get(key, -1))
-    session.bind(key, update.get('material', ''))
-    if 'color' in update and not session.bindings.get(key):
-        session.display_material(key, update['color'], update.get('color_varying', False))
+    instance_nodes.finish(session, key, obj, update)
     cloud.update_tag()

@@ -33,6 +33,7 @@ import usd_material
 import volumes
 from picking import PickTable
 from protocol import PixelSegment
+from shader_utils import primvar
 from viewport_state import assign
 
 # Right-handed basis: Houdini +X -> Blender +X, +Y -> +Z, +Z -> -Y.
@@ -73,6 +74,7 @@ class Session:
         self.subset_bindings = {}
         self.subsets = {}
         self.display = {}
+        self.display_colors = {}
         self.categories = {}
         self.light_links = {}
         self.links_dirty = False
@@ -81,6 +83,7 @@ class Session:
         self.point_instances = {}
         self.instancing_motion = False
         self.instance_state = {}
+        self.instance_primvars = {}
         self.visibility = {}
         self.prim_ids = {}
         self.domes = {}
@@ -130,6 +133,7 @@ class Session:
                 bpy.data.objects.remove(obj, do_unlink=True)
         self.instances.clear()
         self.instance_state.clear()
+        self.instance_primvars.clear()
         for obj in list(self.objects.values()):
             data = obj.data
             bpy.data.objects.remove(obj, do_unlink=True)
@@ -141,7 +145,7 @@ class Session:
             if image.get('hde_ramp') and not image.users:
                 bpy.data.images.remove(image)
         for name in ('objects', 'materials', 'material_digest', 'materialx_defs', 'bindings', 'bound',
-                     'subset_bindings', 'subsets', 'display', 'categories', 'light_links',
+                     'subset_bindings', 'subsets', 'display', 'display_colors', 'categories', 'light_links',
                      'topology', 'visibility', 'prim_ids', 'fields', 'volume_defs', 'motion_defs', 'domes',
                      'material_warnings', 'geometry_warnings', 'exported_attributes'):
             getattr(self, name).clear()
@@ -195,7 +199,8 @@ class Session:
         # Rebuild from the current transforms when changing representation.
         for key, transforms in list(self.instance_state.items()):
             if key in self.objects:
-                meshes.sync(self, {'id': key, 'instances': transforms})
+                instance_nodes.sync_objects(self, key, self.objects[key], transforms)
+                instance_nodes.refresh(self, key, self.objects[key], self.visibility.get(key, True))
 
     def configure(self, config, request):
         """Apply Stage render settings only when they actually change."""
@@ -250,6 +255,9 @@ class Session:
             tree.nodes.clear()
             nodes = {}
             for definition in graph['nodes']:
+                if definition['type'] == 'hde:primvar':
+                    nodes[definition['id']] = primvar(tree, definition['name'])
+                    continue
                 node = tree.nodes.new(definition['type'])
                 nodes[definition['id']] = node
                 for prop, value in definition.get('properties', {}).items():
@@ -357,7 +365,7 @@ class Session:
             material_key = '__hde_display_attribute'
             if material_key not in self.materials:
                 self.material({'id': material_key, 'graph': {
-                    'nodes': [{'id': 'color', 'type': 'ShaderNodeAttribute', 'properties': {'attribute_name': 'displayColor'}},
+                    'nodes': [{'id': 'color', 'type': 'hde:primvar', 'name': 'displayColor'},
                               {'id': 'bsdf', 'type': 'ShaderNodeBsdfPrincipled', 'inputs': {'Roughness': 0.4}},
                               {'id': 'output', 'type': 'ShaderNodeOutputMaterial'}],
                     'links': [['color', 'Color', 'bsdf', 'Base Color'], ['bsdf', 'BSDF', 'output', 'Surface']]}})
@@ -366,6 +374,19 @@ class Session:
             self.material({'id': material_key, 'parameters': {'diffuseColor': list(color), 'roughness': 0.4}})
         self.display[key] = material_key
         self.assign_material(key)
+
+    def display_color(self, key, update):
+        """Apply displayColor to a prim without a bound material. update is the
+        prim's latest change; its displayColor is kept for later rebinding."""
+        if 'color' in update:
+            self.display_colors[key] = (update['color'], update.get('color_varying', False))
+        if self.bindings.get(key):
+            return
+        color, varying = self.display_colors.get(key, (None, False))
+        # Per-instance displayColor needs the attribute-reading material.
+        varying = varying or 'displayColor' in self.instance_primvars.get(key, {})
+        if color is not None or varying:
+            self.display_material(key, color, varying)
 
     # ------------------------------------------------------------------ lights
     def light(self, update):
@@ -484,7 +505,7 @@ class Session:
             if 'categories' in change and self.categories.get(change['id']) != change['categories']:
                 self.categories[change['id']] = change['categories']
                 self.links_dirty = True
-            elif kind != 'light' and 'instances' in change and self.light_links:
+            elif kind != 'light' and change.get('instances') is not None and self.light_links:
                 self.links_dirty = True   # instance copies must join their prototype's link collections
         if kind == 'material':
             self.material(change)
@@ -535,7 +556,7 @@ class Session:
         for material_id in self.subset_bindings.pop(key, ()):
             self.bound.get(material_id, set()).discard(key)
         for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings',
-                     'subsets', 'display'):
+                     'subsets', 'display', 'display_colors', 'instance_primvars'):
             getattr(self, name).pop(key, None)
         if self.categories.pop(key, None) is not None or self.light_links.pop(key, None) is not None:
             self.links_dirty = True
