@@ -14,7 +14,7 @@ EEVEE Bridge is a Hydra render delegate for Houdini 22 that renders your Solaris
 - **A real viewport renderer.** Click-picking and selection highlighting work, and real depth keeps Houdini's handles and grid in place. You can run several EEVEE viewports at once. Render stats and status messages appear in Houdini.
 - **Final frames too.** The *EEVEE Render Settings* LOP exposes EEVEE's settings. It renders stills, sequences, render passes and Cryptomatte through Houdini's USD Render ROP and husk, and can render to MPlay.
 
-> **Status:** Tested on Linux x86-64 with Houdini 22.0.368, Blender 5.2.0 LTS and NVIDIA GPUs under Vulkan. Windows support is implemented but has not been built or tested yet. See [Limitations](#limitations).
+> **Status:** Runs on **Linux** and **Windows**. Linux x86-64 is tested with Houdini 22.0.368, Blender 5.2.0 LTS and NVIDIA GPUs under Vulkan. On Windows 11, the plugin builds with Visual Studio 2022 and passes the installer's checks, including an EEVEE render on the GPU. See [Limitations](#limitations).
 
 ## Contents
 
@@ -54,8 +54,8 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 | **Houdini** | 22.0 (tested: 22.0.368). The plugin binary must match your exact Houdini build. The installer can rebuild it with the HDK that ships with Houdini. |
 | **Blender** | 5.2 LTS. The installer checks for EEVEE and OpenVDB support, and adds NumPy and OpenEXR privately if Blender lacks them. |
 | **GPU** | A Vulkan-capable GPU and driver (tested on NVIDIA). OpenGL is available as a fallback. |
-| **OS** | Linux x86-64 (tested) or Windows x86-64 (implemented, untested). |
-| **Build tools** | Only when building from source: CMake 3.22 or later and the C++ compiler your Houdini HDK expects. |
+| **OS** | Linux x86-64, or Windows 11 x86-64. |
+| **Build tools** | Only for source builds, which Windows always needs for now: CMake 3.22 or later and the C++ compiler your Houdini HDK expects (Visual Studio 2022 on Windows). |
 
 ## Quick start
 
@@ -67,7 +67,7 @@ cd houdini-eevee-0.6.1-linux-x86_64
 bash install.sh
 ```
 
-**Any other Houdini 22 build, or a clone of this repository.** Build the plugin against your Houdini:
+**Linux, any other Houdini 22 build, or a clone of this repository.** Build the plugin against your Houdini:
 
 ```bash
 git clone https://github.com/LilBadger/houdini-eevee-bridge.git
@@ -75,9 +75,15 @@ cd houdini-eevee-bridge
 bash install.sh --build
 ```
 
-If the installer cannot find Houdini or Blender, pass `--houdini /opt/hfs22.0.368 --blender /path/to/blender`.
+**Windows.** There is no prebuilt Windows download yet, so the installer builds the plugin. Install [CMake](https://cmake.org/download/) and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. Download `houdini-eevee-0.6.1-source.zip` from [Releases](https://github.com/LilBadger/houdini-eevee-bridge/releases), or clone the repository. Then run this in its folder:
 
-The installer copies the bridge to `~/.local/share/houdini-eevee/<version>` and adds one package file to your Houdini `packages` folder. It then renders a small test image with EEVEE on your GPU. It needs no administrator rights and makes no changes to `houdini.env` or your Blender preferences.
+```bat
+install.cmd --build
+```
+
+If the installer cannot find Houdini or Blender, pass `--houdini PATH --blender PATH`. For example, on Linux: `--houdini /opt/hfs22.0.368 --blender /path/to/blender`.
+
+The installer copies the bridge to `~/.local/share/houdini-eevee/<version>` (on Windows, `%LOCALAPPDATA%\HoudiniEEVEE\<version>`) and adds one package file to your Houdini `packages` folder. It then renders a small test image with EEVEE on your GPU. It needs no administrator rights and makes no changes to `houdini.env` or your Blender preferences.
 
 Restart Houdini, open a Solaris network, and choose **EEVEE Bridge** from the viewport's renderer menu.
 
@@ -165,7 +171,7 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 
 ## Limitations
 
-- **Windows** support (build, installer and transport) is implemented but has not been built or tested yet.
+- **Windows** has no prebuilt download yet, so installing builds the plugin from source. On Windows 11 it builds and passes the installer's checks, but interactive use in a Houdini viewport on Windows hasn't been confirmed yet.
 - **Houdini version.** The plugin binary must match your exact Houdini build. Use `--build` for any build other than 22.0.368.
 - **Material fidelity.** Karma and MaterialX materials are approximated with Blender's BSDFs. VEX shaders are not supported.
 - **Picking.** Point instances drawn through Geometry Nodes pick as their prototype prim. Face and point picking is not provided.

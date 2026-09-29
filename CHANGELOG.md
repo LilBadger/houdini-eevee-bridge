@@ -2,6 +2,10 @@
 
 ## 0.6.1
 
+### Windows
+
+- The plugin now links Houdini's Python libraries, which the MSVC linker requires. Windows 11 builds with Visual Studio 2022 and passes the installer's checks, including an EEVEE render on the GPU.
+
 ### Video memory and first draw
 
 Measured on a production shot (1653×1078, 110 meshes of which 37 subdivided, 99 materials, 52 4K textures, 116,347 point instances):

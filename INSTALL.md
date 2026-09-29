@@ -25,7 +25,7 @@ You need:
 | **Blender 5.2 LTS** | Tested with 5.2.0 LTS. It must include OpenVDB, as official builds do. |
 | **GPU driver** | A Vulkan-capable driver (tested with NVIDIA). |
 | **Python 3.10+** | To run the installer. On Linux, the system `python3` is enough. On Windows, `install.cmd` uses the Python that ships with Houdini. |
-| **Build tools** | Only when building from source: CMake 3.22 or later, plus the compiler your Houdini build expects. That is GCC on Linux and the Visual Studio C++ toolset listed in the HDK documentation on Windows. On Linux, Ninja or Make works. |
+| **Build tools** | Only when building from source: CMake 3.22 or later, plus the compiler your Houdini build expects. That is GCC on Linux and Visual Studio 2022 Build Tools on Windows (tested: MSVC 19.44). On Linux, Ninja or Make works. |
 
 Blender needs **NumPy** and the **OpenEXR** Python module. If they are missing, the installer downloads them from PyPI into the bridge's own folder, leaving Blender untouched. This step needs internet access.
 
@@ -68,11 +68,11 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 ## 3. Install on Windows
 
-> Windows support is implemented but has not yet been built or tested. Please report what you find.
+> Tested on Windows 11 with Houdini 22.0.368, Blender 5.2.0 LTS and Visual Studio 2022 Build Tools (MSVC 19.44). The plugin builds, and the doctor passes, including an EEVEE render on the GPU. Interactive use in a Houdini viewport on Windows hasn't been confirmed yet, so please report what you find.
 
 There is no prebuilt Windows binary yet, so the first installation builds the plugin.
 
-1. Install Houdini 22.0, Blender 5.2, [CMake](https://cmake.org/download/), and the Visual Studio C++ build tools that your Houdini version's HDK requires.
+1. Install Houdini 22.0, Blender 5.2, [CMake](https://cmake.org/download/), and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload.
 2. Download `houdini-eevee-0.6.1-source.zip` (or clone the repository) and extract it.
 3. In the extracted folder, run:
 
