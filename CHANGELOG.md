@@ -5,6 +5,7 @@
 ### Windows
 
 - The plugin now links Houdini's Python libraries, which the MSVC linker requires. Windows 11 builds with Visual Studio 2022 and passes the installer's checks, including an EEVEE render on the GPU.
+- Prebuilt Windows package for Houdini 22.0.368: `houdini-eevee-0.6.1-windows-x86_64.zip`, built with MSVC 19.42 to match Houdini.
 
 ### Video memory and first draw
 

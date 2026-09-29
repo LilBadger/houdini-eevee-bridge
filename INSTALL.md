@@ -70,7 +70,20 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 > Tested on Windows 11 with Houdini 22.0.368, Blender 5.2.0 LTS and Visual Studio 2022 Build Tools (MSVC 19.44). The plugin builds, and the doctor passes, including an EEVEE render on the GPU. Interactive use in a Houdini viewport on Windows hasn't been confirmed yet, so please report what you find.
 
-There is no prebuilt Windows binary yet, so the first installation builds the plugin.
+### From the prebuilt release (Houdini 22.0.368)
+
+1. Download `houdini-eevee-0.6.1-windows-x86_64.zip` from the [releases page](https://github.com/LilBadger/houdini-eevee-bridge/releases).
+2. Extract it, and in the extracted folder run:
+
+   ```bat
+   install.cmd
+   ```
+
+3. Restart Houdini.
+
+The prebuilt plugin works only with **Houdini 22.0.368**. It is built with MSVC 19.42, the same compiler as Houdini 22.0.368, so it needs no compiler or extra Visual C++ runtime. For another Houdini 22.0 build, build from source.
+
+### From source (any Houdini 22.0 build)
 
 1. Install Houdini 22.0, Blender 5.2, [CMake](https://cmake.org/download/), and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload.
 2. Download `houdini-eevee-0.6.1-source.zip` (or clone the repository) and extract it.

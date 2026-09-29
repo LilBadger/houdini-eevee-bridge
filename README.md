@@ -55,7 +55,7 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 | **Blender** | 5.2 LTS. The installer checks for EEVEE and OpenVDB support, and adds NumPy and OpenEXR privately if Blender lacks them. |
 | **GPU** | A Vulkan-capable GPU and driver (tested on NVIDIA). OpenGL is available as a fallback. |
 | **OS** | Linux x86-64, or Windows 11 x86-64. |
-| **Build tools** | Only for source builds, which Windows always needs for now: CMake 3.22 or later and the C++ compiler your Houdini HDK expects (Visual Studio 2022 on Windows). |
+| **Build tools** | Only for source builds: CMake 3.22 or later and the C++ compiler your Houdini HDK expects (Visual Studio 2022 on Windows). |
 
 ## Quick start
 
@@ -75,7 +75,13 @@ cd houdini-eevee-bridge
 bash install.sh --build
 ```
 
-**Windows.** There is no prebuilt Windows download yet, so the installer builds the plugin. Install [CMake](https://cmake.org/download/) and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. Download `houdini-eevee-0.6.1-source.zip` from [Releases](https://github.com/LilBadger/houdini-eevee-bridge/releases), or clone the repository. Then run this in its folder:
+**Windows, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.6.1-windows-x86_64.zip` from [Releases](https://github.com/LilBadger/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
+
+```bat
+install.cmd
+```
+
+**Windows, any other Houdini 22 build.** Install [CMake](https://cmake.org/download/) and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. Download `houdini-eevee-0.6.1-source.zip` from [Releases](https://github.com/LilBadger/houdini-eevee-bridge/releases), or clone the repository. Then run this in its folder:
 
 ```bat
 install.cmd --build
@@ -171,7 +177,7 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 
 ## Limitations
 
-- **Windows** has no prebuilt download yet, so installing builds the plugin from source. On Windows 11 it builds and passes the installer's checks, but interactive use in a Houdini viewport on Windows hasn't been confirmed yet.
+- **Windows.** On Windows 11 the plugin builds and passes the installer's checks, but interactive use in a Houdini viewport on Windows hasn't been confirmed yet.
 - **Houdini version.** The plugin binary must match your exact Houdini build. Use `--build` for any build other than 22.0.368.
 - **Material fidelity.** Karma and MaterialX materials are approximated with Blender's BSDFs. VEX shaders are not supported.
 - **Picking.** Point instances drawn through Geometry Nodes pick as their prototype prim. Face and point picking is not provided.
