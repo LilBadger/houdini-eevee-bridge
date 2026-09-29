@@ -825,7 +825,7 @@ class Session:
                 velocity = np.zeros((0, 3), np.float32) if velocity is None else np.asarray(velocity, np.float32).reshape(-1, 3)
                 if len(samples) < 2 and len(velocity) == len(obj.data.vertices) and len(velocity):
                     points = np.empty(len(obj.data.vertices) * 3, dtype=np.float32)
-                    obj.data.vertices.foreach_get('co', points)
+                    obj.data.attributes['position'].data.foreach_get('vector', points)
                     points = points.reshape(-1, 3)
                     acceleration = animation.get('accelerations')
                     acceleration = (np.asarray(acceleration, np.float32).reshape(-1, 3)

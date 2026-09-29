@@ -86,12 +86,37 @@ class Topology:
         return values[self.loops]
 
 
+def set_positions(mesh, points):
+    # The position attribute is contiguous; MeshVertex.co goes through RNA per
+    # element and is about 100x slower for millions of points.
+    mesh.attributes['position'].data.foreach_set('vector', np.ascontiguousarray(points, dtype=np.float32).ravel())
+
+
+def set_flat(mesh, flat):
+    """Flat or smooth shading. Mesh.shade_flat() loops over faces in Python."""
+    existing = mesh.attributes.get('sharp_face')
+    if not flat:
+        if existing is not None:
+            mesh.attributes.remove(existing)
+        return
+    if existing is None or existing.domain != 'FACE' or existing.data_type != 'BOOLEAN':
+        if existing is not None:
+            mesh.attributes.remove(existing)
+        existing = mesh.attributes.new('sharp_face', 'BOOLEAN', 'FACE')
+    existing.data.foreach_set('value', np.ones(len(mesh.polygons), dtype=bool))
+
+
 def build(mesh, points, topology):
     mesh.clear_geometry()
     mesh.vertices.add(len(points))
-    mesh.vertices.foreach_set('co', points.ravel())
+    if len(points):
+        set_positions(mesh, points)
     mesh.loops.add(len(topology.loops))
-    mesh.loops.foreach_set('vertex_index', topology.loops)
+    corner_vert = mesh.attributes.get('.corner_vert')
+    if corner_vert is not None and len(topology.loops):
+        corner_vert.data.foreach_set('value', topology.loops)
+    else:
+        mesh.loops.foreach_set('vertex_index', topology.loops)
     mesh.polygons.add(len(topology.counts))
     starts = np.zeros(len(topology.counts), dtype=np.int32)
     if len(starts) > 1:
@@ -158,7 +183,8 @@ def sync(session, update):
             if topology.dropped:
                 session.warn(key, str(topology.dropped) + ' degenerate faces were skipped')
         elif topology is not None and len(points) == len(mesh.vertices):
-            mesh.vertices.foreach_set('co', points.ravel())
+            if len(points):
+                set_positions(mesh, points)
             mesh.update()
         else:
             raise ValueError('Point count changed without topology: ' + key)
@@ -180,10 +206,7 @@ def sync(session, update):
             except ValueError as exc:
                 session.warn(key, str(exc) + '; using computed normals')
                 remove_attribute(mesh, 'custom_normal')
-        if has_normals or topology.smooth:
-            mesh.shade_smooth()
-        else:
-            mesh.shade_flat()
+        set_flat(mesh, not (has_normals or topology.smooth))
     if names_changed and topology is not None:
         mark_present(session, key, mesh)
     if 'subsets' in update:
@@ -232,6 +255,9 @@ def sync(session, update):
 
 def set_face_materials(mesh, topology, subsets):
     """Material slot per face from USD GeomSubsets (slot 0: the prim's own material)."""
+    if not subsets:
+        remove_attribute(mesh, 'material_index')   # every face uses slot 0
+        return
     index = np.zeros(topology.source_faces, dtype=np.int32)
     for slot, (_, faces) in enumerate(subsets, start=1):
         index[faces[(faces >= 0) & (faces < topology.source_faces)]] = slot
