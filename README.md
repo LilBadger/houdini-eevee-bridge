@@ -33,15 +33,14 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 ## How it works
 
 ```text
- Houdini                                                            Blender 5.2, headless
- ┌───────────────┐    ┌───────────────────────┐     scene edits     ┌─────────────────────┐
- │ Solaris stage │───>│ EEVEE Bridge          │────────────────────>│ EEVEE worker        │
- └───────────────┘    │ Hydra render delegate │   binary over TCP   │ one Blender scene   │
-                      │ background thread     │<────────────────────│ per viewport        │
-                      └───────────┬───────────┘  color, depth, IDs  └─────────────────────┘
-                                  │                shared memory
-                                  v
-                      Solaris viewport or husk
+ Houdini                                                 Blender 5.2
+ ┌───────────────┐   ┌───────────────────┐  scene edits  ┌───────────────┐
+ │ Solaris stage │──>│ EEVEE Bridge      │──────────────>│ EEVEE worker  │
+ └───────────────┘   │ Hydra delegate    │     binary    │ one scene per │
+                     │ render thread     │<──────────────│ viewport      │
+                     └─────────┬─────────┘     pixels    └───────────────┘
+                               v           shared memory
+                    Solaris viewport or husk
 ```
 
 - **Only changes travel.** The C++ delegate turns Hydra prims into compact edits and sends only what changed, over an authenticated loopback connection. Arrays go as raw binary, and unchanged arrays are not sent again. Pixels come back through shared memory.
