@@ -32,20 +32,19 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 
 ## How it works
 
-```mermaid
-flowchart LR
-  subgraph Houdini
-    S["Solaris stage"] --> D["Hydra render delegate<br/>(background render thread)"]
-    D --> V["Viewport or husk"]
-  end
-  subgraph Blender["Blender 5.2, headless worker"]
-    E["EEVEE scene per viewport"]
-  end
-  D -- "scene edits: JSON + raw binary arrays<br/>over authenticated loopback TCP" --> E
-  E -- "color, depth and pick IDs<br/>through shared memory" --> D
+```text
+ Houdini                                                            Blender 5.2, headless
+ ┌───────────────┐    ┌───────────────────────┐     scene edits     ┌─────────────────────┐
+ │ Solaris stage │───>│ EEVEE Bridge          │────────────────────>│ EEVEE worker        │
+ └───────────────┘    │ Hydra render delegate │   binary over TCP   │ one Blender scene   │
+                      │ background thread     │<────────────────────│ per viewport        │
+                      └───────────┬───────────┘  color, depth, IDs  └─────────────────────┘
+                                  │                shared memory
+                                  v
+                      Solaris viewport or husk
 ```
 
-- **Only changes travel.** The C++ delegate turns Hydra prims into compact edits and sends only what changed. Arrays go as raw binary, and unchanged arrays are not sent again.
+- **Only changes travel.** The C++ delegate turns Hydra prims into compact edits and sends only what changed, over an authenticated loopback connection. Arrays go as raw binary, and unchanged arrays are not sent again. Pixels come back through shared memory.
 - **One worker, many viewports.** A single Blender worker serves every viewport in a Houdini session. Each viewport gets its own Blender scene, and compiled shaders, textures and identical materials are shared between them.
 - **Disk renders are isolated.** Each disk render or husk job starts its own worker, and the worker exits when the job ends or is cancelled.
 
