@@ -14,6 +14,7 @@ import selectors
 import signal
 import socket
 import sys
+import time
 import traceback
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'tools'))
@@ -29,7 +30,12 @@ from protocol import (PROTOCOL, SUPPORTED, ProtocolError, read_frame, send_frame
                       remove_stale_segments)
 from session import Session
 
-VERSION = '0.7.1'
+VERSION = '0.7.2'
+# Houdini's supervisor (tools/hde_installation.py) sets this: once no viewport has
+# been connected for this many seconds, the worker exits so that all of its GPU
+# memory returns to the driver, for Karma XPU for example. The supervisor starts a
+# new worker when a viewport shows EEVEE again. 0 keeps the worker running.
+IDLE_EXIT_SECONDS = float(os.environ.get('HDEEVEE_IDLE_EXIT_SECONDS') or 0)
 SETTING_GROUPS = ('eevee', 'eevee.ray_tracing_options', 'render', 'render.image_settings',
                   'view_settings', 'display_settings')
 
@@ -232,9 +238,24 @@ class Server:
         self.running = True
         self.selector = selectors.DefaultSelector()
         self.selector.register(server, selectors.EVENT_READ, None)
+        self.used = False            # a viewport has connected at least once
+        self.unused_since = None
 
     def alive(self):
         return not self.owner_pid or process_alive(self.owner_pid)
+
+    def unused(self):
+        """True once no viewport has been connected for IDLE_EXIT_SECONDS. A worker
+        that never had a viewport keeps waiting for the one it was started for."""
+        if self.worker.sessions:
+            self.used, self.unused_since = True, None
+            return False
+        if IDLE_EXIT_SECONDS <= 0 or not self.used:
+            return False
+        now = time.monotonic()
+        if self.unused_since is None:
+            self.unused_since = now
+        return now - self.unused_since >= IDLE_EXIT_SECONDS
 
     def authenticate(self, header):
         if self.token and not secrets.compare_digest(str(header.get('token', '')), self.token):
@@ -245,6 +266,10 @@ class Server:
     def serve(self):
         while self.running:
             if not self.alive():
+                break
+            if self.unused():
+                print('[EEVEE] No viewport has used this worker for %g s; exiting to free its GPU memory.'
+                      % IDLE_EXIT_SECONDS, flush=True)
                 break
             # Settled viewports send no requests; release idle targets here.
             for session in list(self.worker.sessions.values()):

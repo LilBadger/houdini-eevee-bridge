@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+
+- **Switching away from EEVEE frees its video memory.** The Blender worker used to keep the scene's textures, compiled shaders and its EEVEE instance in video memory for the rest of the Houdini session, even with no EEVEE viewport open. Switching the viewport to Karma XPU could then run out of video memory and crash Houdini. Now the worker exits 2 seconds after the last EEVEE viewport closes, which returns all of its memory: 2.4 GB for the benchmark scene, within 3 seconds. It starts again when a viewport uses EEVEE, which costs a few seconds plus the scene's shader compilation. `HDEEVEE_IDLE_EXIT_SECONDS` sets the delay, and `0` keeps the worker running. A worker that exits this way does not count toward the three automatic restarts after crashes.
+
 ## 0.7.1
 
 ### Installer

@@ -69,7 +69,7 @@ bash install.sh
 
 If a release includes a prebuilt `houdini-eevee-<version>-linux-x86_64.zip`, run `bash install.sh` in its extracted folder instead. It uses the prebuilt plugin on the Houdini build it names, and on other builds works like the Windows installer below.
 
-**Windows, any Houdini 22.0 build.** Download `houdini-eevee-0.7.1-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
+**Windows, any Houdini 22.0 build.** Download `houdini-eevee-0.7.2-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
 
 ```bat
 install.cmd
@@ -172,6 +172,7 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 - **Instant feedback.** A solid preview appears while a new session compiles its shaders. Progress and errors appear in the status bar and render stats.
 - **Picking and depth.** A flat ID pass on settled frames supplies prim and instance IDs and window-space depth.
 - **Viewport controls.** Multiple viewports, pause and resume, and automatic reconnection to a restarted worker.
+- **Video memory is freed when you switch away.** Two seconds after the last EEVEE viewport closes, for example when you switch to Karma XPU, the Blender worker exits and returns all its video memory. It starts again when a viewport uses EEVEE, and recompiles the scene's shaders. `HDEEVEE_IDLE_EXIT_SECONDS` sets the delay; `0` keeps the worker running.
 
 ## Limitations
 

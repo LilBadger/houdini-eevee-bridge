@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 import hou
 from hde_runtime import cache_root, new_session
-from start_worker import start, stop, is_running
+from start_worker import start, stop, is_running, exit_code
 
 
 def activate():
@@ -86,13 +86,23 @@ def activate():
                                         hou.severityType.Error)
         worker = state['worker']
         if worker and not is_running(worker):
-            # Delegates reconnect to a replacement worker and replay their scene.
+            code = exit_code(worker)
             stop(worker)
             state['worker'] = None
-            hou.ui.setStatusMessage('EEVEE worker exited; restarting it.', hou.severityType.Warning)
+            if code == 0:
+                # It exited by itself once no viewport used EEVEE, which frees its
+                # GPU memory (HDEEVEE_IDLE_EXIT_SECONDS). That is not a failure.
+                state['attempts'] = 0
+                if not viewers:
+                    hou.ui.setStatusMessage('EEVEE freed its GPU memory; it starts again when a viewport uses EEVEE.')
+            else:
+                # Delegates reconnect to a replacement worker and replay their scene.
+                hou.ui.setStatusMessage('EEVEE worker exited; restarting it.', hou.severityType.Warning)
         if viewers and not state['worker'] and not state['future'] and state['attempts'] < 3:
             state['attempts'] += 1
-            state['future'] = executor.submit(start, parent=os.getpid(), environment=os.environ.copy())
+            environment = os.environ.copy()
+            environment.setdefault('HDEEVEE_IDLE_EXIT_SECONDS', '2')
+            state['future'] = executor.submit(start, parent=os.getpid(), environment=environment)
             hou.ui.setStatusMessage('Starting Blender EEVEE…')
         if viewers:
             report_status()
