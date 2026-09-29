@@ -33,7 +33,7 @@ OpenEXR currently publishes wheels up to Python 3.13. Some Linux distributions b
 
 ## 2. Install on Linux
 
-### From the prebuilt release (Houdini 22.0.368)
+### From the prebuilt release (any Houdini 22.0 build)
 
 1. Download `houdini-eevee-0.7.0-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it and run the installer:
@@ -46,21 +46,21 @@ OpenEXR currently publishes wheels up to Python 3.13. Some Linux distributions b
 
 3. Restart Houdini.
 
-The prebuilt plugin works only with **Houdini 22.0.368**. For another Houdini 22.0 build, add `--build` (see below). If the prebuilt binary does not load on your distribution, for example because of an older system C++ library, `--build` fixes that too.
+The prebuilt plugin is compiled for **Houdini 22.0.368**. On another Houdini 22.0 build, the installer compiles the plugin itself when CMake and the compiler your HDK expects are installed; otherwise it keeps the prebuilt plugin only if a test render with it in your Houdini succeeds. If the prebuilt binary does not load on your distribution, for example because of an older system C++ library, `--build` compiles it even for 22.0.368.
 
 ### From source (any Houdini 22.0 build)
 
 ```bash
 git clone https://github.com/badgerz42/houdini-eevee-bridge.git
 cd houdini-eevee-bridge
-bash install.sh --build
+bash install.sh
 ```
 
-You can also run `install.sh --build` from the extracted source archive, `houdini-eevee-0.7.0-source.zip`.
+With no prebuilt plugin in the folder, the installer compiles one. You can also run `install.sh` from the extracted source archive, `houdini-eevee-0.7.0-source.zip`.
 
 ### When Houdini or Blender are not found
 
-The installer looks for Houdini in `$HFS`, `/opt/hfs22.0.*` and `~/houdini-22.0.*`, and for Blender on your `PATH`. If it finds none, or more than one, name them:
+The installer uses the Houdini in `$HFS`, or else the newest build in `/opt/hfs22.0.*` and `~/houdini-22.0.*`. It looks for Blender on your `PATH`. To choose, or if it finds none, name them:
 
 ```bash
 bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
@@ -70,7 +70,7 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 > Tested on Windows 11 with Houdini 22.0.368, Blender 5.2.0 LTS and Visual Studio 2022 Build Tools (MSVC 19.44). The plugin builds, and the doctor passes, including an EEVEE render on the GPU. Interactive use in a Houdini viewport on Windows hasn't been confirmed yet, so please report what you find.
 
-### From the prebuilt release (Houdini 22.0.368)
+### From the prebuilt release (any Houdini 22.0 build)
 
 1. Download `houdini-eevee-0.7.0-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it, and in the extracted folder run:
@@ -81,27 +81,30 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 3. Restart Houdini.
 
-The prebuilt plugin works only with **Houdini 22.0.368**. It is built with MSVC 19.42, the same compiler as Houdini 22.0.368, so it needs no compiler or extra Visual C++ runtime. For another Houdini 22.0 build, build from source.
+The prebuilt plugin is compiled for **Houdini 22.0.368** with MSVC 19.42, the same compiler as that Houdini, so on 22.0.368 it needs no compiler or extra Visual C++ runtime. On another Houdini 22.0 build, the installer:
+
+- compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload are installed. It uses the CMake that comes with them and needs no Developer Command Prompt. This takes a few minutes.
+- otherwise tries the prebuilt plugin, and registers it only if a test render through it in your Houdini succeeds. If it fails, install the Build Tools and run `install.cmd` again.
 
 ### From source (any Houdini 22.0 build)
 
-1. Install Houdini 22.0, Blender 5.2, [CMake](https://cmake.org/download/), and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload.
+1. Install Houdini 22.0, Blender 5.2, and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. A separate [CMake](https://cmake.org/download/) is optional.
 2. Download `houdini-eevee-0.7.0-source.zip` (or clone the repository) and extract it.
 3. In the extracted folder, run:
 
    ```bat
-   install.cmd --build
+   install.cmd
    ```
 
-   If more than one Houdini or Blender is installed, or they live in non-default folders, name them:
+   If several Houdini 22.0 builds are installed, the installer uses the newest. To choose one, or if Houdini or Blender live in non-default folders, name them:
 
    ```bat
-   install.cmd --build --houdini "C:\Program Files\Side Effects Software\Houdini 22.0.368" --blender "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
+   install.cmd --houdini "C:\Program Files\Side Effects Software\Houdini 22.0.368" --blender "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
    ```
 
 4. Restart Houdini.
 
-`install.cmd` finds Houdini's bundled Python, so a separate Python install is not required. The bridge installs to `%LOCALAPPDATA%\HoudiniEEVEE`. Its package file goes into the `houdini22.0\packages` folder inside your Documents folder. Paths with spaces, and Documents redirected to OneDrive, are supported. If CMake cannot find a compiler, run the command from the matching *Developer Command Prompt for Visual Studio*.
+`install.cmd` finds Houdini's bundled Python, so a separate Python install is not required. The bridge installs to `%LOCALAPPDATA%\HoudiniEEVEE`. Its package file goes into the `houdini22.0\packages` folder inside your Documents folder. Paths with spaces, and Documents redirected to OneDrive, are supported.
 
 **Installing on more Windows machines without a compiler.** After one machine has built the plugin and passed `--doctor`, package that installed copy:
 
@@ -113,13 +116,13 @@ Adjust the path to Houdini's bundled Python for your version. The resulting arch
 
 ## 4. What the installer does
 
-1. It finds Houdini and checks that it is version 22.0 with the HDK.
+1. It finds Houdini 22.0 (the one in `HFS`, or the newest installed build) and checks that it has the HDK.
 2. It finds Blender 5.2 and checks for EEVEE, OpenVDB, NumPy and OpenEXR. If Python modules are missing, it installs them privately.
-3. It uses the prebuilt plugin when it matches your Houdini build. Otherwise, with `--build`, it compiles the plugin.
+3. It uses the prebuilt plugin when it was compiled for your Houdini build. For another 22.0 build it compiles the plugin if build tools are available, and otherwise uses the prebuilt plugin only if the test render in step 5 succeeds.
 4. It copies everything to a new, versioned folder:
    - Linux: `~/.local/share/houdini-eevee/0.7.0-h22.0.368`
    - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.7.0-h22.0.368`
-5. It starts a Blender worker and renders a small test image with EEVEE on your GPU. Use `--no-gpu-check` to skip this on a machine without a GPU.
+5. It starts a Blender worker and renders a small test image with EEVEE on your GPU, then renders a test scene with `husk` through the EEVEE plugin in your Houdini, ignoring other installed packages. Use `--no-gpu-check` to skip this on a machine without a GPU.
 6. It writes `houdini_eevee.json` to your Houdini packages folder:
    - Linux: `~/houdini22.0/packages`
    - Windows: `Documents\houdini22.0\packages`
@@ -165,7 +168,8 @@ Each run writes a log to `~/.cache/houdini-eevee/logs/doctor-*.log`.
 | --- | --- |
 | `--houdini PATH` | Houdini 22.0 installation folder (`$HFS`). |
 | `--blender PATH` | Blender 5.2 executable. |
-| `--build` | Build the plugin against this Houdini instead of using a prebuilt binary. `--jobs N` sets the number of parallel compile jobs (default 4). |
+| `--build` | Build the plugin against this Houdini even when a prebuilt one matches. `--jobs N` sets the number of parallel compile jobs (default 4). |
+| `--no-build` | Never build. On a Houdini build the prebuilt plugin was not compiled for, use it only if the test render succeeds. |
 | `--prefix PATH` | Install into this new folder instead of the default versioned one. Spaces are allowed. |
 | `--packages-dir PATH` | Write the Houdini package into this folder, for example a studio or render-account packages folder. |
 | `--gpu-device ID` | Pin the worker to a Vulkan GPU. The default, `auto`, lets Blender choose. See [Choosing the GPU](#8-choosing-the-gpu). |
@@ -267,7 +271,7 @@ Session folders are kept for diagnosis. When a worker starts, session folders no
 
 **EEVEE Bridge is not in the renderer menu.**
 - Check that `houdini_eevee.json` is in your packages folder.
-- Check that your Houdini build is the one the bridge was installed for, since the package activates only there. After a Houdini update, reinstall with `--build`.
+- Check that your Houdini build is the one the bridge was installed for, since the package activates only there. After a Houdini update, run the installer again for the new build.
 - Run `--doctor` from the installed folder.
 
 **The viewport stays empty or the status bar shows an error.**

@@ -46,6 +46,9 @@ endforeach()
 if(MSVC)
     target_compile_options(hdEevee PRIVATE /utf-8)
     target_compile_options(hde_volume PRIVATE /utf-8)
+    # Houdini's USD headers use std::atomic_load on shared_ptr, which C++20 deprecates.
+    # The warning repeats for every source file and buries real build errors.
+    target_compile_definitions(hdEevee PRIVATE _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
     target_link_options(hde_volume PRIVATE /MANIFEST:EMBED "/MANIFESTINPUT:${CMAKE_CURRENT_SOURCE_DIR}/src/utf8.manifest")
 endif()
 install(TARGETS hdEevee LIBRARY DESTINATION plugin/hdEevee/lib RUNTIME DESTINATION plugin/hdEevee/lib)
