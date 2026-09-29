@@ -29,7 +29,7 @@ from protocol import (PROTOCOL, SUPPORTED, ProtocolError, read_frame, send_frame
                       remove_stale_segments)
 from session import Session
 
-VERSION = '0.6.1'
+VERSION = '0.7.0'
 SETTING_GROUPS = ('eevee', 'eevee.ray_tracing_options', 'render', 'render.image_settings',
                   'view_settings', 'display_settings')
 
