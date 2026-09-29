@@ -59,11 +59,11 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 
 ## Quick start
 
-**Linux, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.6.1-linux-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), then run:
+**Linux, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.7.0-linux-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), then run:
 
 ```bash
-unzip houdini-eevee-0.6.1-linux-x86_64.zip
-cd houdini-eevee-0.6.1-linux-x86_64
+unzip houdini-eevee-0.7.0-linux-x86_64.zip
+cd houdini-eevee-0.7.0-linux-x86_64
 bash install.sh
 ```
 
@@ -75,13 +75,13 @@ cd houdini-eevee-bridge
 bash install.sh --build
 ```
 
-**Windows, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.6.1-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
+**Windows, prebuilt for Houdini 22.0.368.** Download `houdini-eevee-0.7.0-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
 
 ```bat
 install.cmd
 ```
 
-**Windows, any other Houdini 22 build.** Install [CMake](https://cmake.org/download/) and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. Download `houdini-eevee-0.6.1-source.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), or clone the repository. Then run this in its folder:
+**Windows, any other Houdini 22 build.** Install [CMake](https://cmake.org/download/) and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. Download `houdini-eevee-0.7.0-source.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), or clone the repository. Then run this in its folder:
 
 ```bat
 install.cmd --build

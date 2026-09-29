@@ -35,12 +35,12 @@ OpenEXR currently publishes wheels up to Python 3.13. Some Linux distributions b
 
 ### From the prebuilt release (Houdini 22.0.368)
 
-1. Download `houdini-eevee-0.6.1-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.7.0-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it and run the installer:
 
    ```bash
-   unzip houdini-eevee-0.6.1-linux-x86_64.zip
-   cd houdini-eevee-0.6.1-linux-x86_64
+   unzip houdini-eevee-0.7.0-linux-x86_64.zip
+   cd houdini-eevee-0.7.0-linux-x86_64
    bash install.sh
    ```
 
@@ -56,7 +56,7 @@ cd houdini-eevee-bridge
 bash install.sh --build
 ```
 
-You can also run `install.sh --build` from the extracted source archive, `houdini-eevee-0.6.1-source.zip`.
+You can also run `install.sh --build` from the extracted source archive, `houdini-eevee-0.7.0-source.zip`.
 
 ### When Houdini or Blender are not found
 
@@ -72,7 +72,7 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 ### From the prebuilt release (Houdini 22.0.368)
 
-1. Download `houdini-eevee-0.6.1-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.7.0-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it, and in the extracted folder run:
 
    ```bat
@@ -86,7 +86,7 @@ The prebuilt plugin works only with **Houdini 22.0.368**. It is built with MSVC 
 ### From source (any Houdini 22.0 build)
 
 1. Install Houdini 22.0, Blender 5.2, [CMake](https://cmake.org/download/), and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload.
-2. Download `houdini-eevee-0.6.1-source.zip` (or clone the repository) and extract it.
+2. Download `houdini-eevee-0.7.0-source.zip` (or clone the repository) and extract it.
 3. In the extracted folder, run:
 
    ```bat
@@ -117,8 +117,8 @@ Adjust the path to Houdini's bundled Python for your version. The resulting arch
 2. It finds Blender 5.2 and checks for EEVEE, OpenVDB, NumPy and OpenEXR. If Python modules are missing, it installs them privately.
 3. It uses the prebuilt plugin when it matches your Houdini build. Otherwise, with `--build`, it compiles the plugin.
 4. It copies everything to a new, versioned folder:
-   - Linux: `~/.local/share/houdini-eevee/0.6.1-h22.0.368`
-   - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.6.1-h22.0.368`
+   - Linux: `~/.local/share/houdini-eevee/0.7.0-h22.0.368`
+   - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.7.0-h22.0.368`
 5. It starts a Blender worker and renders a small test image with EEVEE on your GPU. Use `--no-gpu-check` to skip this on a machine without a GPU.
 6. It writes `houdini_eevee.json` to your Houdini packages folder:
    - Linux: `~/houdini22.0/packages`
@@ -144,7 +144,7 @@ The installed startup hook, `scripts/python/uiready.py`, only adds to Houdini's 
 From the **installed** folder, run the doctor:
 
 ```bash
-cd ~/.local/share/houdini-eevee/0.6.1-h22.0.368
+cd ~/.local/share/houdini-eevee/0.7.0-h22.0.368
 python3 install.py --doctor
 ```
 
@@ -176,7 +176,7 @@ Each run writes a log to `~/.cache/houdini-eevee/logs/doctor-*.log`.
 | `--dry-run` | Show what would be installed, and where, without doing it. |
 | `--doctor` | Check this installed copy (run it from the installed folder). |
 | `--uninstall` | Remove this copy's package registration (run it from the installed folder). |
-| `--rollback [VERSION]` | Restore the registration that the last install replaced, or a specific earlier one such as `0.6.0-h22.0.368`. |
+| `--rollback [VERSION]` | Restore the registration that the last install replaced, or a specific earlier one such as `0.6.1-h22.0.368`. |
 
 ## 8. Choosing the GPU
 
@@ -200,7 +200,7 @@ To list devices yourself, run `blender --background --gpu-backend vulkan --gpu-d
 
 ```bash
 python3 install.py --rollback                   # the registration the last install replaced
-python3 install.py --rollback 0.6.0-h22.0.368   # a specific earlier version
+python3 install.py --rollback 0.6.1-h22.0.368   # a specific earlier version
 ```
 
 Restart Houdini afterwards.
