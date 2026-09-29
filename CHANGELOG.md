@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased
+
+### Scene compatibility
+
+- **Particles.** USD Points render as Blender point clouds, sized by their widths (diameters), with display color and primvars. They were not rendered before.
+- **Implicit shapes.** Sphere, Cube, Cone, Cylinder, Capsule and Plane prims are converted to meshes by USD's implicit-surface scene index. They were not rendered before.
+- **Cubic curves.** B-spline, Bézier and Catmull-Rom curves render with their exact shape, including pinned and periodic wrap. B-splines become uniform cubic NURBS; Bézier and Catmull-Rom curves become Blender Bézier curves with equivalent handles.
+- **Curve thickness.** Curves render as round tubes of their widths (Blender's *Cylinder* curve shape), as in Karma. Blender's default *Strand* shape draws thin lines that ignore the width. EEVEE Render Settings › Curves Shape still offers Strand, which is lighter for very dense grooms, and Strip.
+- **Curve and point primvars.** Display color and float, float2 and float3 primvars on curves and points become attributes, like on meshes.
+- **Per-face materials.** GeomSubsets bound to different materials now render with each subset's material. Houdini's Hydra provides subsets as child prims of the mesh.
+- **Display color.** A display color that varies per point, face or corner is shown in full; before, only its first value was used.
+- **Bilinear subdivision** meshes, such as converted cubes, are now shaded flat instead of smooth.
+- **Texture color spaces.** USD Preview Surface textures with `sourceColorSpace` `auto` read float images such as EXR as linear; before, every non-raw texture was decoded as sRGB, which darkened linear textures. An asset's color-space metadata is honored, and UDIMs work.
+- **Texture wrap.** A USD Preview Surface texture without an authored wrap mode is black outside 0–1, as in Karma, instead of repeating.
+- **Instanced curves, points and volumes.** Point instancers and native instances of curves, particles and volumes render; before, only meshes could be instanced.
+- **Per-instance primvars.** Point instancer primvars (per-instance color, for example) and primvars authored on native instances reach materials, display color and MaterialX `geompropvalue`. As in Karma, a value authored on the prototype itself wins.
+- **MaterialX `geompropvalue` on curves and points** reads their primvars instead of always returning the default.
+
+### Lights and materials
+
+- **Distant lights match Karma's brightness.** A normalized distant light's intensity is irradiance, as in Karma; before, it was multiplied by 4, so Houdini's Distant Light LOP (normalized by default) rendered four times brighter than in Karma. An unnormalized distant light's intensity is the radiance of the sun's disc, as in USD and Karma. **Scenes lit by distant lights render darker than in 0.6.1**; other lights are unchanged and were already within about 10% of Karma (cylinder lights, drawn as rect lights, differ more).
+- **Light and shadow linking.** A light's light-link collection limits the objects it lights, and its shadow-link collection the objects that cast its shadows.
+- **Spot lights.** Sphere and disk lights with a UsdLux cone angle and softness become EEVEE spot lights.
+- **IES profiles and light textures are approximated.** EEVEE cannot draw them. An IES profile becomes the spot cone that fits its beam, and a textured rect, disk, sphere or cylinder light takes the texture's average color. Each approximation is named in the log.
+- **Displacement.** USD Preview Surface displacement and MaterialX displacement (height or vector) move the surface, with bump mapping for detail finer than the mesh. EEVEE does not dice surfaces, so detail depends on the mesh density or subdivision level.
+- **Default volume shading.** Volumes without a material are white, or tinted by their display color, as in Karma; before, they were Blender's mid gray.
+
+### Performance
+
+- **Large meshes load about 3× faster.** A 2.25-million-quad mesh went from 2.7 s to 0.9 s. Flat shading and point positions are now written as whole arrays; Blender's `shade_flat()` and `MeshVertex.co` loop per element. Deforming meshes update their points about 100× faster.
+- **Volumes are exported once per geometry change.** A live SOP volume used to be written to a new VDB for each of its fields (density, temperature, flame, velocity) on every sync. It is now exported once and shared, and an unchanged volume keeps its file, so the worker reuses its composed volume without reloading.
+- **Automatic cleanup.** Session folders nothing has used for 7 days, and logs older than 14 days, are removed when a worker starts (`HDEEVEE_KEEP_SESSION_DAYS`, `HDEEVEE_KEEP_LOG_DAYS`).
+- **Development tools.** `probes/vram_profile.py` works on Windows, where per-process GPU memory is not reported, and the Hydra harness uses 1 ms timer resolution on Windows so it simulates a 60 Hz viewport.
+
 ## 0.6.1
 
 ### Windows

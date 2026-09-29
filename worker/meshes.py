@@ -86,12 +86,37 @@ class Topology:
         return values[self.loops]
 
 
+def set_positions(mesh, points):
+    # The position attribute is contiguous; MeshVertex.co goes through RNA per
+    # element and is about 100x slower for millions of points.
+    mesh.attributes['position'].data.foreach_set('vector', np.ascontiguousarray(points, dtype=np.float32).ravel())
+
+
+def set_flat(mesh, flat):
+    """Flat or smooth shading. Mesh.shade_flat() loops over faces in Python."""
+    existing = mesh.attributes.get('sharp_face')
+    if not flat:
+        if existing is not None:
+            mesh.attributes.remove(existing)
+        return
+    if existing is None or existing.domain != 'FACE' or existing.data_type != 'BOOLEAN':
+        if existing is not None:
+            mesh.attributes.remove(existing)
+        existing = mesh.attributes.new('sharp_face', 'BOOLEAN', 'FACE')
+    existing.data.foreach_set('value', np.ones(len(mesh.polygons), dtype=bool))
+
+
 def build(mesh, points, topology):
     mesh.clear_geometry()
     mesh.vertices.add(len(points))
-    mesh.vertices.foreach_set('co', points.ravel())
+    if len(points):
+        set_positions(mesh, points)
     mesh.loops.add(len(topology.loops))
-    mesh.loops.foreach_set('vertex_index', topology.loops)
+    corner_vert = mesh.attributes.get('.corner_vert')
+    if corner_vert is not None and len(topology.loops):
+        corner_vert.data.foreach_set('value', topology.loops)
+    else:
+        mesh.loops.foreach_set('vertex_index', topology.loops)
     mesh.polygons.add(len(topology.counts))
     starts = np.zeros(len(topology.counts), dtype=np.int32)
     if len(starts) > 1:
@@ -158,7 +183,8 @@ def sync(session, update):
             if topology.dropped:
                 session.warn(key, str(topology.dropped) + ' degenerate faces were skipped')
         elif topology is not None and len(points) == len(mesh.vertices):
-            mesh.vertices.foreach_set('co', points.ravel())
+            if len(points):
+                set_positions(mesh, points)
             mesh.update()
         else:
             raise ValueError('Point count changed without topology: ' + key)
@@ -180,12 +206,14 @@ def sync(session, update):
             except ValueError as exc:
                 session.warn(key, str(exc) + '; using computed normals')
                 remove_attribute(mesh, 'custom_normal')
-        if has_normals or topology.smooth:
-            mesh.shade_smooth()
-        else:
-            mesh.shade_flat()
+        set_flat(mesh, not (has_normals or topology.smooth))
     if names_changed and topology is not None:
         mark_present(session, key, mesh)
+    if 'subsets' in update:
+        session.subsets[key] = [(s['material'], array(s['indices'], np.int64)) for s in update['subsets'] or []]
+        session.bind_subsets(key, [material for material, _ in session.subsets[key]])
+    if topology is not None and ('subsets' in update or rebuilt) and key in session.subsets:
+        set_face_materials(mesh, topology, session.subsets[key])
     if 'transform' in update:
         obj.matrix_world = session.basis @ Matrix(update['transform']).transposed()
     if 'subdivision' in update or 'subdivision_scheme' in update:
@@ -195,34 +223,28 @@ def sync(session, update):
         session.visibility[key] = update['visible']
     if 'prim_id' in update:
         session.prim_ids[key] = int(update['prim_id'])
-    if 'instances' in update:
-        sync_instances(session, key, obj, update['instances'])
-    visible = session.visibility.get(key, True)
-    # Prototypes remain data owners but are hidden beside their instances.
-    hidden = not visible or key in session.instances or key in session.point_instances
-    if obj.hide_render != hidden:
-        obj.hide_render = hidden
-    if obj.hide_get(view_layer=session.view_layer) != hidden:
-        obj.hide_set(hidden, view_layer=session.view_layer)
-    for instance in session.instances.get(key, []):
-        if instance.hide_render == visible:
-            instance.hide_render = not visible
-            instance.hide_set(not visible, view_layer=session.view_layer)
-    if key in session.point_instances:
-        points_object = session.point_instances[key]
-        if points_object.hide_render == visible:
-            points_object.hide_render = not visible
-            points_object.hide_set(not visible, view_layer=session.view_layer)
-    prim_id = session.prim_ids.get(key, -1)
-    session.picks.assign(obj, prim_id)
-    for index, instance in enumerate(session.instances.get(key, [])):
-        session.picks.assign(instance, prim_id, index)
-    if key in session.point_instances:
-        session.picks.assign(session.point_instances[key], prim_id)
+    if 'instances' in update or 'instance_primvars' in update:
+        instance_nodes.sync_objects(session, key, obj, update['instances'] if 'instances' in update else
+                                    session.instance_state.get(key), update.get('instance_primvars'))
+    instance_nodes.refresh(session, key, obj, session.visibility.get(key, True))
     if 'material' in update:
         session.bind(key, update['material'])
-    if 'color' in update and not session.bindings.get(key):
-        session.display_material(key, update['color'])
+    if any(k in update for k in ('color', 'material', 'instance_primvars')):
+        session.display_color(key, update)
+
+
+def set_face_materials(mesh, topology, subsets):
+    """Material slot per face from USD GeomSubsets (slot 0: the prim's own material)."""
+    if not subsets:
+        remove_attribute(mesh, 'material_index')   # every face uses slot 0
+        return
+    index = np.zeros(topology.source_faces, dtype=np.int32)
+    for slot, (_, faces) in enumerate(subsets, start=1):
+        index[faces[(faces >= 0) & (faces < topology.source_faces)]] = slot
+    if topology.face_src is not None:
+        index = index[topology.face_src]
+    if len(index) == len(mesh.polygons):
+        mesh.polygons.foreach_set('material_index', index)
 
 
 def sync_primvars(session, key, mesh, topology, update, rebuilt):
@@ -295,36 +317,3 @@ def mark_present(session, key, mesh):
         if ones is None:
             ones = np.ones(len(mesh.vertices), dtype=np.float32)
         write_attribute(mesh, marker, 'FLOAT', 'POINT', ones)
-
-
-def sync_instances(session, key, obj, transforms):
-    if transforms is None:
-        session.instance_state.pop(key, None)
-        instance_nodes.remove(session, key)
-        for instance in session.instances.pop(key, []):
-            session.picks.release(instance)
-            bpy.data.objects.remove(instance, do_unlink=True)
-        return
-    transforms = array(transforms, np.float32).reshape(-1, 4, 4)
-    session.instance_state[key] = transforms
-    session.dirty_geometry = True
-    # Matrix attributes avoid creating tens of thousands of Blender objects.
-    # Shutter motion blur needs individually animated objects instead.
-    if len(transforms) > 256 and not session.instancing_motion:
-        for instance in session.instances.pop(key, []):
-            session.picks.release(instance)
-            bpy.data.objects.remove(instance, do_unlink=True)
-        instance_nodes.sync(session, key, obj, transforms, session.visibility.get(key, True))
-        return
-    instance_nodes.remove(session, key)
-    objects = session.instances.setdefault(key, [])
-    while len(objects) > len(transforms):
-        extra = objects.pop()
-        session.picks.release(extra)
-        bpy.data.objects.remove(extra, do_unlink=True)
-    while len(objects) < len(transforms):
-        instance = bpy.data.objects.new(key + '/instance_' + str(len(objects)), obj.data)
-        session.scene.collection.objects.link(instance)
-        objects.append(instance)
-    for instance, transform in zip(objects, transforms):
-        instance.matrix_world = session.basis @ Matrix(transform.tolist()).transposed()

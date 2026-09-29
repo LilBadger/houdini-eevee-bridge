@@ -43,6 +43,10 @@
 #include <fstream>
 #include <map>
 #include <thread>
+#ifdef _WIN32
+#include <windows.h>
+#include <timeapi.h>
+#endif
 
 PXR_NAMESPACE_USING_DIRECTIVE
 using Json = nlohmann::json;
@@ -276,6 +280,11 @@ Json Settle(Viewport &v, const HarnessCamera &camera, double timeoutSeconds) {
 } // namespace
 
 int main(int argc, char **argv) {
+#ifdef _WIN32
+    // The default 15.6 ms timer turns each 16.7 ms tick into ~31 ms, halving the
+    // simulated viewport rate. Request 1 ms resolution, as interactive apps do.
+    timeBeginPeriod(1);
+#endif
     if (argc < 4) {
         fprintf(stderr, "usage: hydra_harness PLUGIN_RESOURCES SCENE.usd REPORT.json [key=value ...]\n"
                         "  width height orbit(ui ticks) degrees(per tick) second(0/1) camera time pivot(x,y,z)\n"

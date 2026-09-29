@@ -7,11 +7,12 @@ if(NOT Houdini_VERSION_MAJOR EQUAL 22)
     message(FATAL_ERROR "This bridge currently targets Houdini 22. Build against a Houdini 22 HDK.")
 endif()
 add_library(hdEevee SHARED
-    src/delegate.cpp src/renderer.cpp src/prims.cpp src/scene.cpp src/protocol.cpp src/buffer.cpp)
+    src/delegate.cpp src/renderer.cpp src/prims.cpp src/scene.cpp src/protocol.cpp src/buffer.cpp
+    src/sceneIndexPlugins.cpp)
 target_include_directories(hdEevee PRIVATE third_party)
 target_link_libraries(hdEevee PRIVATE Houdini Houdini::Dep::pxr_hd Houdini::Dep::pxr_hf Houdini::Dep::pxr_tf
     Houdini::Dep::pxr_gf Houdini::Dep::pxr_vt Houdini::Dep::pxr_sdf Houdini::Dep::pxr_plug
-    Houdini::Dep::pxr_work Houdini::Dep::pxr_arch)
+    Houdini::Dep::pxr_work Houdini::Dep::pxr_arch Houdini::Dep::pxr_hdsi)
 if(UNIX AND NOT APPLE)
     target_link_libraries(hdEevee PRIVATE rt)
 endif()
@@ -60,6 +61,9 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/probes/registry_probe.cpp")
         Houdini::Dep::pxr_gf Houdini::Dep::pxr_vt Houdini::Dep::pxr_sdf Houdini::Dep::pxr_plug Houdini::Dep::pxr_usd
         Houdini::Dep::pxr_usdGeom Houdini::Dep::pxr_usdShade Houdini::Dep::pxr_usdImaging Houdini::Dep::pxr_cameraUtil
         Houdini::Dep::pxr_work Houdini::Dep::pxr_python Houdini::Dep::pxr_ar Houdini::Dep::pxr_pcp Houdini::Dep::python3.13)
+    if(WIN32)
+        target_link_libraries(hydra_harness PRIVATE winmm)
+    endif()
     add_library(volume_registry_probe SHARED EXCLUDE_FROM_ALL probes/volume_registry_probe.cpp)
     target_include_directories(volume_registry_probe PRIVATE third_party)
     target_link_libraries(volume_registry_probe PRIVATE Houdini Houdini::Dep::pxr_sdf)

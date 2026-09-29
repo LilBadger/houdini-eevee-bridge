@@ -19,10 +19,13 @@ from mathutils import Matrix
 import curves
 import environment
 import instances as instance_nodes
+import light_links
+import light_shaping
 import material_pool
 import materialx_material
 import meshes
 import motion
+import points
 import render_config
 import render_passes
 import subdivision
@@ -30,6 +33,7 @@ import usd_material
 import volumes
 from picking import PickTable
 from protocol import PixelSegment
+from shader_utils import primvar
 from viewport_state import assign
 
 # Right-handed basis: Houdini +X -> Blender +X, +Y -> +Z, +Z -> -Y.
@@ -48,6 +52,9 @@ class Session:
         scene.render.engine = 'BLENDER_EEVEE'
         scene.eevee.taa_samples = 16
         scene.eevee.use_raytracing = True
+        # USD curves are round tubes of their widths, as in Karma; Blender's
+        # default strands are thin lines that ignore the width.
+        scene.render.hair_type = 'CYLINDER'
         # Only the Workbench ID/preview passes read these.
         scene.display.viewport_aa = 'OFF'
         scene.display.render_aa = 'OFF'
@@ -67,11 +74,19 @@ class Session:
         self.materialx_defs = {}
         self.bindings = {}
         self.bound = {}
+        self.subset_bindings = {}
+        self.subsets = {}
+        self.display = {}
+        self.display_colors = {}
+        self.categories = {}
+        self.light_links = {}
+        self.links_dirty = False
         self.topology = {}
         self.instances = {}
         self.point_instances = {}
         self.instancing_motion = False
         self.instance_state = {}
+        self.instance_primvars = {}
         self.visibility = {}
         self.prim_ids = {}
         self.domes = {}
@@ -121,6 +136,7 @@ class Session:
                 bpy.data.objects.remove(obj, do_unlink=True)
         self.instances.clear()
         self.instance_state.clear()
+        self.instance_primvars.clear()
         for obj in list(self.objects.values()):
             data = obj.data
             bpy.data.objects.remove(obj, do_unlink=True)
@@ -132,10 +148,13 @@ class Session:
             if image.get('hde_ramp') and not image.users:
                 bpy.data.images.remove(image)
         for name in ('objects', 'materials', 'material_digest', 'materialx_defs', 'bindings', 'bound',
+                     'subset_bindings', 'subsets', 'display', 'display_colors', 'categories', 'light_links',
                      'topology', 'visibility', 'prim_ids', 'fields', 'volume_defs', 'motion_defs', 'domes',
                      'material_warnings', 'geometry_warnings', 'exported_attributes'):
             getattr(self, name).clear()
         self.picks.reset()
+        light_links.clear(self)
+        self.links_dirty = False
         self.environment_signature = None
         self.dirty_geometry = True
         self.dirty_environment = True
@@ -148,6 +167,8 @@ class Session:
             bpy.data.hair_curves.remove(data)
         elif isinstance(data, bpy.types.Volume):
             bpy.data.volumes.remove(data)
+        elif isinstance(data, bpy.types.PointCloud):
+            bpy.data.pointclouds.remove(data)
         elif isinstance(data, bpy.types.Light):
             bpy.data.lights.remove(data)
 
@@ -181,7 +202,8 @@ class Session:
         # Rebuild from the current transforms when changing representation.
         for key, transforms in list(self.instance_state.items()):
             if key in self.objects:
-                meshes.sync(self, {'id': key, 'instances': transforms})
+                instance_nodes.sync_objects(self, key, self.objects[key], transforms)
+                instance_nodes.refresh(self, key, self.objects[key], self.visibility.get(key, True))
 
     def configure(self, config, request):
         """Apply Stage render settings only when they actually change."""
@@ -236,6 +258,9 @@ class Session:
             tree.nodes.clear()
             nodes = {}
             for definition in graph['nodes']:
+                if definition['type'] == 'hde:primvar':
+                    nodes[definition['id']] = primvar(tree, definition['name'])
+                    continue
                 node = tree.nodes.new(definition['type'])
                 nodes[definition['id']] = node
                 for prop, value in definition.get('properties', {}).items():
@@ -251,6 +276,11 @@ class Session:
                 warnings = [str(exc)]
                 tree.nodes.clear()
                 usd_material.principled(tree, {'diffuseColor': [1., 0., 1.], 'roughness': .5})
+            if 'materialx_displacement' in update:
+                try:
+                    warnings += materialx_material.displacement(tree, update['materialx_displacement'], self.basis)
+                except (materialx_material.TranslationError, ValueError) as exc:
+                    warnings.append('Displacement: ' + str(exc))
         elif 'usd_network' in update:
             usd_material.network(tree, update['usd_network'])
         else:
@@ -267,6 +297,10 @@ class Session:
             (n.bl_idname == 'ShaderNodeBsdfPrincipled' and
              (n.inputs['Transmission Weight'].is_linked or n.inputs['Transmission Weight'].default_value > 0.))
             for n in tree.nodes)
+        # True displacement moves vertices (plus bump for detail finer than the mesh);
+        # EEVEE does not dice, so its detail depends on the mesh or subdivision level.
+        displaced = any(n.bl_idname == 'ShaderNodeOutputMaterial' and n.inputs['Displacement'].is_linked for n in tree.nodes)
+        mat.displacement_method = 'BOTH' if displaced else 'BUMP'
         # The Workbench preview shown while shaders compile uses this color.
         base = next((n for n in tree.nodes if n.bl_idname == 'ShaderNodeBsdfPrincipled'), None)
         if base is not None and not base.inputs['Base Color'].is_linked:
@@ -291,35 +325,71 @@ class Session:
 
     def bind(self, key, material_id):
         previous = self.bindings.get(key)
-        if previous is not None and previous != material_id:
+        if previous is not None and previous != material_id and previous not in self.subset_bindings.get(key, ()):
             self.bound.get(previous, set()).discard(key)
         self.bindings[key] = material_id
         self.bound.setdefault(material_id, set()).add(key)
         self.assign_material(key)
 
+    def bind_subsets(self, key, material_ids):
+        """Per-face materials: slot 0 is the prim's own material, slot i+1 subset i."""
+        for previous in self.subset_bindings.get(key, ()):
+            if previous not in material_ids and previous != self.bindings.get(key):
+                self.bound.get(previous, set()).discard(key)
+        self.subset_bindings[key] = list(material_ids)
+        for material_id in material_ids:
+            self.bound.setdefault(material_id, set()).add(key)
+        self.assign_material(key)
+
     def assign_material(self, key):
         obj = self.objects.get(key)
-        mat = self.materials.get(self.bindings.get(key))
-        if obj is None or mat is None or obj.data is None or not hasattr(obj.data, 'materials'):
+        if obj is None or obj.data is None or not hasattr(obj.data, 'materials'):
             return
+        base = self.materials.get(self.bindings.get(key)) or self.materials.get(self.display.get(key))
+        subsets = self.subset_bindings.get(key, ())
+        if base is None and not subsets:
+            return
+        wanted = [base] + [self.materials.get(m) or base for m in subsets]
         slots = obj.data.materials
-        if len(slots) == 1 and slots[0] == mat:
+        if list(slots) == wanted:
             return
         slots.clear()
-        slots.append(mat)
+        for mat in wanted:
+            slots.append(mat)
 
     def rebind(self, material_key):
         for obj_key in list(self.bound.get(material_key, ())):
             self.assign_material(obj_key)
 
-    def display_material(self, key, color):
-        material_key = key + '/display'
-        self.material({'id': material_key, 'parameters': {'diffuseColor': list(color), 'roughness': 0.4}})
-        obj = self.objects.get(key)
-        mat = self.materials.get(material_key)
-        if obj is not None and mat is not None and not (len(obj.data.materials) == 1 and obj.data.materials[0] == mat):
-            obj.data.materials.clear()
-            obj.data.materials.append(mat)
+    def display_material(self, key, color, varying=False):
+        """Material for prims without a bound material, from USD displayColor."""
+        if varying:
+            # Shared by every prim whose displayColor varies per point, face or corner.
+            material_key = '__hde_display_attribute'
+            if material_key not in self.materials:
+                self.material({'id': material_key, 'graph': {
+                    'nodes': [{'id': 'color', 'type': 'hde:primvar', 'name': 'displayColor'},
+                              {'id': 'bsdf', 'type': 'ShaderNodeBsdfPrincipled', 'inputs': {'Roughness': 0.4}},
+                              {'id': 'output', 'type': 'ShaderNodeOutputMaterial'}],
+                    'links': [['color', 'Color', 'bsdf', 'Base Color'], ['bsdf', 'BSDF', 'output', 'Surface']]}})
+        else:
+            material_key = key + '/display'
+            self.material({'id': material_key, 'parameters': {'diffuseColor': list(color), 'roughness': 0.4}})
+        self.display[key] = material_key
+        self.assign_material(key)
+
+    def display_color(self, key, update):
+        """Apply displayColor to a prim without a bound material. update is the
+        prim's latest change; its displayColor is kept for later rebinding."""
+        if 'color' in update:
+            self.display_colors[key] = (update['color'], update.get('color_varying', False))
+        if self.bindings.get(key):
+            return
+        color, varying = self.display_colors.get(key, (None, False))
+        # Per-instance displayColor needs the attribute-reading material.
+        varying = varying or 'displayColor' in self.instance_primvars.get(key, {})
+        if color is not None or varying:
+            self.display_material(key, color, varying)
 
     # ------------------------------------------------------------------ lights
     def light(self, update):
@@ -329,22 +399,39 @@ class Session:
             self.domes[key] = update
             self.dirty_environment = True
             return
-        color = params.get('color', [1, 1, 1])
+        color = light_shaping.tint(self, key, kind, params, params.get('color', [1, 1, 1]))
         intensity = params.get('intensity', 1) * 2 ** params.get('exposure', 0)
+        light_type = {'rectLight': 'AREA', 'diskLight': 'AREA', 'distantLight': 'SUN',
+                      'sphereLight': 'POINT', 'cylinderLight': 'AREA'}.get(kind, 'POINT')
+        spot = light_shaping.spot(self, key, kind, params)
+        if spot is not None:
+            light_type = 'SPOT'
         obj = self.objects.get(key)
         if obj is None:
-            light_type = {'rectLight': 'AREA', 'diskLight': 'AREA', 'distantLight': 'SUN',
-                          'sphereLight': 'POINT', 'cylinderLight': 'AREA'}.get(kind, 'POINT')
             obj = bpy.data.objects.new(key, bpy.data.lights.new(key, light_type))
             self.scene.collection.objects.link(obj)
             self.objects[key] = obj
             obj.matrix_world = self.basis
-        light = obj.data
+        assign(obj.data, 'type', light_type)
+        light = obj.data   # the RNA type follows the light type
+        link = (params.get('lightLink', ''), params.get('shadowLink', ''))
+        if self.light_links.get(key, ('', '')) != link:
+            self.light_links[key] = link
+            self.links_dirty = True
         assign(light, 'color', list(color))
-        # Match Blender's USD radiance -> radiant-flux conversion. Normalize is
-        # essential: USD's default is radiance independent of emitter area.
-        assign(light, 'normalize', bool(params.get('normalize', False)))
-        assign(light, 'energy', intensity * (4. if light.type == 'SUN' else math.pi))
+        normalize = bool(params.get('normalize', False))
+        if light.type == 'SUN':
+            # Blender's normalized sun strength is irradiance. As in Karma, a normalized
+            # distant light's intensity is irradiance too; otherwise it is the radiance
+            # of the sun's disc, so irradiance scales with the disc's solid angle.
+            half_angle = math.radians(params.get('angle', 0.53)) / 2
+            assign(light, 'normalize', True)
+            assign(light, 'energy', intensity if normalize else intensity * 2 * math.pi * (1 - math.cos(half_angle)))
+        else:
+            # Match Blender's USD radiance -> radiant-flux conversion. Normalize is
+            # essential: USD's default is radiance independent of emitter area.
+            assign(light, 'normalize', normalize)
+            assign(light, 'energy', intensity * math.pi)
         assign(light, 'use_temperature', bool(params.get('enableColorTemperature', False)))
         assign(light, 'temperature', params.get('colorTemperature', 6500.))
         assign(light, 'diffuse_factor', params.get('diffuse', 1.))
@@ -358,8 +445,11 @@ class Session:
                 assign(light, 'size', params.get('width', params.get('radius', 0.5) * 2))
                 if light.shape == 'RECTANGLE':
                     assign(light, 'size_y', params.get('height', 1))
-        if light.type == 'POINT':
+        if light.type in ('POINT', 'SPOT'):
             assign(light, 'shadow_soft_size', 0. if params.get('treatAsPoint', False) else params.get('radius', 0.5))
+        if light.type == 'SPOT':
+            assign(light, 'spot_size', spot[0])
+            assign(light, 'spot_blend', spot[1])
         if light.type == 'SUN':
             assign(light, 'angle', params.get('angle', 0.53) * 0.0174532925199433)
         if 'transform' in update:
@@ -401,17 +491,25 @@ class Session:
             for image in list(bpy.data.images):
                 if image.get('hde_ramp') and not image.users:
                     bpy.data.images.remove(image)
+        if self.links_dirty:
+            light_links.sync(self)
+            self.links_dirty = False
         return errors
 
     def apply_change(self, change):
         kind = change['kind']
-        if kind in ('mesh', 'curves', 'light', 'volume'):
+        if kind in ('mesh', 'curves', 'points', 'light', 'volume'):
             names = [n for n in ('transform_samples', 'point_samples', 'instance_samples',
                                  'velocities', 'accelerations') if n in change]
             if names:
                 animation = self.motion_defs.setdefault(change['id'], {})
                 for name in names:
                     animation[name] = change[name]
+            if 'categories' in change and self.categories.get(change['id']) != change['categories']:
+                self.categories[change['id']] = change['categories']
+                self.links_dirty = True
+            elif kind != 'light' and change.get('instances') is not None and self.light_links:
+                self.links_dirty = True   # instance copies must join their prototype's link collections
         if kind == 'material':
             self.material(change)
         elif kind == 'mesh':
@@ -419,6 +517,9 @@ class Session:
             self.dirty_geometry = True
         elif kind == 'curves':
             curves.sync(self, change)
+            self.dirty_geometry = True
+        elif kind == 'points':
+            points.sync(self, change)
             self.dirty_geometry = True
         elif kind == 'light':
             self.light(change)
@@ -455,8 +556,13 @@ class Session:
         previous = self.bindings.pop(key, None)
         if previous is not None:
             self.bound.get(previous, set()).discard(key)
-        for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings'):
+        for material_id in self.subset_bindings.pop(key, ()):
+            self.bound.get(material_id, set()).discard(key)
+        for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings',
+                     'subsets', 'display', 'display_colors', 'instance_primvars'):
             getattr(self, name).pop(key, None)
+        if self.categories.pop(key, None) is not None or self.light_links.pop(key, None) is not None:
+            self.links_dirty = True
         self.dirty_geometry = True
 
     # ------------------------------------------------------------------ render
@@ -789,7 +895,7 @@ class Session:
                 velocity = np.zeros((0, 3), np.float32) if velocity is None else np.asarray(velocity, np.float32).reshape(-1, 3)
                 if len(samples) < 2 and len(velocity) == len(obj.data.vertices) and len(velocity):
                     points = np.empty(len(obj.data.vertices) * 3, dtype=np.float32)
-                    obj.data.vertices.foreach_get('co', points)
+                    obj.data.attributes['position'].data.foreach_get('vector', points)
                     points = points.reshape(-1, 3)
                     acceleration = animation.get('accelerations')
                     acceleration = (np.asarray(acceleration, np.float32).reshape(-1, 3)

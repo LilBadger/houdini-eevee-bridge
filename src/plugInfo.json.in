@@ -2,8 +2,18 @@
   "Plugins": [{
     "Type": "library", "Name": "hdEevee", "Root": "..",
     "LibraryPath": "lib/hdEevee@CMAKE_SHARED_LIBRARY_SUFFIX@", "ResourcePath": "resources",
-    "Info": {"Types": {"HdEeveeRendererPlugin": {
-      "bases": ["HdRendererPlugin"], "displayName": "EEVEE Bridge (Prototype)", "priority": 0
-    }}}
+    "Info": {"Types": {
+      "HdEeveeRendererPlugin": {
+        "bases": ["HdRendererPlugin"], "displayName": "EEVEE Bridge (Prototype)", "priority": 0
+      },
+      "HdEevee_ImplicitSurfaceSceneIndexPlugin": {
+        "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
+        "priority": 0, "displayName": "EEVEE implicit surfaces to meshes"
+      },
+      "HdEevee_LightLinkingSceneIndexPlugin": {
+        "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
+        "priority": 0, "displayName": "EEVEE light and shadow linking"
+      }
+    }}
   }]
 }

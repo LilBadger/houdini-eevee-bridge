@@ -8,6 +8,7 @@
 #include <pxr/imaging/hd/light.h>
 #include <pxr/imaging/hd/material.h>
 #include <pxr/imaging/hd/mesh.h>
+#include <pxr/imaging/hd/points.h>
 #include <pxr/imaging/hd/renderSettings.h>
 #include <pxr/imaging/hd/volume.h>
 #include <pxr/base/gf/matrix4d.h>
@@ -22,11 +23,17 @@ Json ValueJson(const VtValue &v);
 
 class EeveeInstancer final : public HdInstancer {
 public:
+    /// One per-instance primvar: `size` floats per instance.
+    struct Primvar { std::vector<float> values; int size = 0; };
+    using Primvars = std::map<std::string, Primvar>;
+
     EeveeInstancer(HdSceneDelegate *d, const SdfPath &id, BridgeState *state) : HdInstancer(d, id), _state(state) {}
     void Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits) override;
     void SampleTimes(std::set<float> &times, int depth = 0);
     VtMatrix4dArray Transforms(const SdfPath &prototype, int depth = 0,
                                float time = std::numeric_limits<float>::quiet_NaN());
+    /// Instance-rate primvars in the order of Transforms(); count is the number of instances.
+    Primvars InstancePrimvars(const SdfPath &prototype, size_t &count, int depth = 0);
 private:
     BridgeState *_state;
 };
@@ -57,7 +64,6 @@ protected:
     HdDirtyBits _PropagateDirtyBits(HdDirtyBits bits) const override { return bits; }
     void _InitRepr(const TfToken &repr, HdDirtyBits*) override;
 private:
-    void SyncInstances(HdSceneDelegate *d, Change &change);
     bool SyncPrimvars(HdSceneDelegate *d, Change &change, bool force);
     BridgeState *_state;
     bool _synced = false, _instanced = false;
@@ -70,6 +76,20 @@ class EeveeCurves final : public HdBasisCurves {
 public:
     EeveeCurves(const SdfPath &id, BridgeState *state) : HdBasisCurves(id), _state(state) {}
     ~EeveeCurves() override;
+    HdDirtyBits GetInitialDirtyBitsMask() const override { return HdChangeTracker::AllDirty; }
+    void Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, const TfToken&) override;
+protected:
+    HdDirtyBits _PropagateDirtyBits(HdDirtyBits bits) const override { return bits; }
+    void _InitRepr(const TfToken &repr, HdDirtyBits*) override;
+private:
+    BridgeState *_state;
+};
+
+/// USD Points (particles): drawn by the worker as a Blender point cloud.
+class EeveePoints final : public HdPoints {
+public:
+    EeveePoints(const SdfPath &id, BridgeState *state) : HdPoints(id), _state(state) {}
+    ~EeveePoints() override;
     HdDirtyBits GetInitialDirtyBitsMask() const override { return HdChangeTracker::AllDirty; }
     void Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, const TfToken&) override;
 protected:

@@ -2,6 +2,8 @@
 import math
 import bpy
 
+from shader_utils import image_file, primvar
+
 INPUTS = {'diffuseColor': 'Base Color', 'base_color': 'Base Color',
           'metallic': 'Metallic', 'roughness': 'Roughness', 'opacity': 'Alpha',
           'ior': 'IOR', 'transmission': 'Transmission Weight',
@@ -12,6 +14,40 @@ INPUTS = {'diffuseColor': 'Base Color', 'base_color': 'Base Color',
           'normal': 'Normal'}
 DEFAULTS = {'diffuseColor': [.18, .18, .18], 'metallic': 0., 'roughness': .5,
             'opacity': 1., 'ior': 1.5, 'emissiveColor': [0., 0., 0.]}
+
+
+def texture_color_space(parameters):
+    """USD sourceColorSpace is raw, sRGB or auto. Hydra's scene-index adapter may also
+    pass the asset's colorSpace metadata as colorSpace:file. For auto, Blender decides
+    by file type, as USD specifies: 8-bit images are sRGB, float images linear."""
+    source = parameters.get('sourceColorSpace', 'auto')
+    if source in ('raw', 'sRGB'):
+        return source
+    return parameters.get('colorSpace:file') or 'auto'
+
+
+def texture(filename, color_space):
+    try:
+        return image_file(filename, color_space)
+    except ValueError as exc:
+        if 'color space' in str(exc) and color_space != 'auto':
+            print('[EEVEE] ' + str(exc) + '; using the file\'s own color space', flush=True)
+            return texture(filename, 'auto')
+        print('[EEVEE] Missing texture: ' + filename, flush=True)
+        image = bpy.data.images.get('__missing_texture') or bpy.data.images.new('__missing_texture', 1, 1)
+        image.pixels[:] = (1, 0, 1, 1)
+        return image
+
+
+def displacement_input(tree, value=0.):
+    """USD Preview Surface displacement: a distance along the normal, in object space."""
+    output = next(n for n in tree.nodes if n.bl_idname == 'ShaderNodeOutputMaterial')
+    node = tree.nodes.new('ShaderNodeDisplacement')
+    node.inputs['Midlevel'].default_value = 0.
+    node.inputs['Scale'].default_value = 1.
+    node.inputs['Height'].default_value = value
+    tree.links.new(node.outputs['Displacement'], output.inputs['Displacement'])
+    return node.inputs['Height']
 
 
 def principled(tree, parameters):
@@ -27,6 +63,8 @@ def principled(tree, parameters):
     node.inputs['Emission Strength'].default_value = parameters.get('emission_strength', 1.)
     output = tree.nodes.new('ShaderNodeOutputMaterial')
     tree.links.new(node.outputs['BSDF'], output.inputs['Surface'])
+    if parameters.get('displacement'):
+        displacement_input(tree, float(parameters['displacement']))
     return node
 
 
@@ -65,29 +103,19 @@ def network(tree, definition):
             ins['normal'] = scale.inputs[0]
             # An unconnected normal keeps the geometric normal.
             scale.inputs[0].default_value = p.get('normal', (0, 0, 1))
+            if (key, 'displacement') in incoming and not p.get('displacement'):
+                ins['displacement'] = displacement_input(tree)
+            elif p.get('displacement'):
+                ins['displacement'] = next(n for n in tree.nodes if n.bl_idname == 'ShaderNodeDisplacement').inputs['Height']
         elif kind == 'UsdUVTexture':
             node = tree.nodes.new('ShaderNodeTexImage')
             filename = p.get('file', '')
             if filename:
-                try:
-                    image = bpy.data.images.load(filename, check_existing=True)
-                except RuntimeError:
-                    print('[EEVEE] Missing texture: ' + filename, flush=True)
-                    image = bpy.data.images.get('__missing_texture') or bpy.data.images.new('__missing_texture', 1, 1)
-                    image.pixels[:] = (1, 0, 1, 1)
-                # Hydra's scene-index adapter converts sourceColorSpace into
-                # colorSpace:file metadata. Ignoring it decodes normal maps as
-                # sRGB colors and rotates the tangent-space normals incorrectly.
-                color_space = p.get('sourceColorSpace', p.get('colorSpace:file', 'auto'))
-                wanted = 'Non-Color' if color_space == 'raw' else 'sRGB'
-                if image.colorspace_settings.name != wanted:
-                    # One texture may also be read as raw data by another node.
-                    if image.users:
-                        image = image.copy()
-                    image.colorspace_settings.name = wanted
-                node.image = image
-            wrap = p.get('wrapS', 'repeat')
-            node.extension = {'clamp': 'EXTEND', 'black': 'CLIP'}.get(wrap, 'REPEAT')
+                node.image = texture(filename, texture_color_space(p))
+            # The unauthored useMetadata falls back to black, as in Karma. Blender has
+            # one wrap mode per image node, so wrapS is used for both directions.
+            wrap = p.get('wrapS', 'useMetadata')
+            node.extension = {'clamp': 'EXTEND', 'repeat': 'REPEAT', 'mirror': 'MIRROR'}.get(wrap, 'CLIP')
             ins['st'] = node.inputs['Vector']
             scale = p.get('scale', (1, 1, 1, 1)); bias = p.get('bias', (0, 0, 0, 0))
             rgb = tree.nodes.new('ShaderNodeVectorMath'); rgb.operation = 'MULTIPLY_ADD'
@@ -111,7 +139,7 @@ def network(tree, definition):
             outs['result'] = node.outputs['UV']
         elif kind.startswith('UsdPrimvarReader_'):
             varname = p.get('varname', '')
-            node = tree.nodes.new('ShaderNodeAttribute'); node.attribute_name = varname
+            node = primvar(tree, varname)
             outs['result'] = node.outputs['Fac' if kind.endswith('_float') else 'Vector']
         else:
             raise ValueError('Unsupported USD shader node: ' + kind)

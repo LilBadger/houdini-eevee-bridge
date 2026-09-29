@@ -6,7 +6,8 @@ from pathlib import Path
 import subprocess
 import time
 
-from hde_runtime import ROOT, blender_program, blender_environment, cache_root, new_session, settings, subprocess_options
+from hde_runtime import (ROOT, blender_program, blender_environment, cache_root, new_session, prune_cache, settings,
+                         subprocess_options)
 
 _processes = {}
 
@@ -14,6 +15,10 @@ _processes = {}
 def start(socket_path=None, parent=0, backend=None, device=None, environment=None):
     env = dict(os.environ if environment is None else environment)
     configuration = settings(env)
+    try:
+        prune_cache()
+    except OSError:
+        pass   # housekeeping never prevents a render
     session = Path(env['HDEEVEE_SESSION_DIR']) if env.get('HDEEVEE_SESSION_DIR') else new_session()
     session.mkdir(parents=True, exist_ok=True)
     env['HDEEVEE_SESSION_DIR'] = str(session)

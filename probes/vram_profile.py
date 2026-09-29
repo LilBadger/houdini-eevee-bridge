@@ -31,9 +31,13 @@ def vram():
                          capture_output=True, text=True).stdout
     for line in out.splitlines():
         pid, used = [x.strip() for x in line.split(',')]
-        if int(pid) == os.getpid():
+        if pid.isdigit() and int(pid) == os.getpid() and used.isdigit():
             return int(used)
-    return None
+    # Windows (WDDM) reports no per-process memory. Fall back to the whole GPU:
+    # the differences between stages stay valid while nothing else allocates.
+    out = subprocess.run(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'],
+                         capture_output=True, text=True).stdout.split()
+    return int(out[0]) if out and out[0].isdigit() else None
 
 
 def textures():

@@ -28,12 +28,17 @@ def render_command():
     return command_line([houdini_python(), '-E', ROOT/'tools/eevee_husk.py'])
 
 
+# Defaults that differ from Blender's, to match Karma: USD curves are round
+# tubes of their widths, while Blender's default strands are thin lines.
+DEFAULTS = {('render', 'hair_type'): 'CYLINDER'}
+
+
 def parm_name(group, name):
     return group + '__' + name
 
 
 def parameter(group, p):
-    name, default = parm_name(group, p['name']), p['default']
+    name, default = parm_name(group, p['name']), DEFAULTS.get((group, p['name']), p['default'])
     common = {'help': p['description']}
     if p['type'] == 'BOOLEAN':
         result = hou.ToggleParmTemplate(name, p['label'], default_value=default, **common)
@@ -361,7 +366,7 @@ def install(output_path='/stage/EEVEE_OUT'):
                 else: parm.set(value)
     old.setColor(hou.Color(.25,.85,.45))
     old.setComment('EEVEE Render Settings\nConnected Houdini Stage → Blender EEVEE')
-    old.type().definition().addSection('Help', '# EEVEE Render Settings\n\nConnect a Solaris Stage. Geometry, lights, cameras, materials and volume fields remain on that Stage.\n\nRender Passes selects native EEVEE passes and Cryptomatte. Enable Multilayer EXR for one EXR at Output Picture; otherwise selected passes are saved as a .passes.exr sidecar. Shader AOV names correspond to Output AOV nodes in Stage-authored EEVEE materials.\n\nFilm & Motion controls the shutter. Final renders use Stage shutter samples for camera, object, instance and stable-topology deformation blur. Animated SOPs need upstream shutter samples or v/velocities. Viewport blur uses EEVEE frame history during timeline changes. Volume files update per frame; within-shutter grid changes and instanced volumes are not implemented.\n\nUse EEVEE Volume Material for Stage-owned volume shading. Baked probe synchronization remains unfinished.\n')
+    old.type().definition().addSection('Help', '# EEVEE Render Settings\n\nConnect a Solaris Stage. Geometry, lights, cameras, materials and volume fields remain on that Stage.\n\nRender Passes selects native EEVEE passes and Cryptomatte. Enable Multilayer EXR for one EXR at Output Picture; otherwise selected passes are saved as a .passes.exr sidecar. Shader AOV names correspond to Output AOV nodes in Stage-authored EEVEE materials.\n\nFilm & Motion controls the shutter. Final renders use Stage shutter samples for camera, object, instance and stable-topology deformation blur. Animated SOPs need upstream shutter samples or v/velocities. Viewport blur uses EEVEE frame history during timeline changes. Volume files update per frame; within-shutter grid changes are not implemented.\n\nUse EEVEE Volume Material for Stage-owned volume shading. Baked probe synchronization remains unfinished.\n')
     old.setDisplayFlag(True); old.setCurrent(True, clear_all_selected=True)
     if hou.isUIAvailable(): hou.ui.triggerUpdate()
     return {'node': old.path(), 'type': old.type().name(), 'library': str(library),

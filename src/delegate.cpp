@@ -187,7 +187,8 @@ public:
     ~EeveeDelegate() override { _renderer.reset(); }
 
     const TfTokenVector &GetSupportedRprimTypes() const override {
-        static TfTokenVector t = {HdPrimTypeTokens->mesh, HdPrimTypeTokens->volume, HdPrimTypeTokens->basisCurves};
+        static TfTokenVector t = {HdPrimTypeTokens->mesh, HdPrimTypeTokens->volume, HdPrimTypeTokens->basisCurves,
+                                  HdPrimTypeTokens->points};
         return t;
     }
     const TfTokenVector &GetSupportedSprimTypes() const override {
@@ -212,6 +213,7 @@ public:
         if (t == HdPrimTypeTokens->mesh) return new EeveeMesh(id, &_state);
         if (t == HdPrimTypeTokens->basisCurves) return new EeveeCurves(id, &_state);
         if (t == HdPrimTypeTokens->volume) return new EeveeVolume(id, &_state);
+        if (t == HdPrimTypeTokens->points) return new EeveePoints(id, &_state);
         return nullptr;
     }
     void DestroyRprim(HdRprim *p) override { delete p; }

@@ -8,6 +8,8 @@ import tempfile
 import bpy
 from mathutils import Matrix
 from hde_runtime import session_dir, volume_helper, houdini_environment
+import instances as instance_nodes
+from shader_utils import primvar
 
 def cache():
     return session_dir()/'cache/volume_cache'
@@ -48,8 +50,7 @@ def sync(worker, definition):
     obj = worker.objects.get(key)
     if path is None:
         if obj:
-            obj.hide_render = True
-            obj.hide_set(True, view_layer=worker.view_layer)
+            instance_nodes.refresh(worker, key, obj, False)
         return
     if obj is None:
         obj = bpy.data.objects.new(key, bpy.data.volumes.new(key))
@@ -63,14 +64,16 @@ def sync(worker, definition):
         if data.grids.error_message:
             raise ValueError('Cannot read volume '+key+': '+data.grids.error_message)
     names = {f['name'] for f in definition['fields']}
-    data.velocity_grid = 'velocity' if 'velocity' in names else 'vel' if 'vel' in names else ''
+    velocity = 'velocity' if 'velocity' in names else 'vel' if 'vel' in names else ''
+    if data.velocity_grid != velocity:   # an empty name that is set logs a missing-grid error
+        data.velocity_grid = velocity
     data.velocity_unit = 'SECOND'
     obj.matrix_world = worker.basis @ Matrix(definition['transform']).transposed()
-    obj.hide_render = not definition.get('visible', True)
-    obj.hide_set(obj.hide_render, view_layer=worker.view_layer)
+    worker.visibility[key] = definition.get('visible', True)
     if 'prim_id' in definition:
         worker.prim_ids[key] = int(definition['prim_id'])
-    worker.picks.assign(obj, worker.prim_ids.get(key, -1))
+    instance_nodes.sync_objects(worker, key, obj, definition.get('instances'), definition.get('instance_primvars', {}))
+    instance_nodes.refresh(worker, key, obj, worker.visibility[key])
     material_id = definition.get('material', '')
     worker.bindings[key] = material_id
     worker.bound.setdefault(material_id, set()).add(key)
@@ -84,6 +87,14 @@ def sync(worker, definition):
             shader = tree.nodes.new('ShaderNodeVolumePrincipled')
             shader.inputs['Density'].default_value = 1.
             shader.inputs['Density Attribute'].default_value = 'density'
+            # Like Karma's default volume: white, or displayColor where the prim has one.
+            color = primvar(tree, 'displayColor')
+            tint = tree.nodes.new('ShaderNodeMix'); tint.data_type = 'RGBA'
+            sockets = {s.identifier: s for s in tint.inputs}
+            sockets['A_Color'].default_value = (1., 1., 1., 1.)
+            tree.links.new(color.outputs['present'], sockets['Factor_Float'])
+            tree.links.new(color.outputs['Color'], sockets['B_Color'])
+            tree.links.new(next(s for s in tint.outputs if s.identifier == 'Result_Color'), shader.inputs['Color'])
             output = tree.nodes.new('ShaderNodeOutputMaterial')
             tree.links.new(shader.outputs['Volume'], output.inputs['Volume'])
     if not (len(data.materials) == 1 and data.materials[0] == mat):
