@@ -6,6 +6,12 @@
 
 - The plugin now links Houdini's Python libraries, which the MSVC linker requires. Windows 11 builds with Visual Studio 2022 and passes the installer's checks, including an EEVEE render on the GPU.
 - Prebuilt Windows package for Houdini 22.0.368: `houdini-eevee-0.6.1-windows-x86_64.zip`, built with MSVC 19.42 to match Houdini.
+- The render buttons on **EEVEE Render Settings** work. The USD Render ROP reads backslashes in its render command as escape characters, so every render failed with `CreateProcess failed`.
+- Rendering to MPlay no longer waits for the MPlay window to be closed after each frame.
+
+### Final renders
+
+- A frame range renders in one husk process with one EEVEE worker, instead of starting Blender and compiling every shader again for each frame. Three frames of a small test scene went from 16.7 s to 6.1 s; the saving grows with the number of materials.
 
 ### Video memory and first draw
 
