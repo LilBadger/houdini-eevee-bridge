@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = '0.6.1'
@@ -31,6 +32,54 @@ def cache_root():
         path = Path(os.environ.get('XDG_CACHE_HOME', Path.home() / '.cache')) / 'houdini-eevee'
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def newest_change(path):
+    newest = path.stat().st_mtime
+    for directory, _, files in os.walk(path):
+        for name in files:
+            try:
+                newest = max(newest, os.stat(os.path.join(directory, name)).st_mtime)
+            except OSError:
+                pass
+    return newest
+
+
+def prune_cache(now=None):
+    """Remove session folders and logs that nothing has touched for days.
+
+    Session folders hold per-session volume and texture caches and are kept for
+    diagnosis, so without pruning they grow without bound. Runs at most hourly.
+    Files a running process still has open cannot be removed on Windows."""
+    root = cache_root()
+    now = time.time() if now is None else now
+    marker = root / '.pruned'
+    try:
+        if now - marker.stat().st_mtime < 3600:
+            return 0
+    except OSError:
+        pass
+    marker.write_text(str(now), encoding='utf-8')
+    session_age = float(os.environ.get('HDEEVEE_KEEP_SESSION_DAYS', 7)) * 86400
+    log_age = float(os.environ.get('HDEEVEE_KEEP_LOG_DAYS', 14)) * 86400
+    removed = 0
+    sessions = root / 'sessions'
+    for entry in (sessions.iterdir() if sessions.is_dir() else ()):
+        try:
+            if entry.is_dir() and now - newest_change(entry) > session_age:
+                shutil.rmtree(entry, ignore_errors=True)
+                removed += not entry.exists()
+        except OSError:
+            pass
+    logs = root / 'logs'
+    for entry in (logs.iterdir() if logs.is_dir() else ()):
+        try:
+            if entry.is_file() and now - entry.stat().st_mtime > log_age:
+                entry.unlink()
+                removed += 1
+        except OSError:
+            pass
+    return removed
 
 
 def new_session(label='worker'):

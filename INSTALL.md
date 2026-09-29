@@ -243,6 +243,8 @@ Set these in Houdini's environment, for example in the shell that launches Houdi
 | `HDEEVEE_IDLE_TARGET_SECONDS` | Seconds before idle viewport render targets release their video memory (default 60). |
 | `HDEEVEE_COLOR_FORMAT` | `float` sends 32-bit viewport color instead of 16-bit half floats. |
 | `HDEEVEE_PYTHON_DEPS` | Folder with OpenEXR, Imath and NumPy modules for Blender's Python. |
+| `HDEEVEE_KEEP_SESSION_DAYS` | Days before an unused session folder is removed (default 7). |
+| `HDEEVEE_KEEP_LOG_DAYS` | Days before a log file is removed (default 14). |
 
 ## Troubleshooting
 
@@ -259,7 +261,7 @@ The logs folder holds these files:
 - `husk-*.log`: the log for a disk render.
 - `doctor-*.log`: the output of `--doctor`.
 
-Session folders are kept for diagnosis. You can delete them whenever Houdini is not running.
+Session folders are kept for diagnosis. When a worker starts, session folders nothing has touched for 7 days and logs older than 14 days are removed; see `HDEEVEE_KEEP_SESSION_DAYS` and `HDEEVEE_KEEP_LOG_DAYS`. You can also delete them yourself whenever Houdini is not running.
 
 ### Common problems
 
