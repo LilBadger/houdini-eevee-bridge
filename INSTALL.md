@@ -35,7 +35,7 @@ OpenEXR currently publishes wheels up to Python 3.13. Some Linux distributions b
 
 ### From the prebuilt release (Houdini 22.0.368)
 
-1. Download `houdini-eevee-0.6.1-linux-x86_64.zip` from the [releases page](https://github.com/LilBadger/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.6.1-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it and run the installer:
 
    ```bash
@@ -51,7 +51,7 @@ The prebuilt plugin works only with **Houdini 22.0.368**. For another Houdini 22
 ### From source (any Houdini 22.0 build)
 
 ```bash
-git clone https://github.com/LilBadger/houdini-eevee-bridge.git
+git clone https://github.com/badgerz42/houdini-eevee-bridge.git
 cd houdini-eevee-bridge
 bash install.sh --build
 ```
@@ -72,7 +72,7 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 ### From the prebuilt release (Houdini 22.0.368)
 
-1. Download `houdini-eevee-0.6.1-windows-x86_64.zip` from the [releases page](https://github.com/LilBadger/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.6.1-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it, and in the extracted folder run:
 
    ```bat
@@ -297,5 +297,5 @@ Session folders are kept for diagnosis. You can delete them whenever Houdini is 
 - *Exact* subdivision takes much longer to prepare than *Fast*.
 
 **Reporting a bug.**
-- [Open an issue](https://github.com/LilBadger/houdini-eevee-bridge/issues).
+- [Open an issue](https://github.com/badgerz42/houdini-eevee-bridge/issues).
 - Include your Houdini, Blender, GPU and driver versions, the relevant log, and if possible a small scene that reproduces it.
