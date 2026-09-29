@@ -138,15 +138,18 @@ In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame
 ## Features
 
 ### Geometry
-- **Meshes.** Supports authored normals, UVs, float and vector primvars, display color and opacity, left-handed orientation and degenerate faces.
+- **Meshes.** Supports authored normals, UVs, float and vector primvars, display color and opacity, left-handed orientation and degenerate faces. Display color can vary per point, face or corner.
+- **Per-face materials.** GeomSubsets bound to different materials render with each subset's material.
+- **Implicit shapes.** Sphere, Cube, Cone, Cylinder, Capsule and Plane prims are converted to meshes.
 - **Subdivision.** Supports Catmull-Clark and bilinear subdivision with creases, corners, and boundary and face-varying interpolation rules. EEVEE Render Settings sets separate viewport and render levels, plus a face budget per mesh.
 - **Instancing.** Supports native USD instancing and point instancers. Large instancers use Geometry Nodes with full affine matrices, so shear and negative scale work.
-- **Curves.** Linear basis curves become EEVEE hair curves with their widths.
+- **Curves.** Linear and cubic basis curves (B-spline, Bézier and Catmull-Rom, including pinned and periodic ones) become EEVEE hair curves with their widths, display color and primvars.
+- **Particles.** USD Points become Blender point clouds, drawn as spheres sized by their widths, with display color and primvars.
 - **Volumes.** OpenVDB and native Houdini volumes work, including live SOP volumes. The **EEVEE Volume Material** LOP controls density, color, absorption, anisotropy, emission, flame and temperature.
 
 ### Materials
 - **Context priority.** Render contexts are used in this order: `eevee`, MaterialX (`mtlx`), Karma (`kma`), then USD Preview Surface.
-- **USD Preview Surface.** Supports UV readers, 2D transforms, color, roughness and normal textures, and texture color spaces.
+- **USD Preview Surface.** Supports UV readers, 2D transforms, color, roughness and normal textures, UDIMs, and texture color spaces: raw, sRGB, or `auto`, which reads 8-bit images as sRGB and float images as linear.
 - **MaterialX Standard Surface.** Maps to Blender's Principled BSDF, including base color, metalness, roughness, IOR, specular, coat, sheen, transmission, subsurface, emission, opacity and normals.
 - **MaterialX nodes.** Supports images and UDIMs, texture coordinates and placement, math, mix, clamp, remap, color correction, channel operations, normal maps and bump.
 - **Procedural noise.** MaterialX noises (2D/3D Noise, Fractal, Cell, Worley, Unified) and Karma Voronoi noise stay procedural in EEVEE, with no texture baking.
@@ -181,7 +184,8 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 - **Houdini version.** The plugin binary must match your exact Houdini build. Use `--build` for any build other than 22.0.368.
 - **Material fidelity.** Karma and MaterialX materials are approximated with Blender's BSDFs. VEX shaders are not supported.
 - **Picking.** Point instances drawn through Geometry Nodes pick as their prototype prim. Face and point picking is not provided.
-- **Not translated yet.** Probe baking, arbitrary world shader graphs, cubic curves and per-face-subset materials.
+- **Not translated yet.** Probe baking and arbitrary world shader graphs.
+- **Particle shape.** EEVEE draws point clouds as low-polygon spheres, so very large particles look faceted.
 - **Heavy instancing.** Very large instance counts limit EEVEE's own frame rate, because Blender processes every instance on each draw.
 
 ## Development
