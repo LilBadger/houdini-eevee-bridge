@@ -12,6 +12,7 @@
 ### Final renders
 
 - A frame range renders in one husk process with one EEVEE worker, instead of starting Blender and compiling every shader again for each frame. Three frames of a small test scene went from 16.7 s to 6.1 s; the saving grows with the number of materials.
+- **Output Color → View** defaults to **ACES 2.0** instead of AgX, and lists Blender's views in a menu. On the sRGB display it is numerically identical to Houdini 22's default *sRGB - Display / ACES 2.0 - SDR 100 nits (Rec.709)* view, so PNG, JPEG and TIFF files now look like Houdini's viewport and MPlay. EXR files, the viewport and MPlay are unchanged: they stay scene-linear in Linear Rec.709, which is also Houdini's working space.
 
 ### Video memory and first draw
 
