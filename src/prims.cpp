@@ -658,7 +658,29 @@ std::string VolumeFilename(const std::string &path, const std::string &name) {
     } else handle = HUSDloadGeometryFromAsset(UT_StringRef(path));
     GU_DetailHandleAutoReadLock source(handle);
     if (!source.getGdp()) throw std::runtime_error("Cannot load Houdini volume: " + path);
-    geo.merge(*source.getGdp());
+    // Export each geometry version once. All fields of a pyro cache (density,
+    // temperature, velocity...) come from the same detail, and an unchanged
+    // file name lets the worker reuse its composed volume without reloading.
+    const GU_Detail *gdp = source.getGdp();
+    std::string key = path + '\n' + std::to_string(gdp->getUniqueId()) + '\n' + std::to_string(gdp->getMetaCacheCount());
+    if (path.rfind("op:", 0) != 0) {
+        FS_Info info(path.c_str());
+        key += '\n' + std::to_string(int64_t(info.getModTime())) + '\n' + std::to_string(int64_t(info.getFileDataSize()));
+    }
+    if (!gdp->findStringTuple(GA_ATTRIB_PRIMITIVE, "name")) key += '\n' + name;   // unnamed grids take the field name
+    // VDB grids also carry change ids for their voxels, metadata and transform.
+    for (GA_Iterator it(gdp->getPrimitiveRange()); !it.atEnd(); ++it)
+        if (const auto *vdb = dynamic_cast<const GEO_PrimVDB*>(gdp->getGEOPrimitive(*it)))
+            key += '\n' + std::to_string(vdb->getTreeUniqueId()) + ':' + std::to_string(vdb->getMetadataUniqueId()) +
+                   ':' + std::to_string(vdb->getTransformUniqueId());
+    static std::mutex mutex;
+    static std::map<std::string, std::string> exported;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        auto it = exported.find(key);
+        if (it != exported.end() && std::filesystem::is_regular_file(it->second)) return it->second;
+    }
+    geo.merge(*gdp);
     std::vector<GA_Offset> dense;
     for (GA_Iterator it(geo.getPrimitiveRange()); !it.atEnd(); ++it)
         if (dynamic_cast<const GEO_PrimVolume*>(geo.getGEOPrimitive(*it))) dense.push_back(*it);
@@ -673,7 +695,8 @@ std::string VolumeFilename(const std::string &path, const std::string &name) {
     static std::atomic<uint64_t> serial{0};
     auto file = directory / (std::to_string(hde::processId()) + "-" + std::to_string(++serial) + ".vdb");
     if (!geo.save(hde::pathString(file).c_str(), nullptr)) throw std::runtime_error("Cannot cache Houdini volume: " + path);
-    return hde::pathString(file);
+    std::lock_guard<std::mutex> lock(mutex);
+    return exported[key] = hde::pathString(file);
 }
 } // namespace
 
