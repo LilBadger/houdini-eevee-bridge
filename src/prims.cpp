@@ -10,6 +10,9 @@
 #include <pxr/usd/sdf/assetPath.h>
 #include <pxr/usd/sdf/layer.h>
 #include <pxr/imaging/hd/changeTracker.h>
+#include <pxr/imaging/hd/geomSubsetSchema.h>
+#include <pxr/imaging/hd/materialBindingSchema.h>
+#include <pxr/imaging/hd/materialBindingsSchema.h>
 #include <pxr/imaging/hd/materialSchema.h>
 #include <pxr/imaging/hd/renderIndex.h>
 #include <pxr/imaging/hd/repr.h>
@@ -197,6 +200,91 @@ void QueueDelete(BridgeState *state, const SdfPath &id, const char *kind) {
     state->Queue(std::move(change));
 }
 
+/// Send float, float2 and float3 primvars as "attributes" and "uvs". Unchanged
+/// arrays are skipped unless forced. Also reports displayColor as "color" and
+/// whether it varies over the prim ("color_varying"). Returns true if sent.
+bool SyncPrimvarsTo(HdSceneDelegate *d, const SdfPath &id, SentArrays &sent, std::set<std::string> &previous,
+                    Change &change, bool force, const std::set<std::string> &skip) {
+    Json uvs = Json::object(), attributes = Json::object();
+    std::set<std::string> names;
+    bool any = false;
+    for (int i = HdInterpolationConstant; i <= HdInterpolationFaceVarying; ++i) {
+        for (const auto &desc : d->GetPrimvarDescriptors(id, HdInterpolation(i))) {
+            const std::string name = desc.name.GetString();
+            if (skip.count(name)) continue;
+            const VtValue value = d->Get(id, desc.name);
+            BlobPtr blob;
+            Json *target = &attributes;
+            std::string type = "FLOAT";
+            if ((blob = Vec2Blob(value))) target = &uvs;
+            else if ((blob = FloatBlob(value))) type = "FLOAT";
+            else if ((blob = Vec3Blob(value))) type = "FLOAT_VECTOR";
+            else continue;
+            names.insert(name);
+            // Interpolation is part of the identity: the same values on a
+            // different domain produce different Blender data.
+            const uint64_t hash = blob->hash ^ (uint64_t(i + 1) * 0x9E3779B97F4A7C15ull);
+            if (!sent.Changed("pv:" + name, hash) && !force) continue;
+            Json entry = {{"values", change.Ref(blob)}, {"interpolation", kInterpolations[i]}};
+            if (target == &attributes) entry["type"] = type;
+            (*target)[name] = std::move(entry);
+            any = true;
+            if (desc.name == HdTokens->displayColor && value.IsHolding<VtVec3fArray>() &&
+                !value.UncheckedGet<VtVec3fArray>().empty()) {
+                const auto &colors = value.UncheckedGet<VtVec3fArray>();
+                change.json["color"] = {colors[0][0], colors[0][1], colors[0][2]};
+                change.json["color_varying"] = i != HdInterpolationConstant && colors.size() > 1;
+            }
+        }
+    }
+    Json removed = Json::array();
+    for (const auto &name : previous) if (!names.count(name)) { removed.push_back(name); sent.Forget("pv:" + name); }
+    if (!any && removed.empty() && !force) return false;
+    change.json["uvs"] = std::move(uvs);
+    change.json["attributes"] = std::move(attributes);
+    if (!force) {
+        change.json["primvars_partial"] = true;
+        change.json["primvars_removed"] = std::move(removed);
+    }
+    previous = std::move(names);
+    return true;
+}
+
+/// Face subsets with their bound materials: (material path, face indices).
+/// Hydra 1 delegates put them on the topology; Hydra 2 scene indices expose
+/// them as child "geomSubset" prims with their own material bindings.
+std::vector<std::pair<SdfPath, VtIntArray>> FaceSubsets(HdSceneDelegate *d, const SdfPath &id,
+                                                        const HdMeshTopology &topology) {
+    std::vector<std::pair<SdfPath, VtIntArray>> result;
+    for (const auto &subset : topology.GetGeomSubsets())
+        if (subset.type == HdGeomSubset::TypeFaceSet && !subset.indices.empty())
+            result.emplace_back(subset.materialId, subset.indices);
+    if (!result.empty()) return result;
+    const auto scene = d->GetRenderIndex().GetTerminalSceneIndex();
+    if (!scene) return result;
+    for (const SdfPath &child : scene->GetChildPrimPaths(id)) {
+        const HdSceneIndexPrim prim = scene->GetPrim(child);
+        if (prim.primType != HdPrimTypeTokens->geomSubset || !prim.dataSource) continue;
+        const HdGeomSubsetSchema subset = HdGeomSubsetSchema::GetFromParent(prim.dataSource);
+        const auto type = subset.GetType();
+        const auto indices = subset.GetIndices();
+        if (!type || !indices || type->GetTypedValue(0.f) != HdGeomSubsetSchemaTokens->typeFaceSet) continue;
+        SdfPath material;
+        const auto bindings = HdMaterialBindingsSchema::GetFromParent(prim.dataSource);
+        for (const TfToken &purpose : {HdTokens->full, HdMaterialBindingsSchemaTokens->allPurpose})
+            if (const auto path = bindings.GetMaterialBinding(purpose).GetPath()) {
+                material = path->GetTypedValue(0.f);
+                if (!material.IsEmpty()) break;
+            }
+        VtIntArray faces = indices->GetTypedValue(0.f);
+        if (!faces.empty()) result.emplace_back(material, std::move(faces));
+    }
+    return result;
+}
+
+const std::set<std::string> kMeshSkip = {"points", "normals", "velocities", "accelerations", "v", "accel"};
+const std::set<std::string> kPointsSkip = {"points", "widths", "normals", "velocities", "accelerations", "v", "accel"};
+
 template <class Reprs>
 void AddRepr(Reprs &reprs, const TfToken &repr) {
     for (auto &r : reprs) if (r.first == repr) return;
@@ -345,50 +433,7 @@ void EeveeMesh::SyncInstances(HdSceneDelegate *d, Change &change) {
 }
 
 bool EeveeMesh::SyncPrimvars(HdSceneDelegate *d, Change &change, bool force) {
-    const SdfPath &id = GetId();
-    Json uvs = Json::object(), attributes = Json::object();
-    std::set<std::string> names;
-    bool any = false;
-    for (int i = HdInterpolationConstant; i <= HdInterpolationFaceVarying; ++i) {
-        for (const auto &desc : d->GetPrimvarDescriptors(id, HdInterpolation(i))) {
-            const std::string name = desc.name.GetString();
-            if (desc.name == HdTokens->points || desc.name == HdTokens->normals ||
-                name == "velocities" || name == "accelerations" || name == "v" || name == "accel") continue;
-            const VtValue value = d->Get(id, desc.name);
-            BlobPtr blob;
-            Json *target = &attributes;
-            std::string type = "FLOAT";
-            if ((blob = Vec2Blob(value))) target = &uvs;
-            else if ((blob = FloatBlob(value))) type = "FLOAT";
-            else if ((blob = Vec3Blob(value))) type = "FLOAT_VECTOR";
-            else continue;
-            names.insert(name);
-            // Interpolation is part of the identity: the same values on a
-            // different domain produce different Blender data.
-            const uint64_t hash = blob->hash ^ (uint64_t(i + 1) * 0x9E3779B97F4A7C15ull);
-            if (!_sent.Changed("pv:" + name, hash) && !force) continue;
-            Json entry = {{"values", change.Ref(blob)}, {"interpolation", kInterpolations[i]}};
-            if (target == &attributes) entry["type"] = type;
-            (*target)[name] = std::move(entry);
-            any = true;
-            if (desc.name == HdTokens->displayColor && value.IsHolding<VtVec3fArray>() &&
-                !value.UncheckedGet<VtVec3fArray>().empty()) {
-                const auto p = value.UncheckedGet<VtVec3fArray>()[0];
-                change.json["color"] = {p[0], p[1], p[2]};
-            }
-        }
-    }
-    Json removed = Json::array();
-    for (const auto &name : _primvars) if (!names.count(name)) { removed.push_back(name); _sent.Forget("pv:" + name); }
-    if (!any && removed.empty() && !force) return false;
-    change.json["uvs"] = std::move(uvs);
-    change.json["attributes"] = std::move(attributes);
-    if (!force) {
-        change.json["primvars_partial"] = true;
-        change.json["primvars_removed"] = std::move(removed);
-    }
-    _primvars = std::move(names);
-    return true;
+    return SyncPrimvarsTo(d, GetId(), _sent, _primvars, change, force, kMeshSkip);
 }
 
 void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, const TfToken&) {
@@ -423,9 +468,21 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
             change.json["counts"] = change.Ref(counts);
             change.json["indices"] = change.Ref(indices);
             change.json["orientation"] = orientation;
-            change.json["smooth"] = topology.GetScheme() != TfToken("none");
+            // Bilinear subdivision is still faceted; only smooth schemes shade smooth.
+            change.json["smooth"] = scheme == "catmullClark" || scheme == "loop";
             change.json["subdivision_scheme"] = scheme;
         }
+    }
+    if (first || (*bits & (HdChangeTracker::DirtyTopology | HdChangeTracker::DirtyMaterialId))) {
+        // Per-face material assignments (UsdGeomSubset "materialBind" family).
+        Json subsets = Json::array();
+        uint64_t hash = 0;
+        for (const auto &[material, faces] : FaceSubsets(d, id, GetMeshTopology(d))) {
+            BlobPtr indices = IntBlob(faces);
+            hash = hash * 1099511628211ull ^ indices->hash ^ std::hash<std::string>{}(material.GetString());
+            subsets.push_back({{"material", material.GetString()}, {"indices", change.Ref(indices)}});
+        }
+        if (_sent.Changed("subsets", hash) || topologyChanged) change.json["subsets"] = std::move(subsets);
     }
     const bool force = topologyChanged;
     if (force) {
@@ -518,6 +575,34 @@ void EeveeCurves::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()}};
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
+    // Curves are re-sent whole, so every primvar is sent with them.
+    SentArrays sent;
+    std::set<std::string> names;
+    SyncPrimvarsTo(d, id, sent, names, change, true, kPointsSkip);
+    change.json["transform_samples"] = TransformSamples(d, id, _state->MotionExtent());
+    _state->Queue(std::move(change));
+    *bits = HdChangeTracker::Clean;
+}
+
+// ------------------------------------------------------------------- points
+EeveePoints::~EeveePoints() { QueueDelete(_state, GetId(), "delete"); }
+
+void EeveePoints::_InitRepr(const TfToken &repr, HdDirtyBits*) { AddRepr(_reprs, repr); }
+
+void EeveePoints::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, const TfToken&) {
+    // Particles usually change as a whole every frame; send the complete state.
+    const SdfPath &id = GetId();
+    Change change;
+    BlobPtr points = Vec3Blob(d->Get(id, HdTokens->points));
+    if (!points) points = CopyBlob(std::vector<float>{}, "f4", {0, 3});
+    change.json = {{"kind", "points"}, {"id", id.GetString()}, {"prim_id", GetPrimId()},
+        {"points", change.Ref(points)}, {"transform", MatrixJson(d->GetTransform(id))},
+        {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()}};
+    if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
+    change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
+    SentArrays sent;
+    std::set<std::string> names;
+    SyncPrimvarsTo(d, id, sent, names, change, true, kPointsSkip);
     change.json["transform_samples"] = TransformSamples(d, id, _state->MotionExtent());
     _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;

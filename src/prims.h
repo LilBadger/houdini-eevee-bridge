@@ -8,6 +8,7 @@
 #include <pxr/imaging/hd/light.h>
 #include <pxr/imaging/hd/material.h>
 #include <pxr/imaging/hd/mesh.h>
+#include <pxr/imaging/hd/points.h>
 #include <pxr/imaging/hd/renderSettings.h>
 #include <pxr/imaging/hd/volume.h>
 #include <pxr/base/gf/matrix4d.h>
@@ -70,6 +71,20 @@ class EeveeCurves final : public HdBasisCurves {
 public:
     EeveeCurves(const SdfPath &id, BridgeState *state) : HdBasisCurves(id), _state(state) {}
     ~EeveeCurves() override;
+    HdDirtyBits GetInitialDirtyBitsMask() const override { return HdChangeTracker::AllDirty; }
+    void Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, const TfToken&) override;
+protected:
+    HdDirtyBits _PropagateDirtyBits(HdDirtyBits bits) const override { return bits; }
+    void _InitRepr(const TfToken &repr, HdDirtyBits*) override;
+private:
+    BridgeState *_state;
+};
+
+/// USD Points (particles): drawn by the worker as a Blender point cloud.
+class EeveePoints final : public HdPoints {
+public:
+    EeveePoints(const SdfPath &id, BridgeState *state) : HdPoints(id), _state(state) {}
+    ~EeveePoints() override;
     HdDirtyBits GetInitialDirtyBitsMask() const override { return HdChangeTracker::AllDirty; }
     void Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, const TfToken&) override;
 protected:

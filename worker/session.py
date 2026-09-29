@@ -23,6 +23,7 @@ import material_pool
 import materialx_material
 import meshes
 import motion
+import points
 import render_config
 import render_passes
 import subdivision
@@ -67,6 +68,9 @@ class Session:
         self.materialx_defs = {}
         self.bindings = {}
         self.bound = {}
+        self.subset_bindings = {}
+        self.subsets = {}
+        self.display = {}
         self.topology = {}
         self.instances = {}
         self.point_instances = {}
@@ -132,6 +136,7 @@ class Session:
             if image.get('hde_ramp') and not image.users:
                 bpy.data.images.remove(image)
         for name in ('objects', 'materials', 'material_digest', 'materialx_defs', 'bindings', 'bound',
+                     'subset_bindings', 'subsets', 'display',
                      'topology', 'visibility', 'prim_ids', 'fields', 'volume_defs', 'motion_defs', 'domes',
                      'material_warnings', 'geometry_warnings', 'exported_attributes'):
             getattr(self, name).clear()
@@ -148,6 +153,8 @@ class Session:
             bpy.data.hair_curves.remove(data)
         elif isinstance(data, bpy.types.Volume):
             bpy.data.volumes.remove(data)
+        elif isinstance(data, bpy.types.PointCloud):
+            bpy.data.pointclouds.remove(data)
         elif isinstance(data, bpy.types.Light):
             bpy.data.lights.remove(data)
 
@@ -291,35 +298,58 @@ class Session:
 
     def bind(self, key, material_id):
         previous = self.bindings.get(key)
-        if previous is not None and previous != material_id:
+        if previous is not None and previous != material_id and previous not in self.subset_bindings.get(key, ()):
             self.bound.get(previous, set()).discard(key)
         self.bindings[key] = material_id
         self.bound.setdefault(material_id, set()).add(key)
         self.assign_material(key)
 
+    def bind_subsets(self, key, material_ids):
+        """Per-face materials: slot 0 is the prim's own material, slot i+1 subset i."""
+        for previous in self.subset_bindings.get(key, ()):
+            if previous not in material_ids and previous != self.bindings.get(key):
+                self.bound.get(previous, set()).discard(key)
+        self.subset_bindings[key] = list(material_ids)
+        for material_id in material_ids:
+            self.bound.setdefault(material_id, set()).add(key)
+        self.assign_material(key)
+
     def assign_material(self, key):
         obj = self.objects.get(key)
-        mat = self.materials.get(self.bindings.get(key))
-        if obj is None or mat is None or obj.data is None or not hasattr(obj.data, 'materials'):
+        if obj is None or obj.data is None or not hasattr(obj.data, 'materials'):
             return
+        base = self.materials.get(self.bindings.get(key)) or self.materials.get(self.display.get(key))
+        subsets = self.subset_bindings.get(key, ())
+        if base is None and not subsets:
+            return
+        wanted = [base] + [self.materials.get(m) or base for m in subsets]
         slots = obj.data.materials
-        if len(slots) == 1 and slots[0] == mat:
+        if list(slots) == wanted:
             return
         slots.clear()
-        slots.append(mat)
+        for mat in wanted:
+            slots.append(mat)
 
     def rebind(self, material_key):
         for obj_key in list(self.bound.get(material_key, ())):
             self.assign_material(obj_key)
 
-    def display_material(self, key, color):
-        material_key = key + '/display'
-        self.material({'id': material_key, 'parameters': {'diffuseColor': list(color), 'roughness': 0.4}})
-        obj = self.objects.get(key)
-        mat = self.materials.get(material_key)
-        if obj is not None and mat is not None and not (len(obj.data.materials) == 1 and obj.data.materials[0] == mat):
-            obj.data.materials.clear()
-            obj.data.materials.append(mat)
+    def display_material(self, key, color, varying=False):
+        """Material for prims without a bound material, from USD displayColor."""
+        if varying:
+            # Shared by every prim whose displayColor varies per point, face or corner.
+            material_key = '__hde_display_attribute'
+            if material_key not in self.materials:
+                self.material({'id': material_key, 'graph': {
+                    'nodes': [{'id': 'color', 'type': 'ShaderNodeAttribute', 'properties': {'attribute_name': 'displayColor'}},
+                              {'id': 'bsdf', 'type': 'ShaderNodeBsdfPrincipled', 'inputs': {'Roughness': 0.4}},
+                              {'id': 'output', 'type': 'ShaderNodeOutputMaterial'}],
+                    'links': [['color', 'Color', 'bsdf', 'Base Color'], ['bsdf', 'BSDF', 'output', 'Surface']]}})
+        else:
+            material_key = key + '/display'
+            self.material({'id': material_key, 'parameters': {'diffuseColor': list(color), 'roughness': 0.4}})
+        self.display[key] = material_key
+        self.assign_material(key)
 
     # ------------------------------------------------------------------ lights
     def light(self, update):
@@ -405,7 +435,7 @@ class Session:
 
     def apply_change(self, change):
         kind = change['kind']
-        if kind in ('mesh', 'curves', 'light', 'volume'):
+        if kind in ('mesh', 'curves', 'points', 'light', 'volume'):
             names = [n for n in ('transform_samples', 'point_samples', 'instance_samples',
                                  'velocities', 'accelerations') if n in change]
             if names:
@@ -419,6 +449,9 @@ class Session:
             self.dirty_geometry = True
         elif kind == 'curves':
             curves.sync(self, change)
+            self.dirty_geometry = True
+        elif kind == 'points':
+            points.sync(self, change)
             self.dirty_geometry = True
         elif kind == 'light':
             self.light(change)
@@ -455,7 +488,10 @@ class Session:
         previous = self.bindings.pop(key, None)
         if previous is not None:
             self.bound.get(previous, set()).discard(key)
-        for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings'):
+        for material_id in self.subset_bindings.pop(key, ()):
+            self.bound.get(material_id, set()).discard(key)
+        for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings',
+                     'subsets', 'display'):
             getattr(self, name).pop(key, None)
         self.dirty_geometry = True
 

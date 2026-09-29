@@ -186,6 +186,11 @@ def sync(session, update):
             mesh.shade_flat()
     if names_changed and topology is not None:
         mark_present(session, key, mesh)
+    if 'subsets' in update:
+        session.subsets[key] = [(s['material'], array(s['indices'], np.int64)) for s in update['subsets'] or []]
+        session.bind_subsets(key, [material for material, _ in session.subsets[key]])
+    if topology is not None and ('subsets' in update or rebuilt) and key in session.subsets:
+        set_face_materials(mesh, topology, session.subsets[key])
     if 'transform' in update:
         obj.matrix_world = session.basis @ Matrix(update['transform']).transposed()
     if 'subdivision' in update or 'subdivision_scheme' in update:
@@ -222,7 +227,18 @@ def sync(session, update):
     if 'material' in update:
         session.bind(key, update['material'])
     if 'color' in update and not session.bindings.get(key):
-        session.display_material(key, update['color'])
+        session.display_material(key, update['color'], update.get('color_varying', False))
+
+
+def set_face_materials(mesh, topology, subsets):
+    """Material slot per face from USD GeomSubsets (slot 0: the prim's own material)."""
+    index = np.zeros(topology.source_faces, dtype=np.int32)
+    for slot, (_, faces) in enumerate(subsets, start=1):
+        index[faces[(faces >= 0) & (faces < topology.source_faces)]] = slot
+    if topology.face_src is not None:
+        index = index[topology.face_src]
+    if len(index) == len(mesh.polygons):
+        mesh.polygons.foreach_set('material_index', index)
 
 
 def sync_primvars(session, key, mesh, topology, update, rebuilt):
