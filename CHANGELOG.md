@@ -7,6 +7,7 @@
 - **Particles.** USD Points render as Blender point clouds, sized by their widths (diameters), with display color and primvars. They were not rendered before.
 - **Implicit shapes.** Sphere, Cube, Cone, Cylinder, Capsule and Plane prims are converted to meshes by USD's implicit-surface scene index. They were not rendered before.
 - **Cubic curves.** B-spline, Bézier and Catmull-Rom curves render with their exact shape, including pinned and periodic wrap. B-splines become uniform cubic NURBS; Bézier and Catmull-Rom curves become Blender Bézier curves with equivalent handles.
+- **Curve thickness.** Curves render as round tubes of their widths (Blender's *Cylinder* curve shape), as in Karma. Blender's default *Strand* shape draws thin lines that ignore the width. EEVEE Render Settings › Curves Shape still offers Strand, which is lighter for very dense grooms, and Strip.
 - **Curve and point primvars.** Display color and float, float2 and float3 primvars on curves and points become attributes, like on meshes.
 - **Per-face materials.** GeomSubsets bound to different materials now render with each subset's material. Houdini's Hydra provides subsets as child prims of the mesh.
 - **Display color.** A display color that varies per point, face or corner is shown in full; before, only its first value was used.

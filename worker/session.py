@@ -52,6 +52,9 @@ class Session:
         scene.render.engine = 'BLENDER_EEVEE'
         scene.eevee.taa_samples = 16
         scene.eevee.use_raytracing = True
+        # USD curves are round tubes of their widths, as in Karma; Blender's
+        # default strands are thin lines that ignore the width.
+        scene.render.hair_type = 'CYLINDER'
         # Only the Workbench ID/preview passes read these.
         scene.display.viewport_aa = 'OFF'
         scene.display.render_aa = 'OFF'
