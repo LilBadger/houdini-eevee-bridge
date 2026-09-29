@@ -11,6 +11,12 @@ TYPE = 'eevee::render_settings::1.0'
 SCHEMA = json.loads((ROOT/'houdini/eevee_settings.json').read_text())
 PASSES = json.loads((ROOT/'houdini/eevee_passes.json').read_text())
 COMMAND_EXPRESSION = "__import__('render_settings').render_command()"
+# Blender's views for its sRGB display. 'ACES 2.0' is numerically the same as Houdini's
+# default 'ACES 2.0 - SDR 100 nits (Rec.709)' view on 'sRGB - Display'.
+VIEWS = ('ACES 2.0', 'ACES 1.3', 'AgX', 'Standard', 'Khronos PBR Neutral', 'Filmic', 'Filmic Log', 'False Color', 'Raw')
+VIEW_HELP = ('Display transform baked into 8- and 16-bit image files (PNG, JPEG, TIFF, ...). ACES 2.0 matches '
+             "Houdini's sRGB - Display / ACES 2.0 - SDR 100 nits (Rec.709) view. EXR files, the viewport and MPlay "
+             "stay scene-linear and use Houdini's own display transform.")
 
 
 def render_command():
@@ -35,6 +41,9 @@ def parameter(group, p):
         items = [i[0] for i in p['items']]
         result = hou.StringParmTemplate(name, p['label'], 1, default_value=(str(default),),
                  menu_items=items, menu_labels=[i[1] for i in p['items']], **common)
+    elif group == 'view_settings' and p['name'] == 'view_transform':
+        result = hou.StringParmTemplate(name, p['label'], 1, default_value=(VIEWS[0],), menu_items=VIEWS,
+                 menu_type=hou.menuType.StringReplace, help=VIEW_HELP)
     elif p['type'] == 'STRING':
         result = hou.StringParmTemplate(name, p['label'], 1, default_value=(str(default),), **common)
     else:
