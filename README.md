@@ -69,7 +69,7 @@ bash install.sh
 
 If a release includes a prebuilt `houdini-eevee-<version>-linux-x86_64.zip`, run `bash install.sh` in its extracted folder instead. It uses the prebuilt plugin on the Houdini build it names, and on other builds works like the Windows installer below.
 
-**Windows, any Houdini 22.0 build.** Download `houdini-eevee-0.7.0-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
+**Windows, any Houdini 22.0 build.** Download `houdini-eevee-0.7.1-windows-x86_64.zip` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases), extract it, and run this in the extracted folder:
 
 ```bat
 install.cmd
