@@ -312,7 +312,7 @@ def install(output_path='/stage/EEVEE_OUT'):
         rop = subnet.createNode('usdrender_rop', 'render_to_disk')
         rop.setParms({'renderer': 'HdEeveeRendererPlugin', 'husk_gpu': True,
                       'loppath': '..',
-                      'soho_foreground': True})
+                      'soho_foreground': True, 'allframesatonce': True})
         rop.parm('rendercommand').setExpression(COMMAND_EXPRESSION, hou.exprLanguage.Python)
         rop.parm('rendersettings').setExpression('chs("../primpath")', hou.exprLanguage.Hscript)
         rop.parm('trange').setExpression('ch("../trange")', hou.exprLanguage.Hscript)
@@ -331,10 +331,14 @@ def install(output_path='/stage/EEVEE_OUT'):
         portable = old.node('render_to_disk').parm('rendercommand').expression() == COMMAND_EXPRESSION
     except hou.OperationFailed:
         portable = False
-    if not portable or old.node('render_to_disk').parm('trange').expression() != 'ch("../trange")':
+    # One husk process and EEVEE worker for the whole frame range; a process per
+    # frame restarts Blender and recompiles every shader on each frame.
+    if (not portable or old.node('render_to_disk').parm('trange').expression() != 'ch("../trange")'
+            or not old.node('render_to_disk').evalParm('allframesatonce')):
         old.allowEditingOfContents()
         old.node('render_to_disk').parm('rendercommand').setExpression(COMMAND_EXPRESSION, hou.exprLanguage.Python)
         old.node('render_to_disk').parm('trange').setExpression('ch("../trange")', hou.exprLanguage.Hscript)
+        old.node('render_to_disk').parm('allframesatonce').set(True)
         old.type().definition().updateFromNode(old)
         old.type().definition().setParmTemplateGroup(template_group())
         old.matchCurrentDefinition()
