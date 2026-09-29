@@ -20,7 +20,9 @@ set_target_properties(hdEevee PROPERTIES PREFIX ""
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugin/hdEevee/lib"
     WINDOWS_EXPORT_ALL_SYMBOLS ON)
 if(WIN32)
-    target_link_libraries(hdEevee PRIVATE ws2_32)
+    # USD headers instantiate pxr_boost::python/CPython calls inline; Linux resolves
+    # them at load time from Houdini, but a Windows DLL must link them explicitly.
+    target_link_libraries(hdEevee PRIVATE ws2_32 Houdini::Dep::pxr_python Houdini::Dep::python3.13)
     target_compile_definitions(hdEevee PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
 foreach(config Debug Release RelWithDebInfo MinSizeRel)
