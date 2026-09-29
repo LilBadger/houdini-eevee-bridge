@@ -265,6 +265,11 @@ class Session:
                 warnings = [str(exc)]
                 tree.nodes.clear()
                 usd_material.principled(tree, {'diffuseColor': [1., 0., 1.], 'roughness': .5})
+            if 'materialx_displacement' in update:
+                try:
+                    warnings += materialx_material.displacement(tree, update['materialx_displacement'], self.basis)
+                except (materialx_material.TranslationError, ValueError) as exc:
+                    warnings.append('Displacement: ' + str(exc))
         elif 'usd_network' in update:
             usd_material.network(tree, update['usd_network'])
         else:
@@ -281,6 +286,10 @@ class Session:
             (n.bl_idname == 'ShaderNodeBsdfPrincipled' and
              (n.inputs['Transmission Weight'].is_linked or n.inputs['Transmission Weight'].default_value > 0.))
             for n in tree.nodes)
+        # True displacement moves vertices (plus bump for detail finer than the mesh);
+        # EEVEE does not dice, so its detail depends on the mesh or subdivision level.
+        displaced = any(n.bl_idname == 'ShaderNodeOutputMaterial' and n.inputs['Displacement'].is_linked for n in tree.nodes)
+        mat.displacement_method = 'BOTH' if displaced else 'BUMP'
         # The Workbench preview shown while shaders compile uses this color.
         base = next((n for n in tree.nodes if n.bl_idname == 'ShaderNodeBsdfPrincipled'), None)
         if base is not None and not base.inputs['Base Color'].is_linked:
@@ -386,10 +395,19 @@ class Session:
             self.light_links[key] = link
             self.links_dirty = True
         assign(light, 'color', list(color))
-        # Match Blender's USD radiance -> radiant-flux conversion. Normalize is
-        # essential: USD's default is radiance independent of emitter area.
-        assign(light, 'normalize', bool(params.get('normalize', False)))
-        assign(light, 'energy', intensity * (4. if light.type == 'SUN' else math.pi))
+        normalize = bool(params.get('normalize', False))
+        if light.type == 'SUN':
+            # Blender's normalized sun strength is irradiance. As in Karma, a normalized
+            # distant light's intensity is irradiance too; otherwise it is the radiance
+            # of the sun's disc, so irradiance scales with the disc's solid angle.
+            half_angle = math.radians(params.get('angle', 0.53)) / 2
+            assign(light, 'normalize', True)
+            assign(light, 'energy', intensity if normalize else intensity * 2 * math.pi * (1 - math.cos(half_angle)))
+        else:
+            # Match Blender's USD radiance -> radiant-flux conversion. Normalize is
+            # essential: USD's default is radiance independent of emitter area.
+            assign(light, 'normalize', normalize)
+            assign(light, 'energy', intensity * math.pi)
         assign(light, 'use_temperature', bool(params.get('enableColorTemperature', False)))
         assign(light, 'temperature', params.get('colorTemperature', 6500.))
         assign(light, 'diffuse_factor', params.get('diffuse', 1.))

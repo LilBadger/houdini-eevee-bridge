@@ -39,6 +39,17 @@ def texture(filename, color_space):
         return image
 
 
+def displacement_input(tree, value=0.):
+    """USD Preview Surface displacement: a distance along the normal, in object space."""
+    output = next(n for n in tree.nodes if n.bl_idname == 'ShaderNodeOutputMaterial')
+    node = tree.nodes.new('ShaderNodeDisplacement')
+    node.inputs['Midlevel'].default_value = 0.
+    node.inputs['Scale'].default_value = 1.
+    node.inputs['Height'].default_value = value
+    tree.links.new(node.outputs['Displacement'], output.inputs['Displacement'])
+    return node.inputs['Height']
+
+
 def principled(tree, parameters):
     node = tree.nodes.new('ShaderNodeBsdfPrincipled')
     # Reset to USD defaults every time: an unauthored value must not retain its
@@ -52,6 +63,8 @@ def principled(tree, parameters):
     node.inputs['Emission Strength'].default_value = parameters.get('emission_strength', 1.)
     output = tree.nodes.new('ShaderNodeOutputMaterial')
     tree.links.new(node.outputs['BSDF'], output.inputs['Surface'])
+    if parameters.get('displacement'):
+        displacement_input(tree, float(parameters['displacement']))
     return node
 
 
@@ -90,13 +103,19 @@ def network(tree, definition):
             ins['normal'] = scale.inputs[0]
             # An unconnected normal keeps the geometric normal.
             scale.inputs[0].default_value = p.get('normal', (0, 0, 1))
+            if (key, 'displacement') in incoming and not p.get('displacement'):
+                ins['displacement'] = displacement_input(tree)
+            elif p.get('displacement'):
+                ins['displacement'] = next(n for n in tree.nodes if n.bl_idname == 'ShaderNodeDisplacement').inputs['Height']
         elif kind == 'UsdUVTexture':
             node = tree.nodes.new('ShaderNodeTexImage')
             filename = p.get('file', '')
             if filename:
                 node.image = texture(filename, texture_color_space(p))
-            wrap = p.get('wrapS', 'repeat')
-            node.extension = {'clamp': 'EXTEND', 'black': 'CLIP'}.get(wrap, 'REPEAT')
+            # The unauthored useMetadata falls back to black, as in Karma. Blender has
+            # one wrap mode per image node, so wrapS is used for both directions.
+            wrap = p.get('wrapS', 'useMetadata')
+            node.extension = {'clamp': 'EXTEND', 'repeat': 'REPEAT', 'mirror': 'MIRROR'}.get(wrap, 'CLIP')
             ins['st'] = node.inputs['Vector']
             scale = p.get('scale', (1, 1, 1, 1)); bias = p.get('bias', (0, 0, 0, 0))
             rgb = tree.nodes.new('ShaderNodeVectorMath'); rgb.operation = 'MULTIPLY_ADD'

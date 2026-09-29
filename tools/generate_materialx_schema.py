@@ -5,12 +5,13 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 OPERATIONS = set('standard_surface surfacematerial image tiledimage texcoord geompropvalue normalmap bump constant add subtract multiply divide power min max absval floor ceil round sign sqrt sin cos tan asin acos atan2 ln exp clamp invert mix remap range separate2 separate3 separate4 combine2 combine3 combine4 convert extract dotproduct crossproduct normalize magnitude rotate2d rotate3d place2d luminance position transformpoint transformvector noise2d noise3d fractal2d fractal3d cellnoise2d cellnoise3d worleynoise2d worleynoise3d unifiednoise2d unifiednoise3d'.split())
-OPERATIONS.update('colorcorrect normal surface_unlit'.split())
-TYPES = {'float','integer','boolean','color3','color4','vector2','vector3','vector4','string','filename','surfaceshader','material'}
+OPERATIONS.update('colorcorrect normal surface_unlit displacement'.split())
+TYPES = {'float','integer','boolean','color3','color4','vector2','vector3','vector4','string','filename','surfaceshader','material',
+         'displacementshader'}
 
 def generate(library, output):
     definitions = {}
-    for file in (library/'stdlib/stdlib_defs.mtlx', library/'bxdf/standard_surface.mtlx'):
+    for file in (library/'stdlib/stdlib_defs.mtlx', library/'bxdf/standard_surface.mtlx', library/'pbrlib/pbrlib_defs.mtlx'):
         for nd in ET.parse(file).getroot().findall('nodedef'):
             definitions[nd.attrib['name']] = nd
     def entry(nd):

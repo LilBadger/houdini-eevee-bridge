@@ -1,4 +1,26 @@
 {
+  "ND_surfacematerial": {
+    "inputs": {
+      "surfaceshader": {
+        "type": "surfaceshader",
+        "value": null
+      },
+      "backsurfaceshader": {
+        "type": "surfaceshader",
+        "value": null
+      },
+      "displacementshader": {
+        "type": "displacementshader",
+        "value": null
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "material"
+      }
+    },
+    "node": "surfacematerial"
+  },
   "ND_surface_unlit": {
     "inputs": {
       "emission": {
@@ -8292,6 +8314,28 @@
     },
     "node": "mix"
   },
+  "ND_mix_displacementshader": {
+    "inputs": {
+      "fg": {
+        "type": "displacementshader",
+        "value": null
+      },
+      "bg": {
+        "type": "displacementshader",
+        "value": null
+      },
+      "mix": {
+        "type": "float",
+        "value": 0.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "displacementshader"
+      }
+    },
+    "node": "mix"
+  },
   "ND_convert_float_color3": {
     "inputs": {
       "in": {
@@ -9907,6 +9951,46 @@
       }
     },
     "node": "standard_surface"
+  },
+  "ND_displacement_float": {
+    "inputs": {
+      "displacement": {
+        "type": "float",
+        "value": 0.0
+      },
+      "scale": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "displacementshader"
+      }
+    },
+    "node": "displacement"
+  },
+  "ND_displacement_vector3": {
+    "inputs": {
+      "displacement": {
+        "type": "vector3",
+        "value": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "scale": {
+        "type": "float",
+        "value": 1.0
+      }
+    },
+    "outputs": {
+      "out": {
+        "type": "displacementshader"
+      }
+    },
+    "node": "displacement"
   },
   "kma_voronoinoise2d_float": {
     "node": "karma_voronoi2d",

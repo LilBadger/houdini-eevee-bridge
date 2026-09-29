@@ -135,6 +135,16 @@ class Builder:
             return {'out':combine(tree,[*components(tree,color),components(tree,v('in'),4)[3]]) if size==4 else color}
         if kind=='surfacematerial':
             return {'out':v('surfaceshader')}
+        if kind=='displacement':
+            # MaterialX scalar displacement is along the normal; vector displacement is
+            # in (dPdu, dPdv, N) tangent space. Neither has a midlevel.
+            vector_input=schema['inputs']['displacement']['type']=='vector3'
+            node=tree.nodes.new('ShaderNodeVectorDisplacement' if vector_input else 'ShaderNodeDisplacement')
+            if vector_input: node.space='TANGENT'
+            feed(tree,node.inputs['Vector' if vector_input else 'Height'],v('displacement'))
+            node.inputs['Midlevel'].default_value=0.
+            feed(tree,node.inputs['Scale'],v('scale'))
+            return {'out':node.outputs['Displacement']}
         if kind=='constant':
             return {'out':v('value')}
         if kind.startswith(('noise','fractal','cellnoise','worleynoise','unifiednoise','karma_voronoi')):
@@ -408,4 +418,16 @@ def network(tree, definition, basis=None):
         # bounds are not a fiber's optical thickness; use each strand diameter.
         hair=tree.nodes.new('ShaderNodeHairInfo')
         tree.links.new(hair.outputs['Thickness'],output.inputs['Thickness'])
+    return builder.warnings
+
+
+def displacement(tree, definition, basis=None):
+    """Add a MaterialX displacement graph to an existing material's output."""
+    builder=Builder(tree,definition,basis)
+    terminal=definition.get('terminal')
+    result=builder.output(terminal)
+    if not isinstance(result,bpy.types.NodeSocket) or result.type!='VECTOR':
+        raise TranslationError('MaterialX displacement terminal is not a displacement shader: '+str(terminal))
+    output=next((n for n in tree.nodes if n.bl_idname=='ShaderNodeOutputMaterial'),None) or tree.nodes.new('ShaderNodeOutputMaterial')
+    tree.links.new(result,output.inputs['Displacement'])
     return builder.warnings

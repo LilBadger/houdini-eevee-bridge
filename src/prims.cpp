@@ -813,6 +813,13 @@ void EeveeMaterial::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits) 
                 update["materialx_network"] = {{"nodes", nodes}, {"links", links}, {"terminal", network.nodes.back().path.GetString()}};
                 supported = true;
             }
+            if (materialx && terminal == TfToken("displacement") && !network.nodes.empty()) {
+                Json displacementLinks = Json::array();
+                for (const auto &link : network.relationships)
+                    displacementLinks.push_back({link.inputId.GetString(), link.inputName.GetString(), link.outputId.GetString(), link.outputName.GetString()});
+                update["materialx_displacement"] = {{"nodes", nodes}, {"links", displacementLinks},
+                                                    {"terminal", network.nodes.back().path.GetString()}};
+            }
         }
     }
     if (!supported) {
