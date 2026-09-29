@@ -155,6 +155,89 @@ def package(root, wanted):
                {'PXR_PLUGINPATH_NAME':str(root/'plugin/hdEevee/resources').replace('\\','/')} ]}
 
 
+def registrations(package_file):
+    """(file, install root) for houdini_eevee.json and its backups that register the EEVEE Bridge."""
+    result = []
+    for file in sorted(package_file.parent.glob(package_file.name+'*')):
+        try:
+            data = json.loads(file.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            continue
+        for item in data.get('env',[]) if isinstance(data,dict) else []:
+            value = item.get('HDEEVEE_ROOT') if isinstance(item,dict) else None
+            value = value.get('value') if isinstance(value,dict) else value
+            if value:
+                result.append((file,Path(value)))
+                break
+    return result
+
+
+def is_install(path):
+    """Only folders this installer wrote (with its installation.json) are ever deleted."""
+    try:
+        return 'bridge_version' in json.loads((Path(path)/'installation.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError, TypeError):
+        return False
+
+
+def houdini_running():
+    names = ('houdini','houdinifx','houdinicore','houdini_indie','happrentice','hython','husk','hbatch')
+    if os.name == 'nt':
+        result = subprocess.run(['tasklist','/fo','csv','/nh'],capture_output=True,text=True,errors='replace')
+        running = {line.split('","')[0].strip('"').lower().removesuffix('.exe') for line in result.stdout.splitlines() if line}
+    else:
+        result = subprocess.run(['ps','-A','-o','comm='],capture_output=True,text=True,errors='replace')
+        running = {Path(line.strip()).name.lower() for line in result.stdout.splitlines()}
+    return sorted(running & set(names))
+
+
+def remove_installs(args, keep=None):
+    """Delete EEVEE Bridge installs and their registrations. keep: an install to leave
+    in place with its registration (after an update); None removes everything,
+    including logs and session caches."""
+    package_file = packages_directory(args.packages_dir)/'houdini_eevee.json'
+    registered = registrations(package_file)
+    base = default_prefix('0').parent
+    candidates = {entry for entry in base.iterdir() if entry.is_dir()} if base.is_dir() else set()
+    candidates |= {root for _,root in registered}
+    installs = sorted(p for p in candidates if is_install(p) and (keep is None or p.resolve() != keep.resolve()))
+    files = [file for file,root in registered if keep is None or root.resolve() != keep.resolve()]
+    files += [f for f in package_file.parent.glob(package_file.name+'.tmp')]
+    leftovers = sorted(base.glob('.eevee-install-*')) if base.is_dir() else []
+    caches = []
+    if keep is None:
+        cache = cache_root()
+        caches = [cache/name for name in ('logs','sessions','.pruned') if (cache/name).exists()]
+    here = [p for p in installs if p.resolve() == SOURCE or p.resolve() in SOURCE.parents]
+    installs = [p for p in installs if p not in here]
+    targets = files + installs + leftovers + caches
+    if not targets and not here:
+        print('No EEVEE Bridge installation found.')
+        return
+    print('EEVEE Bridge '+('uninstall' if keep is None else 'cleanup')+':')
+    for item in targets: print('  remove '+str(item))
+    for item in here: print('  keep   '+str(item)+'  (this script runs from it; delete it yourself afterwards)')
+    if args.dry_run: return
+    running = houdini_running()
+    if running:
+        raise RuntimeError('Close Houdini first; its files are in use ('+', '.join(running)+' running).')
+    if not args.yes and sys.stdin.isatty() and input('Remove these? [y/N] ').strip().lower() not in ('y','yes'):
+        print('Nothing was removed.')
+        return
+    failed = []
+    for item in targets:
+        try:
+            if item.is_dir(): shutil.rmtree(item)
+            else: item.unlink()
+        except OSError as exc:
+            failed.append(str(item)+': '+str(exc))
+    if (base.is_dir() and keep is None and not any(base.iterdir())):
+        base.rmdir()
+    if failed:
+        raise RuntimeError('Could not remove:\n  '+'\n  '.join(failed)+'\nClose Houdini and Blender, then run this again.')
+    print('Removed.'+(' Restart Houdini.' if keep is None else ''))
+
+
 def default_prefix(wanted):
     base = (Path(os.environ.get('LOCALAPPDATA',Path.home()))/'HoudiniEEVEE' if os.name=='nt'
             else Path(os.environ.get('XDG_DATA_HOME',Path.home()/'.local/share'))/'houdini-eevee')
@@ -168,7 +251,10 @@ def install(args):
     prefix = Path(args.prefix).expanduser().resolve() if args.prefix else default_prefix(wanted)
     package_file = packages_directory(args.packages_dir)/'houdini_eevee.json'
     if prefix.exists():
-        raise RuntimeError('Destination already exists: '+str(prefix)+'\nUse a new --prefix for an update; existing installs are never overwritten while Houdini may be using them.')
+        if not (args.reinstall and is_install(prefix)):
+            raise RuntimeError('Destination already exists: '+str(prefix)+'\nUse a new --prefix for an update, or --reinstall to replace it; existing installs are never overwritten while Houdini may be using them.')
+        if houdini_running() and not args.dry_run:
+            raise RuntimeError('Close Houdini first; it may be using '+str(prefix)+'.')
     if package_file.exists():
         previous = json.loads(package_file.read_text(encoding='utf-8'))
         if not any('HDEEVEE_ROOT' in item for item in previous.get('env',[]) if isinstance(item,dict)):
@@ -205,6 +291,8 @@ def install(args):
                                     'verify':'verify the plugin built for Houdini '+(other[1] if other else '')}[plan],
                          'missing_blender_modules':info['missing']},indent=2))
         return
+    if prefix.exists():
+        shutil.rmtree(prefix)   # --reinstall of an install this installer wrote; Houdini is closed
     prefix.parent.mkdir(parents=True,exist_ok=True)
     env = houdini_environment(hfs)
     env.update(HDEEVEE_AUTO_WORKER='0', HDEEVEE_DEMO='0', HDEEVEE_AUTO_SELECT='0')
@@ -217,7 +305,8 @@ def install(args):
         # Development hooks must not mask an artist/studio's scene startup.
         for name in ('123.py','456.py'):
             (staging/'houdini/scripts'/name).unlink(missing_ok=True)
-        for name in ('install.py','install.sh','install.cmd','install.ps1','CMakeLists.txt','README.md','INSTALL.md','CHANGELOG.md','LICENSE'):
+        for name in ('install.py','install.sh','install.cmd','install.ps1','uninstall.sh','uninstall.cmd','uninstall.ps1',
+                     'CMakeLists.txt','README.md','INSTALL.md','CHANGELOG.md','LICENSE'):
             if (SOURCE/name).is_file(): shutil.copy2(SOURCE/name,staging/name)
         if plan == 'build':
             build = Path(temp)/'build'
@@ -293,6 +382,12 @@ def install(args):
             temporary.write_text(json.dumps(generated,indent=2),encoding='utf-8')
             temporary.replace(package_file)
         print('Installed: '+str(prefix)+'\n'+('Package: '+str(package_file) if not args.no_register else 'Not registered (--no-register).'))
+        if args.remove_old and not args.no_register:
+            args.yes = True
+            try:
+                remove_installs(args,keep=prefix)
+            except RuntimeError as exc:
+                print('Previous versions were kept: '+str(exc),flush=True)
         print('Restart Houdini normally, select EEVEE in Solaris, and add EEVEE Render Settings.')
     except Exception:
         print('Files retained for diagnosis at '+str(prefix)+'. Existing Houdini packages were not changed.',file=sys.stderr)
@@ -316,6 +411,10 @@ def main():
     parser.add_argument('--dry-run',action='store_true')
     parser.add_argument('--doctor',action='store_true',help='Check this installed copy')
     parser.add_argument('--uninstall',action='store_true',help='Unregister this installed copy; keep files and scenes')
+    parser.add_argument('--uninstall-all',action='store_true',help='Remove every installed version, its Houdini package registration, logs and caches')
+    parser.add_argument('--remove-old',action='store_true',help='After a successful install, delete the previously installed versions')
+    parser.add_argument('--reinstall',action='store_true',help='Replace an existing install of this version (Houdini must be closed)')
+    parser.add_argument('--yes',action='store_true',help='Do not ask before removing files')
     parser.add_argument('--rollback',nargs='?',const='previous',metavar='VERSION',
                         help='Restore the registration the last install replaced, or a replaced VERSION such as 0.5.0-h22.0.368')
     args = parser.parse_args()
@@ -325,6 +424,8 @@ def main():
         if args.doctor:
             from doctor import check
             print(json.dumps(check(),indent=2))
+        elif args.uninstall_all:
+            remove_installs(args)
         elif args.rollback:
             package_file = packages_directory(args.packages_dir)/'houdini_eevee.json'
             backup = (package_file.with_suffix('.json.previous') if args.rollback == 'previous'
