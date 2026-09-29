@@ -12,6 +12,19 @@
 - **Display color.** A display color that varies per point, face or corner is shown in full; before, only its first value was used.
 - **Bilinear subdivision** meshes, such as converted cubes, are now shaded flat instead of smooth.
 - **Texture color spaces.** USD Preview Surface textures with `sourceColorSpace` `auto` read float images such as EXR as linear; before, every non-raw texture was decoded as sRGB, which darkened linear textures. An asset's color-space metadata is honored, and UDIMs work.
+- **Texture wrap.** A USD Preview Surface texture without an authored wrap mode is black outside 0–1, as in Karma, instead of repeating.
+- **Instanced curves, points and volumes.** Point instancers and native instances of curves, particles and volumes render; before, only meshes could be instanced.
+- **Per-instance primvars.** Point instancer primvars (per-instance color, for example) and primvars authored on native instances reach materials, display color and MaterialX `geompropvalue`. As in Karma, a value authored on the prototype itself wins.
+- **MaterialX `geompropvalue` on curves and points** reads their primvars instead of always returning the default.
+
+### Lights and materials
+
+- **Distant lights match Karma's brightness.** A normalized distant light's intensity is irradiance, as in Karma; before, it was multiplied by 4, so Houdini's Distant Light LOP (normalized by default) rendered four times brighter than in Karma. An unnormalized distant light's intensity is the radiance of the sun's disc, as in USD and Karma. **Scenes lit by distant lights render darker than in 0.6.1**; other lights are unchanged and were already within about 10% of Karma (cylinder lights, drawn as rect lights, differ more).
+- **Light and shadow linking.** A light's light-link collection limits the objects it lights, and its shadow-link collection the objects that cast its shadows.
+- **Spot lights.** Sphere and disk lights with a UsdLux cone angle and softness become EEVEE spot lights.
+- **IES profiles and light textures are approximated.** EEVEE cannot draw them. An IES profile becomes the spot cone that fits its beam, and a textured rect, disk, sphere or cylinder light takes the texture's average color. Each approximation is named in the log.
+- **Displacement.** USD Preview Surface displacement and MaterialX displacement (height or vector) move the surface, with bump mapping for detail finer than the mesh. EEVEE does not dice surfaces, so detail depends on the mesh density or subdivision level.
+- **Default volume shading.** Volumes without a material are white, or tinted by their display color, as in Karma; before, they were Blender's mid gray.
 
 ### Performance
 

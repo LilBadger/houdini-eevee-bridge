@@ -142,14 +142,16 @@ In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame
 - **Per-face materials.** GeomSubsets bound to different materials render with each subset's material.
 - **Implicit shapes.** Sphere, Cube, Cone, Cylinder, Capsule and Plane prims are converted to meshes.
 - **Subdivision.** Supports Catmull-Clark and bilinear subdivision with creases, corners, and boundary and face-varying interpolation rules. EEVEE Render Settings sets separate viewport and render levels, plus a face budget per mesh.
-- **Instancing.** Supports native USD instancing and point instancers. Large instancers use Geometry Nodes with full affine matrices, so shear and negative scale work.
+- **Instancing.** Supports native USD instancing and point instancers, of meshes, curves, points and volumes. Large instancers use Geometry Nodes with full affine matrices, so shear and negative scale work.
+- **Per-instance primvars.** Point instancer primvars and primvars authored on native instances reach materials, display color and MaterialX `geompropvalue`. As in Karma, a value the prototype authors itself wins.
 - **Curves.** Linear and cubic basis curves (B-spline, Bézier and Catmull-Rom, including pinned and periodic ones) become EEVEE hair curves with their widths, display color and primvars.
 - **Particles.** USD Points become Blender point clouds, drawn as spheres sized by their widths, with display color and primvars.
 - **Volumes.** OpenVDB and native Houdini volumes work, including live SOP volumes. The **EEVEE Volume Material** LOP controls density, color, absorption, anisotropy, emission, flame and temperature.
 
 ### Materials
 - **Context priority.** Render contexts are used in this order: `eevee`, MaterialX (`mtlx`), Karma (`kma`), then USD Preview Surface.
-- **USD Preview Surface.** Supports UV readers, 2D transforms, color, roughness and normal textures, UDIMs, and texture color spaces: raw, sRGB, or `auto`, which reads 8-bit images as sRGB and float images as linear.
+- **USD Preview Surface.** Supports UV readers, 2D transforms, color, roughness, normal and displacement textures, UDIMs, wrap modes, and texture color spaces: raw, sRGB, or `auto`, which reads 8-bit images as sRGB and float images as linear. An unauthored wrap mode is black outside 0–1, as in Karma.
+- **Displacement.** USD Preview Surface displacement and MaterialX displacement (height or vector) move the surface, with bump mapping for detail finer than the mesh.
 - **MaterialX Standard Surface.** Maps to Blender's Principled BSDF, including base color, metalness, roughness, IOR, specular, coat, sheen, transmission, subsurface, emission, opacity and normals.
 - **MaterialX nodes.** Supports images and UDIMs, texture coordinates and placement, math, mix, clamp, remap, color correction, channel operations, normal maps and bump.
 - **Procedural noise.** MaterialX noises (2D/3D Noise, Fractal, Cell, Worley, Unified) and Karma Voronoi noise stay procedural in EEVEE, with no texture baking.
@@ -159,7 +161,10 @@ In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame
 Standard Surface and Principled BSDF are different shading models, so materials look close to Karma but not identical. Unsupported shader nodes render magenta and are named in the worker log. VEX and compiled Karma shaders cannot run in EEVEE; use MaterialX equivalents or baked textures instead.
 
 ### Lights and environment
-- **Lights.** Rect, disk, sphere, distant and cylinder lights, with intensity, exposure, color temperature, normalization and diffuse and specular multipliers.
+- **Lights.** Rect, disk, sphere, distant and cylinder lights, with intensity, exposure, color temperature, normalization and diffuse and specular multipliers. Brightness matches Karma, including distant lights, whose intensity is irradiance when normalized and otherwise the radiance of the sun's disc.
+- **Spot lights.** Sphere and disk lights with a UsdLux cone angle and softness become EEVEE spot lights.
+- **Light and shadow linking.** A light's light-link and shadow-link collections decide which objects it lights and which cast its shadows.
+- **IES profiles and light textures.** EEVEE cannot draw either, so both are approximated and named in the log: an IES profile becomes the spot cone that fits it, and a textured light (other than a dome) takes the texture's average color.
 - **World.** Dome lights drive EEVEE's world: lat-long HDRIs, rotation, tint and exposure. Multiple domes add together. EEVEE Render Settings can override the environment with an HDRI or a color, or turn it off.
 
 ### Cameras and motion
@@ -187,6 +192,10 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 - **Not translated yet.** Probe baking and arbitrary world shader graphs.
 - **Particle shape.** EEVEE draws point clouds as low-polygon spheres, so very large particles look faceted.
 - **Heavy instancing.** Very large instance counts limit EEVEE's own frame rate, because Blender processes every instance on each draw.
+- **Displacement detail.** EEVEE does not dice surfaces the way Karma does, so displacement detail is limited by the mesh's density or subdivision level. Bump mapping adds the finer detail.
+- **Light shapes.** IES profiles and light textures are approximated (see [Lights and environment](#lights-and-environment)). Cones on rect and cylinder lights are ignored, and a cylinder light is drawn as a rect light.
+- **Unshaded prims.** Prims without a material use their display color with a plain Principled BSDF. Karma's own fallback material is darker.
+- **Several viewports share one worker.** Each viewport has its own Blender scene, but they take turns on the GPU. On one GPU, a worker per viewport was slower overall (two viewports: about 58 instead of 80 combined frames per second) and needs about 1 GB more VRAM each, so it isn't offered.
 
 ## Development
 
