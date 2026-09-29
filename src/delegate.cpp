@@ -177,7 +177,7 @@ public:
     explicit EeveeDelegate(const HdRenderSettingsMap &settings)
         : HdRenderDelegate(settings), _registry(std::make_shared<HdResourceRegistry>()),
           _renderer(std::make_unique<Renderer>(&_state)) {
-        fprintf(stderr, "[EEVEE] Native Hydra delegate created (0.7.1)\n");
+        fprintf(stderr, "[EEVEE] Native Hydra delegate created (0.7.2)\n");
         auto it = settings.find(TfToken("eevee:config"));
         if (it != settings.end() && it->second.IsHolding<std::string>() && !it->second.UncheckedGet<std::string>().empty()) {
             const Json config = Json::parse(it->second.UncheckedGet<std::string>(), nullptr, false);
