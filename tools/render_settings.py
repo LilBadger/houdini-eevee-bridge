@@ -15,6 +15,10 @@ COMMAND_EXPRESSION = "__import__('render_settings').render_command()"
 
 def render_command():
     from hde_runtime import houdini_python, command_line
+    if os.name == 'nt':
+        # The ROP's command parser treats backslashes as escapes, so Windows paths
+        # must use forward slashes; quotes keep paths with spaces intact.
+        return '"{}" -E "{}"'.format(Path(houdini_python()).as_posix(), (ROOT/'tools/eevee_husk.py').as_posix())
     return command_line([houdini_python(), '-E', ROOT/'tools/eevee_husk.py'])
 
 
