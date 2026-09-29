@@ -112,14 +112,14 @@ A headless Hydra harness (`probes/hydra_harness.cpp`) called the render pass the
 
 | | 0.5.1 | 0.6.1 |
 | --- | --- | --- |
-| Opening the shot | One 46.5 s call that freezes Houdini | The UI never blocks for more than 60 ms. First image after 2.7 s, all 64 samples after 8.3 s. |
-| Uploading the scene | about 15 s | 1.9 s |
-| Orbiting the camera | Every frame blocks the UI (median 82 ms) | The UI stays at 60 Hz (longest call 0.3 ms), and new EEVEE frames arrive about 13 times per second. |
+| Opening the shot | One 50.4 s call that freezes Houdini | The UI never blocks for more than 60 ms. First image after 2.7 s, all 64 samples after 8.3 s. |
+| Uploading the scene | 16 s | 1.9 s |
+| Orbiting the camera | Every frame blocks the UI (median 101 ms) | The UI stays at 60 Hz (longest call 0.3 ms), and new EEVEE frames arrive about 13 times per second. |
 | Worker video memory | about 17 GB | about 7 GB, or 3.4 GB less with a 2048 texture limit |
 
-The 0.5.1 timings were measured on an RTX PRO 6000 Blackwell. The 0.6.1 timings were measured on an RTX 5090, which is slightly slower in `tools/gpu_benchmark.py`.
+All measurements were taken on an NVIDIA GeForce RTX 5090.
 
-In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame, mostly because Blender processes all 116k instances on every draw. That makes Blender, not the bridge, the limit on navigation speed here. On a lighter scene (`probes/bench_scene.py`), the harness receives about 46 new frames per second while orbiting.
+In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame, mostly because Blender processes all 116k instances on every draw. That makes Blender, not the bridge, the limit on navigation speed here. On a lighter scene (`probes/bench_scene.py`), the harness receives about 38 new frames per second while orbiting.
 
 `tools/gpu_benchmark.py` times each GPU in your machine and recommends one for the worker. The worker can run on a different GPU from Houdini's display at no extra transfer cost.
 
