@@ -13,6 +13,13 @@
 - **Bilinear subdivision** meshes, such as converted cubes, are now shaded flat instead of smooth.
 - **Texture color spaces.** USD Preview Surface textures with `sourceColorSpace` `auto` read float images such as EXR as linear; before, every non-raw texture was decoded as sRGB, which darkened linear textures. An asset's color-space metadata is honored, and UDIMs work.
 
+### Performance
+
+- **Large meshes load about 3× faster.** A 2.25-million-quad mesh went from 2.7 s to 0.9 s. Flat shading and point positions are now written as whole arrays; Blender's `shade_flat()` and `MeshVertex.co` loop per element. Deforming meshes update their points about 100× faster.
+- **Volumes are exported once per geometry change.** A live SOP volume used to be written to a new VDB for each of its fields (density, temperature, flame, velocity) on every sync. It is now exported once and shared, and an unchanged volume keeps its file, so the worker reuses its composed volume without reloading.
+- **Automatic cleanup.** Session folders nothing has used for 7 days, and logs older than 14 days, are removed when a worker starts (`HDEEVEE_KEEP_SESSION_DAYS`, `HDEEVEE_KEEP_LOG_DAYS`).
+- **Development tools.** `probes/vram_profile.py` works on Windows, where per-process GPU memory is not reported, and the Hydra harness uses 1 ms timer resolution on Windows so it simulates a 60 Hz viewport.
+
 ## 0.6.1
 
 ### Windows
