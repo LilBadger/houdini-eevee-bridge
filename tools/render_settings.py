@@ -15,6 +15,10 @@ COMMAND_EXPRESSION = "__import__('render_settings').render_command()"
 
 def render_command():
     from hde_runtime import houdini_python, command_line
+    if os.name == 'nt':
+        # The ROP's command parser treats backslashes as escapes, so Windows paths
+        # must use forward slashes; quotes keep paths with spaces intact.
+        return '"{}" -E "{}"'.format(Path(houdini_python()).as_posix(), (ROOT/'tools/eevee_husk.py').as_posix())
     return command_line([houdini_python(), '-E', ROOT/'tools/eevee_husk.py'])
 
 
@@ -308,7 +312,7 @@ def install(output_path='/stage/EEVEE_OUT'):
         rop = subnet.createNode('usdrender_rop', 'render_to_disk')
         rop.setParms({'renderer': 'HdEeveeRendererPlugin', 'husk_gpu': True,
                       'loppath': '..',
-                      'soho_foreground': True})
+                      'soho_foreground': True, 'allframesatonce': True})
         rop.parm('rendercommand').setExpression(COMMAND_EXPRESSION, hou.exprLanguage.Python)
         rop.parm('rendersettings').setExpression('chs("../primpath")', hou.exprLanguage.Hscript)
         rop.parm('trange').setExpression('ch("../trange")', hou.exprLanguage.Hscript)
@@ -327,10 +331,14 @@ def install(output_path='/stage/EEVEE_OUT'):
         portable = old.node('render_to_disk').parm('rendercommand').expression() == COMMAND_EXPRESSION
     except hou.OperationFailed:
         portable = False
-    if not portable or old.node('render_to_disk').parm('trange').expression() != 'ch("../trange")':
+    # One husk process and EEVEE worker for the whole frame range; a process per
+    # frame restarts Blender and recompiles every shader on each frame.
+    if (not portable or old.node('render_to_disk').parm('trange').expression() != 'ch("../trange")'
+            or not old.node('render_to_disk').evalParm('allframesatonce')):
         old.allowEditingOfContents()
         old.node('render_to_disk').parm('rendercommand').setExpression(COMMAND_EXPRESSION, hou.exprLanguage.Python)
         old.node('render_to_disk').parm('trange').setExpression('ch("../trange")', hou.exprLanguage.Hscript)
+        old.node('render_to_disk').parm('allframesatonce').set(True)
         old.type().definition().updateFromNode(old)
         old.type().definition().setParmTemplateGroup(template_group())
         old.matchCurrentDefinition()

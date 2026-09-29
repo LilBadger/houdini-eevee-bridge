@@ -5,6 +5,7 @@ from pathlib import Path
 import signal
 import subprocess
 import sys
+import threading
 from start_worker import start, stop
 from hde_runtime import houdini_program, new_session, renderer_environment, cache_root
 
@@ -18,6 +19,16 @@ def output_override(arguments):
         elif argument.startswith('--output='):
             output = argument.split('=', 1)[1]
     return output
+
+
+def relay(stream, log):
+    """Copy husk's output to the job log and this process's stdout."""
+    try:
+        for line in stream:
+            log.write(line); log.flush()
+            print(line, end='', flush=True)
+    except (OSError, ValueError):
+        pass  # The log was closed after husk exited.
 
 
 def main(arguments=None):
@@ -59,10 +70,12 @@ def main(arguments=None):
             process = subprocess.Popen([str(houdini_program('husk')), *arguments, *output],
                 env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                 encoding='utf-8', errors='replace')
-            for line in process.stdout:
-                log.write(line); log.flush()
-                print(line, end='', flush=True)
+            # MPlay, which husk starts for 'ip' output, can inherit husk's stdout
+            # and hold the pipe open until it is closed, so wait for husk itself.
+            reader = threading.Thread(target=relay, args=(process.stdout, log), daemon=True)
+            reader.start()
             status = process.wait()
+            reader.join(timeout=2)
         records = outputs()
         if status == 0 and records:
             for record in records:
