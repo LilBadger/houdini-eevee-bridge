@@ -23,13 +23,19 @@ def activate():
         hou.putenv(name, value)
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='eevee-start')
     state = {'worker': None, 'future': None, 'last_check': 0., 'attempts': 0, 'stopped': False,
-             'status': None, 'status_mtime': 0, 'unseen_since': None}
+             'status': None, 'status_mtime': 0, 'unseen_since': None, 'renderers': {}, 'releasing': {}, 'watched': set(),
+             'switching': False}
     # Free the worker's GPU memory once no viewport shows EEVEE: soon after a LOP viewport
     # switches to another renderer, later when no viewport shows the LOP scene at all
     # (while working in SOPs, say), so diving into a network does not force a restart.
     # HDEEVEE_IDLE_EXIT_SECONDS=0 keeps the worker running for the whole session.
     idle_exit = float(os.environ.get('HDEEVEE_IDLE_EXIT_SECONDS', '0.5') or 0)
     offscreen_exit = float(os.environ.get('HDEEVEE_OFFSCREEN_EXIT_SECONDS', '30') or 0)
+    # Houdini VK/GL stays alive behind EEVEE with the whole scene on the GPU (textures
+    # at full size: 10 GB for a production scene), and ignores stage changes while it
+    # is hidden. Empty its scene before EEVEE takes over the viewport.
+    # HDEEVEE_RELEASE_NATIVE_VIEWPORT=0 keeps Houdini's viewport loaded instead.
+    release_native = os.environ.get('HDEEVEE_RELEASE_NATIVE_VIEWPORT', '1') != '0'
     hou.session._hde_installation = state
 
     def finish():
@@ -68,13 +74,92 @@ def activate():
         elif key[0] == 'converged' and previous and previous[0] in ('error', 'compiling', 'starting'):
             hou.ui.setStatusMessage('')
 
+    def release_native_viewports():
+        """Switch a viewport that just went from Houdini VK/GL to EEVEE back to Houdini's
+        renderer on an empty LOP network for one tick, so it drops its scene, then on to
+        EEVEE and the viewport's own network."""
+        for name, (viewer, network, renderer, empty) in list(state['releasing'].items()):
+            del state['releasing'][name]
+            try:
+                state['switching'] = True
+                viewer.setHydraRenderer(renderer)
+                viewer.setPwd(network)
+            except hou.Error as exc:
+                print('[EEVEE] Could not restore the viewport: ' + str(exc), flush=True)
+            finally:
+                state['switching'] = False
+                try:
+                    with hou.undos.disabler():
+                        empty.destroy()
+                except hou.ObjectWasDeleted:
+                    pass
+            state['renderers'][name] = renderer
+        for viewer in hou.ui.paneTabs():
+            if not isinstance(viewer, hou.SceneViewer) or not viewer.isViewingSceneGraph():
+                continue
+            name, renderer = viewer.name(), viewer.currentHydraRenderer()
+            previous, state['renderers'][name] = state['renderers'].get(name), renderer
+            if not (release_native and previous and previous.lower().startswith('houdini ')
+                    and 'eevee' in renderer.lower()):
+                continue
+            try:
+                with hou.undos.disabler():
+                    empty = hou.node('/obj').createNode('lopnet', '__eevee_release_viewport')
+                network = viewer.pwd()
+                state['switching'] = True
+                viewer.setHydraRenderer(previous)
+                viewer.setPwd(empty)
+            except hou.Error as exc:
+                print('[EEVEE] Could not release the Houdini viewport: ' + str(exc), flush=True)
+                continue
+            finally:
+                state['switching'] = False
+            state['releasing'][name] = (viewer, network, renderer, empty)
+
+    def stop_unused_worker(leaving):
+        """Stop the worker at once when the viewport `leaving` switches away from EEVEE
+        and no other viewport shows it. Called from the RendererChanged viewer event: a
+        switch to Houdini VK/GL loads the whole scene before the next tick, and EEVEE must
+        not hold its memory meanwhile. The event arrives before the viewer reports its new
+        renderer, so the direction comes from the renderer last seen on it."""
+        worker = state['worker']
+        if state['switching'] or not worker or idle_exit <= 0 or not is_running(worker):
+            return
+        if 'eevee' not in state['renderers'].get(leaving.name(), '').lower():
+            return
+        if any(isinstance(v, hou.SceneViewer) and v.name() != leaving.name() and v.isViewingSceneGraph()
+               and 'eevee' in v.currentHydraRenderer().lower() for v in hou.ui.paneTabs()):
+            return
+        stop(worker)
+        state.update(worker=None, attempts=0, unseen_since=None)
+        hou.ui.setStatusMessage('EEVEE freed its GPU memory; it starts again when a viewport uses EEVEE.')
+
+    def viewer_event(**event):
+        kind, viewer = event.get('event_type'), event.get('viewer')
+        try:
+            if kind == hou.sceneViewerEvent.RendererChanged and viewer is not None:
+                stop_unused_worker(viewer)
+            elif kind == hou.sceneViewerEvent.ViewerTerminated and viewer is not None:
+                state['watched'].discard(viewer.name())
+        except Exception as exc:
+            print('[EEVEE] ' + str(exc), flush=True)
+
+    def watch_viewers():
+        for viewer in hou.ui.paneTabs():
+            if isinstance(viewer, hou.SceneViewer) and viewer.name() not in state['watched']:
+                viewer.addEventCallback(viewer_event)
+                state['watched'].add(viewer.name())
+
     def tick():
         now = time.monotonic()
         if state['stopped'] or now - state['last_check'] < .25:
             return
         state['last_check'] = now
+        watch_viewers()
+        release_native_viewports()
         scene_viewers = [v for v in hou.ui.paneTabs() if isinstance(v, hou.SceneViewer) and v.isViewingSceneGraph()]
-        viewers = [v for v in scene_viewers if 'eevee' in v.currentHydraRenderer().lower()]
+        viewers = [v for v in scene_viewers if 'eevee' in v.currentHydraRenderer().lower()
+                   or v.name() in state['releasing']]
         if state['future'] and state['future'].done():
             future, state['future'] = state['future'], None
             try:
@@ -99,8 +184,9 @@ def activate():
             state['unseen_since'] = None
         else:
             state['unseen_since'] = state['unseen_since'] or now
-            delay = idle_exit if scene_viewers else offscreen_exit
-            if delay > 0 and now - state['unseen_since'] >= delay:
+            # A LOP viewport that switched away from EEVEE frees it at once: a switch to
+            # Houdini VK/GL loads the whole scene within the next redraws.
+            if scene_viewers or (offscreen_exit > 0 and now - state['unseen_since'] >= offscreen_exit):
                 stop(worker)
                 state.update(worker=None, attempts=0, unseen_since=None)
                 worker = None
