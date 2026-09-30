@@ -7,6 +7,7 @@
 - **Switching back to EEVEE** shows the last EEVEE image at once. The scene is sent to a new worker with the next change, such as moving the camera.
 - The worker exits as soon as it is no longer used instead of after Blender releases each resource, and Houdini asks its own GPU caches (viewport, OpenCL, Karma XPU) to release unneeded memory before a new worker starts.
 - `HDEEVEE_IDLE_EXIT_SECONDS` now defaults to 0.5 seconds; `0` still keeps the worker running.
+- **Changing the texture size limit frees the memory again.** Once the viewport had been navigated, EEVEE's navigation render target kept the previous textures alive, so lowering the limit freed little and raising it again added more memory each time. The worker now frees its render targets when the limit changes. In a production scene (54 textures), 2048 to 512 now frees 640 MB each time and 512 to 2048 adds it back; before, memory grew with every change.
 
 ## 0.7.3
 
