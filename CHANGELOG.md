@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.3
+
+### Windows installer
+
+- **Prebuilt plugins for Houdini 22.0.368 and 22.0.429.** The Windows package and setup carry a plugin for each (the second in `native/22.0.429`), so both install without a compiler or a test-render fallback. `tools/package_release.py --native-root` can be repeated for more builds.
+- **No internet access needed.** The OpenEXR module for Blender's Python ships in the package (`wheels/`) instead of being downloaded from PyPI during the install (`package_release.py --wheels`).
+- **Houdini and Blender outside their default folders.** The setup, `install.cmd` and `install.py` also find Houdini 22.0 through the folders its installer registers, and `HFS`. `install.py` also finds Blender 5.2 through its installer's registration and Steam, and picks a 5.2 install when there are several instead of stopping.
+- **Machines where husk has no license.** The install check's test render uses husk. Without a husk license, a plugin compiled for this exact Houdini build is installed without that render; one compiled for another build still has to pass it.
+- **Full installer log.** The setup passes `HDEEVEE_INSTALL_LOG`, so everything the installer prints, including compiler and pip output, is also saved to `%TEMP%\houdini-eevee-install.log`.
+
 ## 0.7.2
 
 - **Texture size limit, 2048 by default.** Textures larger than the limit are scaled down on the GPU, keeping their aspect ratio; the files are not changed. A 4K texture at 2048 needs a quarter of the video memory (eight 4K textures in a final render: 744 MB full size, 264 MB at 2048). **EEVEE Render Settings › Textures** sets the size and applies it to the viewport (on by default) and final renders (off by default). Without that node, viewports use `HDEEVEE_TEXTURE_LIMIT` (a studio default), or 2048. The viewport's own *Texture Size Limit* setting also gains *Full*.

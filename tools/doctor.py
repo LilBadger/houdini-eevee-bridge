@@ -40,6 +40,14 @@ def isolated(env, session):
     return result
 
 
+class LicenseUnavailable(RuntimeError):
+    """husk could not get a Houdini license on this machine."""
+
+
+def unlicensed(result):
+    return result.returncode != 0 and re.search(r'licen[cs]', result.stdout+result.stderr, re.I) is not None
+
+
 def hydra_render(env, worker, session):
     """Render a small stage with husk through the EEVEE render delegate. This loads
     the native plugin into this Houdini build and runs it end to end."""
@@ -49,6 +57,8 @@ def hydra_render(env, worker, session):
                              '-c', '/camera', '-o', str(output), '--timelimit', '120', str(scene)],
                             env=dict(isolated(env, session), HDEEVEE_ENDPOINT=worker['endpoint']), capture_output=True, text=True,
                             encoding='utf-8', errors='replace', timeout=180)
+    if unlicensed(result):
+        raise LicenseUnavailable((result.stdout+result.stderr)[-2000:])
     if result.returncode or not output.is_file():
         raise RuntimeError('Husk could not render with EEVEE in this Houdini build:\n'+(result.stdout+result.stderr)[-4000:])
     stats = subprocess.run([str(houdini_program('hoiiotool')), str(output), '--ch', 'R,G,B', '--cut', '1x1+16+16',
@@ -82,7 +92,7 @@ def check():
         raise RuntimeError('Houdini volume helper could not load: '+helper.stderr[-3000:])
     native = subprocess.run([str(houdini_program('husk')), '--list-renderers'], env=isolated(env, session),
                             capture_output=True, text=True, timeout=60)
-    if native.returncode or 'HdEeveeRendererPlugin' not in native.stdout+native.stderr:
+    if not unlicensed(native) and (native.returncode or 'HdEeveeRendererPlugin' not in native.stdout+native.stderr):
         raise RuntimeError('Husk did not discover EEVEE: '+(native.stdout+native.stderr)[-4000:])
     worker = start(parent=os.getpid(), environment=env)
     client = None
@@ -96,7 +106,17 @@ def check():
         if len(color) != 32*32*16: raise RuntimeError('EEVEE GPU readback returned incorrect dimensions')
         client.close()
         client = None
-        pixel = hydra_render(env, worker, session)
+        try:
+            pixel = hydra_render(env, worker, session)
+        except LicenseUnavailable as exc:
+            # Without a husk license the plugin cannot be test-rendered. A plugin compiled for
+            # this very build is trusted; one compiled for another build must pass the render.
+            if info.get('houdini_version') != build:
+                raise RuntimeError('husk has no Houdini license on this machine, so the plugin built for Houdini '+
+                                   str(info.get('houdini_version'))+' cannot be verified for Houdini '+str(build)+
+                                   '. Install C++ build tools (on Windows, Visual Studio 2022 Build Tools with "Desktop '
+                                   'development with C++") and run the installer again, so it compiles the plugin.') from exc
+            pixel = 'skipped: husk has no Houdini license on this machine'
         return {'ok':True, 'houdini':build, 'native_plugin':info, 'volume_helper':str(volume_helper()),
                 'gpu':worker['gpu'], 'transport':'authenticated loopback TCP',
                 'gpu_draw':[32,32], 'hydra_render':pixel, 'worker_log':worker['log'], 'bridge_ms':metadata.get('bridge_ms')}
