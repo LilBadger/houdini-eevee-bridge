@@ -51,7 +51,7 @@ The full install manual is in **[INSTALL.md](INSTALL.md)**. It covers Windows, i
 
 | | |
 | --- | --- |
-| **Houdini** | Any 22.0 build (tested: 22.0.368). The prebuilt plugin is compiled for 22.0.368; for another build the installer compiles it with the HDK that ships with Houdini. |
+| **Houdini** | Any 22.0 build (tested: 22.0.368 and 22.0.429). Prebuilt plugins are included for those two builds; for another build the installer compiles it with the HDK that ships with Houdini. |
 | **Blender** | 5.2 LTS. The installer checks for EEVEE and OpenVDB support, and adds NumPy and OpenEXR privately if Blender lacks them. |
 | **GPU** | A Vulkan-capable GPU and driver (tested on NVIDIA). OpenGL is available as a fallback. |
 | **OS** | Linux x86-64, or Windows 11 x86-64. |
@@ -69,11 +69,11 @@ bash install.sh
 
 If a release includes a prebuilt `houdini-eevee-<version>-linux-x86_64.zip`, run `bash install.sh` in its extracted folder instead. It uses the prebuilt plugin on the Houdini build it names, and on other builds works like the Windows installer below.
 
-**Windows, any Houdini 22.0 build.** Close Houdini, then download and run `houdini-eevee-0.7.2-windows-x86_64-setup.exe` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases). It installs for your user without administrator rights and removes older versions once the new one has passed its checks. Settings › Apps uninstalls it. Windows may warn that the publisher is unknown, because the setup is not code-signed; choose *More info › Run anyway*.
+**Windows, any Houdini 22.0 build.** Close Houdini, then download and run `houdini-eevee-0.7.3-windows-x86_64-setup.exe` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases). It installs for your user without administrator rights and removes older versions once the new one has passed its checks. Settings › Apps uninstalls it. Windows may warn that the publisher is unknown, because the setup is not code-signed; choose *More info › Run anyway*.
 
-Alternatively, extract `houdini-eevee-0.7.2-windows-x86_64.zip` and run `install.cmd` in it; `uninstall.cmd` removes every installed version.
+Alternatively, extract `houdini-eevee-0.7.3-windows-x86_64.zip` and run `install.cmd` in it; `uninstall.cmd` removes every installed version.
 
-The prebuilt plugin is compiled for Houdini 22.0.368. On another 22.0 build, the installer compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with *Desktop development with C++* are installed. Without them, it tries the prebuilt plugin and registers it only if a test render through it in your Houdini succeeds. The same command works in the source zip or a clone of this repository.
+Prebuilt plugins are included for Houdini 22.0.368 and 22.0.429. On another 22.0 build, the installer compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with *Desktop development with C++* are installed. Without them, it tries the prebuilt plugin and registers it only if a test render through it in your Houdini succeeds. The same command works in the source zip or a clone of this repository.
 
 If the installer cannot find Houdini or Blender, pass `--houdini PATH --blender PATH`. For example, on Linux: `--houdini /opt/hfs22.0.368 --blender /path/to/blender`.
 

@@ -1,6 +1,7 @@
 """Build a redistributable source ZIP, optionally containing host native binaries."""
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -41,7 +42,9 @@ def build_setup(archive, output):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--native-root',type=Path,help='CMake build/install folder containing plugin/ and bin/')
+    parser.add_argument('--native-root',type=Path,action='append',
+                        help='CMake install folder with plugin/ and bin/; repeat for more Houdini builds (stored in native/<build>)')
+    parser.add_argument('--wheels',type=Path,help='Folder of Python wheels for Blender, bundled so installs need no internet')
     parser.add_argument('--output',type=Path,default=ROOT/'dist')
     parser.add_argument('--setup',action='store_true',help='Also build the Windows setup .exe with NSIS (needs --native-root)')
     args=parser.parse_args()
@@ -57,10 +60,15 @@ def main():
     for filename in ('install.py','install.sh','install.cmd','install.ps1','uninstall.sh','uninstall.cmd','uninstall.ps1',
                      'CMakeLists.txt','README.md','INSTALL.md','CHANGELOG.md','LICENSE'):
         files.append((ROOT/filename,Path(filename)))
-    if args.native_root:
+    for index, native in enumerate(args.native_root or []):
+        # The first build sits at the top, where older installers look; others in native/<build>.
+        build=json.loads((native/'plugin/hdEevee/build-info.json').read_text(encoding='utf-8'))['houdini_version']
+        base=Path('.') if index == 0 else Path('native')/build
         for directory in ('plugin','bin'):
-            for path in (args.native_root/directory).rglob('*'):
-                if path.is_file(): files.append((path,path.relative_to(args.native_root)))
+            for path in (native/directory).rglob('*'):
+                if path.is_file(): files.append((path,base/path.relative_to(native)))
+    if args.wheels:
+        for path in sorted(args.wheels.glob('*.whl')): files.append((path,Path('wheels')/path.name))
     with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as output:
         for path,relative in sorted(files): output.write(path,str(Path(name)/relative))
     checksum(archive)

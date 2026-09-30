@@ -17,9 +17,57 @@ from hde_runtime import (VERSION, blender_environment, cache_root, houdini_build
                          houdini_python, platform_tag)
 
 
+class Tee:
+    """Also write the installer's output to a file (HDEEVEE_INSTALL_LOG; the Windows setup sets it)."""
+    def __init__(self, stream, file):
+        self.stream, self.file = stream, file
+
+    def write(self, text):
+        self.stream.write(text)
+        self.file.write(text)
+        return len(text)
+
+    def flush(self):
+        self.stream.flush()
+        self.file.flush()
+
+
 def run(command, env=None, timeout=None):
     print('> '+subprocess.list2cmdline(list(map(str, command))), flush=True)
-    subprocess.run(list(map(str, command)), env=env, check=True, timeout=timeout)
+    # Relay the output through this process, so that HDEEVEE_INSTALL_LOG captures it too.
+    process = subprocess.Popen(list(map(str, command)), env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               text=True, encoding='utf-8', errors='replace')
+    for line in process.stdout:
+        print(line, end='', flush=True)
+    code = process.wait(timeout=timeout)
+    if code:
+        raise subprocess.CalledProcessError(code, command)
+
+
+def windows_registry(path):
+    """(subkey, {value: data}) for each subkey of HKLM and HKCU path, in the 64- and 32-bit views."""
+    if os.name != 'nt':
+        return []
+    import winreg
+    result = []
+    for hive in (winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER):
+        for view in (winreg.KEY_WOW64_64KEY, winreg.KEY_WOW64_32KEY):
+            try:
+                key = winreg.OpenKey(hive, path, 0, winreg.KEY_READ | view)
+            except OSError:
+                continue
+            with key:
+                for index in range(winreg.QueryInfoKey(key)[0]):
+                    name, values = winreg.EnumKey(key, index), {}
+                    try:
+                        with winreg.OpenKey(key, name, 0, winreg.KEY_READ | view) as sub:
+                            for number in range(winreg.QueryInfoKey(sub)[1]):
+                                value, data, _ = winreg.EnumValue(sub, number)
+                                values[value] = data
+                    except OSError:
+                        pass
+                    result.append((name, values))
+    return result
 
 
 def version(hfs):
@@ -53,7 +101,10 @@ def find_houdini(explicit):
     if preferred and (explicit or str(houdini_build(preferred) or '').startswith('22.0.')):
         return choose([],'Houdini','--houdini',preferred)
     if os.name == 'nt':
+        # The Houdini installer registers every build with its folder, also outside Program Files.
         candidates = list((program_files()/'Side Effects Software').glob('Houdini 22.0.*'))
+        candidates += [values['InstallPath'] for name, values in windows_registry(r'SOFTWARE\Side Effects Software')
+                       if name.startswith('Houdini 22.0.') and values.get('InstallPath')]
     else:
         candidates = list(Path('/opt').glob('hfs22.0.*')) + list(Path.home().glob('houdini-22.0.*'))
     found = {Path(p).resolve(): houdini_build(p) for p in candidates if str(houdini_build(p) or '').startswith('22.0.')}
@@ -67,11 +118,29 @@ def find_houdini(explicit):
 
 
 def find_blender(explicit):
+    """Blender 5.2: --blender or HDEEVEE_BLENDER, else on PATH, in its default folder, where its
+    Windows installer registered it, or from Steam. Paths naming 5.2 are preferred."""
     preferred = explicit or os.environ.get('HDEEVEE_BLENDER')
+    if preferred:
+        return choose([],'Blender','--blender',preferred)
     candidates = [shutil.which('blender')]
     if os.name == 'nt':
         candidates += list((program_files()/'Blender Foundation').glob('Blender 5.2*/blender.exe'))
-    return choose(candidates,'Blender','--blender',preferred)
+        candidates += [Path(values['InstallLocation'])/'blender.exe'
+                       for _, values in windows_registry(r'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall')
+                       if str(values.get('DisplayName','')).lower().startswith('blender')
+                       and str(values.get('DisplayVersion','5.2')).startswith('5.2') and values.get('InstallLocation')]
+        candidates.append(Path(os.environ.get('ProgramFiles(x86)','C:/Program Files (x86)'))/'Steam/steamapps/common/Blender/blender.exe')
+    found = []
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file() and Path(candidate).resolve() not in found:
+            found.append(Path(candidate).resolve())
+    if not found:
+        raise RuntimeError('Blender 5.2 was not found. Install it from blender.org, or supply --blender PATH.')
+    found.sort(key=lambda path: '5.2' not in str(path))
+    if len(found) > 1:
+        print('Found Blender at '+', '.join(map(str,found))+'; using '+str(found[0])+'. Use --blender PATH for another.',flush=True)
+    return found[0]
 
 
 def packages_directory(explicit=None):
@@ -115,11 +184,19 @@ def install_dependencies(info, target):
         'w=glob.glob(sys.prefix+"/lib/python*/ensurepip/_bundled/pip-*.whl")+'
         'glob.glob(sys.prefix+"/Lib/ensurepip/_bundled/pip-*.whl"); '
         'sys.path[:0]=w; runpy.run_module("pip",run_name="__main__")')
-    try:
-        run([python,'-c',bootstrap,'install','--disable-pip-version-check','--only-binary=:all:',
-             '--no-deps','--target',target,*requirements],env=env,timeout=300)
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError('Private Blender dependency installation failed. Use a Blender build whose Python has matching OpenEXR wheels, or supply matching OpenEXR/Imath/NumPy modules through HDEEVEE_PYTHON_DEPS. No render passes were disabled. Python 3.14 currently has no OpenEXR PyPI wheel.') from exc
+    # Release packages bundle the wheels, so installing needs no internet access.
+    wheels = SOURCE/'wheels'
+    sources = ([['--no-index','--find-links',str(wheels)], ['--find-links',str(wheels)]] if wheels.is_dir() else [[]])
+    failure = None
+    for source in sources:
+        try:
+            run([python,'-c',bootstrap,'install','--disable-pip-version-check','--only-binary=:all:',
+                 '--no-deps',*source,'--target',target,*requirements],env=env,timeout=300)
+            return
+        except subprocess.CalledProcessError as exc:
+            failure = exc
+    if failure:
+        raise RuntimeError('Private Blender dependency installation failed. Use a Blender build whose Python has matching OpenEXR wheels, or supply matching OpenEXR/Imath/NumPy modules through HDEEVEE_PYTHON_DEPS. No render passes were disabled. Python 3.14 currently has no OpenEXR PyPI wheel.') from failure
 
 
 def native_build(root):
@@ -269,10 +346,15 @@ def install(args):
     # The plugin is compiled against one exact Houdini build. For another 22.0 build,
     # build it from source when a compiler is available; otherwise use a prebuilt
     # plugin only if a test render through it succeeds in this build (see doctor.py).
-    prebuilt = [(root,native_build(root)) for root in (SOURCE,SOURCE/'build-portable',SOURCE/'build')]
-    prebuilt = [(root,build) for root,build in prebuilt if build]
+    # Release packages may carry plugins for several builds, in native/<build>.
+    roots = [SOURCE,SOURCE/'build-portable',SOURCE/'build',*sorted((SOURCE/'native').glob('*'))]
+    prebuilt = [(root,native_build(root)) for root in roots]
+    number = lambda build: tuple(int(part) for part in build.split('.'))
+    prebuilt = sorted(((root,build) for root,build in prebuilt if build), key=lambda item: number(item[1]), reverse=True)
     exact = next((root for root,build in prebuilt if build == wanted),None)
-    other = next(((root,build) for root,build in prebuilt if build != wanted),None)
+    # Without an exact match, try the newest build not newer than this one, else the oldest.
+    other = next(((root,build) for root,build in prebuilt if build != wanted and number(build) <= number(wanted)),
+                 next(((root,build) for root,build in reversed(prebuilt) if build != wanted),None))
     cmake = None if args.no_build else find_cmake()
     buildable = bool(cmake) and (SOURCE/'src').is_dir()
     if args.build and not buildable:
@@ -423,6 +505,11 @@ def main():
     parser.add_argument('--rollback',nargs='?',const='previous',metavar='VERSION',
                         help='Restore the registration the last install replaced, or a replaced VERSION such as 0.5.0-h22.0.368')
     args = parser.parse_args()
+    for stream in (sys.stdout, sys.stderr):
+        stream.reconfigure(errors='replace')
+    if os.environ.get('HDEEVEE_INSTALL_LOG'):
+        log = open(os.environ['HDEEVEE_INSTALL_LOG'],'w',encoding='utf-8')
+        sys.stdout, sys.stderr = Tee(sys.stdout,log), Tee(sys.stderr,log)
     if sys.platform not in ('linux','win32') or platform.machine().lower() not in ('x86_64','amd64'):
         parser.error('This release supports Linux and Windows x86-64.')
     try:

@@ -30,7 +30,7 @@ from protocol import (PROTOCOL, SUPPORTED, ProtocolError, read_frame, send_frame
                       remove_stale_segments)
 from session import Session
 
-VERSION = '0.7.2'
+VERSION = '0.7.3'
 # Houdini's supervisor (tools/hde_installation.py) sets this: once no viewport has
 # been connected for this many seconds, the worker exits so that all of its GPU
 # memory returns to the driver, for Karma XPU for example. The supervisor starts a

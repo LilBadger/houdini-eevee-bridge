@@ -35,12 +35,12 @@ OpenEXR currently publishes wheels up to Python 3.13. Some Linux distributions b
 
 ### From the prebuilt release (any Houdini 22.0 build)
 
-1. Download `houdini-eevee-0.7.2-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.7.3-linux-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it and run the installer:
 
    ```bash
-   unzip houdini-eevee-0.7.2-linux-x86_64.zip
-   cd houdini-eevee-0.7.2-linux-x86_64
+   unzip houdini-eevee-0.7.3-linux-x86_64.zip
+   cd houdini-eevee-0.7.3-linux-x86_64
    bash install.sh
    ```
 
@@ -56,7 +56,7 @@ cd houdini-eevee-bridge
 bash install.sh
 ```
 
-With no prebuilt plugin in the folder, the installer compiles one. You can also run `install.sh` from the extracted source archive, `houdini-eevee-0.7.2-source.zip`.
+With no prebuilt plugin in the folder, the installer compiles one. You can also run `install.sh` from the extracted source archive, `houdini-eevee-0.7.3-source.zip`.
 
 ### When Houdini or Blender are not found
 
@@ -73,16 +73,16 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 ### With the setup program (any Houdini 22.0 build)
 
 1. Close Houdini.
-2. Download `houdini-eevee-0.7.2-windows-x86_64-setup.exe` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases) and run it. It needs no administrator rights. The setup is not code-signed, so Windows SmartScreen may warn about an unknown publisher; choose *More info › Run anyway*.
+2. Download `houdini-eevee-0.7.3-windows-x86_64-setup.exe` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases) and run it. It needs no administrator rights. The setup is not code-signed, so Windows SmartScreen may warn about an unknown publisher; choose *More info › Run anyway*.
 3. The setup runs the installer described below and shows its progress. Once the new version has passed its checks, it removes older EEVEE Bridge versions.
 
 To uninstall, use Settings › Apps › *EEVEE Bridge for Houdini*. It removes every installed version, the Houdini package registration, logs and caches.
 
-For deployment, `setup.exe /S` installs silently. The setup and `install.cmd` run Houdini's bundled Python and start no PowerShell, so endpoint security tools don't block them. If a setup stops, the reason is written to `%TEMP%\houdini-eevee-setup.log`.
+For deployment, `setup.exe /S` installs silently. The setup and `install.cmd` run Houdini's bundled Python and start no PowerShell, so endpoint security tools don't block them. If a setup stops, the reason is written to `%TEMP%\houdini-eevee-setup.log`, and everything the installer printed to `%TEMP%\houdini-eevee-install.log`.
 
 ### From the prebuilt zip (any Houdini 22.0 build)
 
-1. Download `houdini-eevee-0.7.2-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
+1. Download `houdini-eevee-0.7.3-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).
 2. Extract it, and in the extracted folder run:
 
    ```bat
@@ -93,7 +93,7 @@ For deployment, `setup.exe /S` installs silently. The setup and `install.cmd` ru
 
 3. Restart Houdini.
 
-The prebuilt plugin is compiled for **Houdini 22.0.368** with MSVC 19.42, the same compiler as that Houdini, so on 22.0.368 it needs no compiler or extra Visual C++ runtime. On another Houdini 22.0 build, the installer:
+The Windows package includes plugins compiled for **Houdini 22.0.368 and 22.0.429** with MSVC 19.42, the same compiler as Houdini, so on those builds it needs no compiler or extra Visual C++ runtime. It also includes the OpenEXR module for Blender, so it installs without internet access. The setup finds Houdini and Blender in their default folders or wherever their installers registered them. On another Houdini 22.0 build, the installer:
 
 - compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload are installed. It uses the CMake that comes with them and needs no Developer Command Prompt. This takes a few minutes.
 - otherwise tries the prebuilt plugin, and registers it only if a test render through it in your Houdini succeeds. If it fails, install the Build Tools and run `install.cmd` again.
@@ -101,7 +101,7 @@ The prebuilt plugin is compiled for **Houdini 22.0.368** with MSVC 19.42, the sa
 ### From source (any Houdini 22.0 build)
 
 1. Install Houdini 22.0, Blender 5.2, and the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with the *Desktop development with C++* workload. A separate [CMake](https://cmake.org/download/) is optional.
-2. Download `houdini-eevee-0.7.2-source.zip` (or clone the repository) and extract it.
+2. Download `houdini-eevee-0.7.3-source.zip` (or clone the repository) and extract it.
 3. In the extracted folder, run:
 
    ```bat
@@ -132,8 +132,8 @@ Adjust the path to Houdini's bundled Python for your version. The resulting arch
 2. It finds Blender 5.2 and checks for EEVEE, OpenVDB, NumPy and OpenEXR. If Python modules are missing, it installs them privately.
 3. It uses the prebuilt plugin when it was compiled for your Houdini build. For another 22.0 build it compiles the plugin if build tools are available, and otherwise uses the prebuilt plugin only if the test render in step 5 succeeds.
 4. It copies everything to a new, versioned folder:
-   - Linux: `~/.local/share/houdini-eevee/0.7.2-h22.0.368`
-   - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.7.2-h22.0.368`
+   - Linux: `~/.local/share/houdini-eevee/0.7.3-h22.0.368`
+   - Windows: `%LOCALAPPDATA%\HoudiniEEVEE\0.7.3-h22.0.368`
 5. It starts a Blender worker and renders a small test image with EEVEE on your GPU, then renders a test scene with `husk` through the EEVEE plugin in your Houdini, ignoring other installed packages. Use `--no-gpu-check` to skip this on a machine without a GPU.
 6. It writes `houdini_eevee.json` to your Houdini packages folder:
    - Linux: `~/houdini22.0/packages`
@@ -159,7 +159,7 @@ The installed startup hook, `scripts/python/uiready.py`, only adds to Houdini's 
 From the **installed** folder, run the doctor:
 
 ```bash
-cd ~/.local/share/houdini-eevee/0.7.2-h22.0.368
+cd ~/.local/share/houdini-eevee/0.7.3-h22.0.368
 python3 install.py --doctor
 ```
 
@@ -196,7 +196,7 @@ Each run writes a log to `~/.cache/houdini-eevee/logs/doctor-*.log`.
 | `--remove-old` | After a successful install, delete the previously installed versions. |
 | `--reinstall` | Replace an existing install of the same version (Houdini must be closed). |
 | `--yes` | Do not ask before removing files. |
-| `--rollback [VERSION]` | Restore the registration that the last install replaced, or a specific earlier one such as `0.7.1-h22.0.368`. |
+| `--rollback [VERSION]` | Restore the registration that the last install replaced, or a specific earlier one such as `0.7.2-h22.0.368`. |
 
 ## 8. Choosing the GPU
 
@@ -222,7 +222,7 @@ To list devices yourself, run `blender --background --gpu-backend vulkan --gpu-d
 
 ```bash
 python3 install.py --rollback                   # the registration the last install replaced
-python3 install.py --rollback 0.7.1-h22.0.368   # a specific earlier version
+python3 install.py --rollback 0.7.2-h22.0.368   # a specific earlier version
 ```
 
 Restart Houdini afterwards.

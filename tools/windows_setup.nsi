@@ -73,6 +73,29 @@ FunctionEnd
 ; work after Houdini was removed.
 Function ${UN}FindPython
   StrCpy $PYTHON ""
+  ; Every Houdini build is registered with its folder, also outside Program Files.
+  SetRegView 64
+  StrCpy $3 0
+  registry:
+    EnumRegKey $2 HKLM "SOFTWARE\Side Effects Software" $3
+    StrCmp $2 "" registry_done
+    IntOp $3 $3 + 1
+    StrCpy $4 $2 13
+    StrCmp $4 "Houdini 22.0." 0 registry
+    ReadRegStr $5 HKLM "SOFTWARE\Side Effects Software\$2" "InstallPath"
+    IfFileExists "$5\python313\python.exe" 0 registry
+      StrCpy $PYTHON "$5\python313\python.exe"
+    Goto registry
+  registry_done:
+  SetRegView default
+  ReadEnvStr $5 HFS
+  ${If} $PYTHON == ""
+  ${AndIf} ${FileExists} "$5\python313\python.exe"
+    StrCpy $PYTHON "$5\python313\python.exe"
+  ${EndIf}
+  ${If} $PYTHON != ""
+    Goto found
+  ${EndIf}
   FindFirst $1 $2 "$PROGRAMFILES64\Side Effects Software\Houdini 22.0.*"
   loop:
     StrCmp $2 "" done
@@ -82,6 +105,7 @@ Function ${UN}FindPython
     Goto loop
   done:
   FindClose $1
+  found:
   ${If} $PYTHON == ""
   ${AndIf} ${FileExists} "$WINDIR\py.exe"
     StrCpy $PYTHON "$WINDIR\py.exe"
@@ -101,7 +125,7 @@ Function .onInit
   Call CloseHoudini
   Call FindPython
   ${If} $PYTHON == ""
-    !insertmacro STOP "Houdini 22.0 was not found in $PROGRAMFILES64\Side Effects Software. Install Houdini 22.0 first."
+    !insertmacro STOP "Houdini 22.0 was not found. Install Houdini 22.0 first, or set HFS to its folder."
   ${EndIf}
 FunctionEnd
 
@@ -117,13 +141,15 @@ Section "Install"
   File /r "${PAYLOAD}\*.*"
   SetOutPath "$INSTDIR"
   DetailPrint "Installing for your Houdini. If the plugin has to be compiled for your Houdini build, this takes a few minutes."
+  ; The installer also writes everything it prints to this file.
+  System::Call 'kernel32::SetEnvironmentVariable(t "HDEEVEE_INSTALL_LOG", t "$TEMP\houdini-eevee-install.log")'
   nsExec::ExecToLog '"$PYTHON" -E "$INSTDIR\incoming\install.py" --reinstall --remove-old'
   Pop $0
   ${If} $0 != 0
     RMDir /r "$INSTDIR\incoming"
     RMDir "$INSTDIR"
     DetailPrint "EEVEE Bridge was not installed, and your Houdini setup was not changed. The messages above say why."
-    !insertmacro STOP "EEVEE Bridge could not be installed: install.py exited with $0. The setup window shows its messages; in a silent install, run install.cmd from the Windows zip to see them."
+    !insertmacro STOP "EEVEE Bridge could not be installed (install.py exited with $0). Its messages are in the setup window and in $TEMP\houdini-eevee-install.log."
   ${EndIf}
   RMDir /r "$INSTDIR\payload"
   Rename "$INSTDIR\incoming" "$INSTDIR\payload"
