@@ -128,9 +128,12 @@ class Worker:
         if system.gl_texture_limit == wanted:
             return
         system.gl_texture_limit = wanted
-        # Existing GPU textures keep their size until they are uploaded again.
+        # Existing GPU textures keep their size until they are uploaded again. EEVEE
+        # instances still reference the old ones, so their render targets go too.
         for image in bpy.data.images:
             image.gl_free()
+        for session in self.sessions.values():
+            session.release_targets()
 
     def open_session(self):
         self.session_count += 1

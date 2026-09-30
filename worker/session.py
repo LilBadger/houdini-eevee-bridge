@@ -865,16 +865,20 @@ class Session:
         """Free render targets that are not in use; each EEVEE target is a full
         EEVEE instance (shadow pool, film and ray-tracing buffers)."""
         now = time.monotonic()
-        released = False
-        for purpose in list(self.offscreens):
-            if purpose in ('beauty', 'ids', 'flush'):
-                continue
-            idle = now - self.offscreen_used.get(purpose, now)
-            if (purpose == 'preview' and self.eevee_drawn) or idle > IDLE_TARGET_SECONDS:
-                self.offscreens.pop(purpose)[1].free()
-                self.offscreen_used.pop(purpose, None)
-                released = True
-        if released:
+        self.release_targets([purpose for purpose in self.offscreens if purpose not in ('beauty', 'ids', 'flush') and
+                              ((purpose == 'preview' and self.eevee_drawn) or
+                               now - self.offscreen_used.get(purpose, now) > IDLE_TARGET_SECONDS)])
+
+    def release_targets(self, purposes=None):
+        """Free the given render targets (all but the flush target by default).
+        An EEVEE target keeps the GPU textures it last drew with alive, so after
+        the texture size limit changes every target must go; the next draw makes
+        a new one."""
+        purposes = [p for p in self.offscreens if p != 'flush'] if purposes is None else purposes
+        for purpose in purposes:
+            self.offscreens.pop(purpose)[1].free()
+            self.offscreen_used.pop(purpose, None)
+        if purposes:
             # Blender's Vulkan backend destroys freed GPU resources only when
             # it next submits work. A tiny flat draw returns the memory now.
             worker = self.worker
