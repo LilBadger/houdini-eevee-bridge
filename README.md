@@ -69,9 +69,9 @@ bash install.sh
 
 If a release includes a prebuilt `houdini-eevee-<version>-linux-x86_64.zip`, run `bash install.sh` in its extracted folder instead. It uses the prebuilt plugin on the Houdini build it names, and on other builds works like the Windows installer below.
 
-**Windows, any Houdini 22.0 build.** Close Houdini, then download and run `houdini-eevee-0.7.3-windows-x86_64-setup.exe` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases). It installs for your user without administrator rights and removes older versions once the new one has passed its checks. Settings › Apps uninstalls it. Windows may warn that the publisher is unknown, because the setup is not code-signed; choose *More info › Run anyway*.
+**Windows, any Houdini 22.0 build.** Close Houdini, then download and run `houdini-eevee-0.7.4-windows-x86_64-setup.exe` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases). It installs for your user without administrator rights and removes older versions once the new one has passed its checks. Settings › Apps uninstalls it. Windows may warn that the publisher is unknown, because the setup is not code-signed; choose *More info › Run anyway*.
 
-Alternatively, extract `houdini-eevee-0.7.3-windows-x86_64.zip` and run `install.cmd` in it; `uninstall.cmd` removes every installed version.
+Alternatively, extract `houdini-eevee-0.7.4-windows-x86_64.zip` and run `install.cmd` in it; `uninstall.cmd` removes every installed version.
 
 Prebuilt plugins are included for Houdini 22.0.368 and 22.0.429. On another 22.0 build, the installer compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with *Desktop development with C++* are installed. Without them, it tries the prebuilt plugin and registers it only if a test render through it in your Houdini succeeds. The same command works in the source zip or a clone of this repository.
 
@@ -171,7 +171,7 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 - **Picking and depth.** A flat ID pass on settled frames supplies prim and instance IDs and window-space depth.
 - **Viewport controls.** Multiple viewports, pause and resume, and automatic reconnection to a restarted worker.
 - **Texture size limit.** Textures larger than 2048 pixels are scaled down on the GPU, keeping their aspect ratio; your files are not changed. A 4K texture then needs a quarter of the video memory. **EEVEE Render Settings › Textures** sets the size (8192 to 512) and whether it applies to the viewport (on by default) and to final renders (off by default). Without that node, the viewport uses `HDEEVEE_TEXTURE_LIMIT`, or 2048. Float textures (EXR, 16-bit PNG or TIFF) are kept in half precision, which halves their memory.
-- **Video memory is freed when you switch away.** Two seconds after the last EEVEE viewport closes, for example when you switch to Karma XPU, the Blender worker exits and returns all its video memory. It starts again when a viewport uses EEVEE, and recompiles the scene's shaders. `HDEEVEE_IDLE_EXIT_SECONDS` sets the delay; `0` keeps the worker running.
+- **Video memory is freed when you switch away.** Half a second after no LOP viewport shows EEVEE, for example when you switch to Karma XPU or Houdini VK, the Blender worker exits and returns all its video memory. With no viewport on the LOP network at all, it waits 30 seconds. It starts again when a viewport uses EEVEE, and the scene is sent again, and its shaders recompiled, with the next change. `HDEEVEE_IDLE_EXIT_SECONDS` and `HDEEVEE_OFFSCREEN_EXIT_SECONDS` set the delays; `0` keeps the worker running.
 
 ## Limitations
 

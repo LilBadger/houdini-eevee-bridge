@@ -320,7 +320,7 @@ std::shared_ptr<const Frame> Renderer::RenderFinal(const ViewRequest &request) {
 void Renderer::Connect() {
     if (_connection.IsOpen()) return;
     _connection.Open(30);
-    _connection.Send({{"op", "hello"}, {"owner_pid", hde::processId()}, {"client", "hdEevee 0.7.3"}});
+    _connection.Send({{"op", "hello"}, {"owner_pid", hde::processId()}, {"client", "hdEevee 0.7.4"}});
     const Json reply = _connection.Receive(nullptr);
     if (!reply.value("ok", false))
         throw WorkerError(reply.value("error", std::string("EEVEE worker rejected the connection")));

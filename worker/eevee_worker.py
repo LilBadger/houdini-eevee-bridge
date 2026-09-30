@@ -30,7 +30,7 @@ from protocol import (PROTOCOL, SUPPORTED, ProtocolError, read_frame, send_frame
                       remove_stale_segments)
 from session import Session
 
-VERSION = '0.7.3'
+VERSION = '0.7.4'
 # Houdini's supervisor (tools/hde_installation.py) sets this: once no viewport has
 # been connected for this many seconds, the worker exits so that all of its GPU
 # memory returns to the driver, for Karma XPU for example. The supervisor starts a
@@ -241,6 +241,7 @@ class Server:
         self.selector.register(server, selectors.EVENT_READ, None)
         self.used = False            # a viewport has connected at least once
         self.unused_since = None
+        self.idle_exit = False
 
     def alive(self):
         return not self.owner_pid or process_alive(self.owner_pid)
@@ -271,11 +272,13 @@ class Server:
             if self.unused():
                 print('[EEVEE] No viewport has used this worker for %g s; exiting to free its GPU memory.'
                       % IDLE_EXIT_SECONDS, flush=True)
+                self.idle_exit = True
                 break
             # Settled viewports send no requests; release idle targets here.
             for session in list(self.worker.sessions.values()):
                 session.release_idle_targets()
-            for key, _ in self.selector.select(timeout=1.0):
+            # While an idle exit is pending, look again soon rather than after a second.
+            for key, _ in self.selector.select(timeout=0.1 if self.unused_since is not None else 1.0):
                 if key.data is None:
                     self.accept()
                     continue
@@ -427,6 +430,12 @@ def main():
                 traceback.print_exc()
         listener.close()
         path.unlink(missing_ok=True)
+    if server.idle_exit:
+        # Nothing is left to save; ending the process now returns the GPU memory at
+        # once, instead of after Blender frees every data-block and GPU resource.
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(0)
 
 
 if __name__ == '__main__':

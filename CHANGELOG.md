@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.4
+
+- **Switching to any other renderer frees EEVEE's video memory, within a second.** 0.7.2 freed it only when Houdini deleted the EEVEE renderer, as it does when switching to Karma. Switching to Houdini VK or GL keeps EEVEE's renderer alive in the background, so the Blender worker kept the whole scene in video memory. Houdini now stops the worker half a second after no LOP viewport shows EEVEE, whichever renderer it switched to. In a test scene the worker's 3.1 GB was released in under a second when switching to Karma XPU or Houdini VK, and Karma XPU's memory was released when switching back to EEVEE.
+- **Leaving the LOP network** (a viewport showing SOPs, say) stops the worker after 30 seconds, so moving between networks does not restart it each time. `HDEEVEE_OFFSCREEN_EXIT_SECONDS` sets this delay, and `0` keeps the worker running.
+- **Switching back to EEVEE** shows the last EEVEE image at once. The scene is sent to a new worker with the next change, such as moving the camera.
+- The worker exits as soon as it is no longer used instead of after Blender releases each resource, and Houdini asks its own GPU caches (viewport, OpenCL, Karma XPU) to release unneeded memory before a new worker starts.
+- `HDEEVEE_IDLE_EXIT_SECONDS` now defaults to 0.5 seconds; `0` still keeps the worker running.
+
 ## 0.7.3
 
 ### Windows installer

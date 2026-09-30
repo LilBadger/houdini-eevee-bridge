@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(HoudiniEevee VERSION 0.7.3 LANGUAGES CXX)
+project(HoudiniEevee VERSION 0.7.4 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Houdini REQUIRED)

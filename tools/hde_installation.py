@@ -23,7 +23,13 @@ def activate():
         hou.putenv(name, value)
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='eevee-start')
     state = {'worker': None, 'future': None, 'last_check': 0., 'attempts': 0, 'stopped': False,
-             'status': None, 'status_mtime': 0}
+             'status': None, 'status_mtime': 0, 'unseen_since': None}
+    # Free the worker's GPU memory once no viewport shows EEVEE: soon after a LOP viewport
+    # switches to another renderer, later when no viewport shows the LOP scene at all
+    # (while working in SOPs, say), so diving into a network does not force a restart.
+    # HDEEVEE_IDLE_EXIT_SECONDS=0 keeps the worker running for the whole session.
+    idle_exit = float(os.environ.get('HDEEVEE_IDLE_EXIT_SECONDS', '0.5') or 0)
+    offscreen_exit = float(os.environ.get('HDEEVEE_OFFSCREEN_EXIT_SECONDS', '30') or 0)
     hou.session._hde_installation = state
 
     def finish():
@@ -64,11 +70,11 @@ def activate():
 
     def tick():
         now = time.monotonic()
-        if state['stopped'] or now - state['last_check'] < 1:
+        if state['stopped'] or now - state['last_check'] < .25:
             return
         state['last_check'] = now
-        viewers = [v for v in hou.ui.paneTabs() if isinstance(v, hou.SceneViewer)
-                   and v.isViewingSceneGraph() and 'eevee' in v.currentHydraRenderer().lower()]
+        scene_viewers = [v for v in hou.ui.paneTabs() if isinstance(v, hou.SceneViewer) and v.isViewingSceneGraph()]
+        viewers = [v for v in scene_viewers if 'eevee' in v.currentHydraRenderer().lower()]
         if state['future'] and state['future'].done():
             future, state['future'] = state['future'], None
             try:
@@ -85,6 +91,20 @@ def activate():
                 hou.ui.setStatusMessage('EEVEE could not start. Run install.py --doctor; see the Python shell for details.',
                                         hou.severityType.Error)
         worker = state['worker']
+        # Houdini keeps a renderer alive in the background when its viewport switches to
+        # Houdini VK/GL or leaves the LOP scene, so the worker cannot see that EEVEE is
+        # gone. Stop it here. A viewport showing EEVEE again starts a new worker, and the
+        # background renderer reconnects and sends its scene again.
+        if viewers or not worker or not is_running(worker) or idle_exit <= 0:
+            state['unseen_since'] = None
+        else:
+            state['unseen_since'] = state['unseen_since'] or now
+            delay = idle_exit if scene_viewers else offscreen_exit
+            if delay > 0 and now - state['unseen_since'] >= delay:
+                stop(worker)
+                state.update(worker=None, attempts=0, unseen_since=None)
+                worker = None
+                hou.ui.setStatusMessage('EEVEE freed its GPU memory; it starts again when a viewport uses EEVEE.')
         if worker and not is_running(worker):
             code = exit_code(worker)
             stop(worker)
@@ -101,7 +121,15 @@ def activate():
         if viewers and not state['worker'] and not state['future'] and state['attempts'] < 3:
             state['attempts'] += 1
             environment = os.environ.copy()
-            environment.setdefault('HDEEVEE_IDLE_EXIT_SECONDS', '2')
+            environment['HDEEVEE_IDLE_EXIT_SECONDS'] = str(idle_exit)
+            # Ask Houdini's own GPU users (viewport and texture caches, OpenCL, COPs, Karma XPU)
+            # to return memory they hold but don't need, before Blender allocates its own.
+            try:
+                freed = hou.hscript('gpumem -f 100000')[0].strip()
+                if freed:
+                    print('[EEVEE] Before starting: ' + freed, flush=True)
+            except hou.Error:
+                pass
             state['future'] = executor.submit(start, parent=os.getpid(), environment=environment)
             hou.ui.setStatusMessage('Starting Blender EEVEE…')
         if viewers:
