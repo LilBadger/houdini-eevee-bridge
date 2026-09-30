@@ -78,6 +78,8 @@ bash install.sh --houdini /opt/hfs22.0.368 --blender /opt/blender-5.2/blender
 
 To uninstall, use Settings › Apps › *EEVEE Bridge for Houdini*. It removes every installed version, the Houdini package registration, logs and caches.
 
+For deployment, `setup.exe /S` installs silently. The setup and `install.cmd` run Houdini's bundled Python and start no PowerShell, so endpoint security tools don't block them. If a setup stops, the reason is written to `%TEMP%\houdini-eevee-setup.log`.
+
 ### From the prebuilt zip (any Houdini 22.0 build)
 
 1. Download `houdini-eevee-0.7.2-windows-x86_64.zip` from the [releases page](https://github.com/badgerz42/houdini-eevee-bridge/releases).

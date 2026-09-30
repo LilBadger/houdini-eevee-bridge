@@ -42,13 +42,18 @@ def choose(candidates, label, option, explicit=None):
     raise RuntimeError('Multiple '+label+' installations found; select one with '+option+':\n'+'\n'.join(map(str,found)))
 
 
+def program_files():
+    """64-bit Program Files, also when a 32-bit parent such as the Windows setup passed its own."""
+    return Path(os.environ.get('ProgramW6432') or os.environ.get('ProgramFiles','C:/Program Files'))
+
+
 def find_houdini(explicit):
     """Any Houdini 22.0 build: the one named by --houdini, HDEEVEE_HOUDINI or HFS, else the newest installed."""
     preferred = explicit or os.environ.get('HDEEVEE_HOUDINI') or os.environ.get('HFS')
     if preferred and (explicit or str(houdini_build(preferred) or '').startswith('22.0.')):
         return choose([],'Houdini','--houdini',preferred)
     if os.name == 'nt':
-        candidates = list((Path(os.environ.get('ProgramFiles','C:/Program Files'))/'Side Effects Software').glob('Houdini 22.0.*'))
+        candidates = list((program_files()/'Side Effects Software').glob('Houdini 22.0.*'))
     else:
         candidates = list(Path('/opt').glob('hfs22.0.*')) + list(Path.home().glob('houdini-22.0.*'))
     found = {Path(p).resolve(): houdini_build(p) for p in candidates if str(houdini_build(p) or '').startswith('22.0.')}
@@ -65,7 +70,7 @@ def find_blender(explicit):
     preferred = explicit or os.environ.get('HDEEVEE_BLENDER')
     candidates = [shutil.which('blender')]
     if os.name == 'nt':
-        candidates += list((Path(os.environ.get('ProgramFiles','C:/Program Files'))/'Blender Foundation').glob('Blender 5.2*/blender.exe'))
+        candidates += list((program_files()/'Blender Foundation').glob('Blender 5.2*/blender.exe'))
     return choose(candidates,'Blender','--blender',preferred)
 
 
@@ -141,7 +146,7 @@ def find_cmake():
                              '-property','installationPath'],capture_output=True,text=True)
     studio = result.stdout.strip().splitlines()[0] if result.returncode == 0 and result.stdout.strip() else None
     if not studio: return None
-    candidates = [shutil.which('cmake'), Path(os.environ.get('ProgramFiles','C:/Program Files'))/'CMake/bin/cmake.exe',
+    candidates = [shutil.which('cmake'), program_files()/'CMake/bin/cmake.exe',
                   Path(studio)/'Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe']
     return next((str(path) for path in candidates if path and Path(path).is_file()),None)
 
