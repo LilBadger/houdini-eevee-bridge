@@ -116,6 +116,21 @@ def activate():
                 state['switching'] = False
             state['releasing'][name] = (viewer, network, renderer, empty)
 
+    def share_instancing(viewer):
+        # EEVEE Render Settings › Instancing › Match Houdini Viewport draws the share
+        # of point instances the Houdini viewport is set to show (Display Options).
+        try:
+            settings = viewer.curViewport().settings()
+            percent = float(settings.pointInstancingPercent()) if settings.pointInstancing() else 100.
+        except (hou.Error, AttributeError):
+            return
+        if percent != state.get('instancing'):
+            state['instancing'] = percent
+            try:
+                (Path(os.environ['HDEEVEE_SESSION_DIR']) / 'houdini_instancing').write_text(repr(percent))
+            except (KeyError, OSError):
+                pass
+
     def keep_loaded():
         # The viewport option Keep EEVEE Loaded When Switching Renderers, written by
         # the render delegate: keep the worker, its scene and compiled shaders.
@@ -228,4 +243,5 @@ def activate():
             hou.ui.setStatusMessage('Starting Blender EEVEE…')
         if viewers:
             report_status()
+            share_instancing(viewers[0])
     hou.ui.addEventLoopCallback(tick)

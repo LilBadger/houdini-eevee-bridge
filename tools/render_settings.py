@@ -192,6 +192,18 @@ def template_group():
     textures.addParmTemplate(hou.ToggleParmTemplate('texture_limit_render','Limit in Final Render',default_value=False,
         help='Apply the limit to renders to disk and MPlay.'))
     group.append(textures)
+    instancing=hou.FolderParmTemplate('instancing','Instancing')
+    instancing.addParmTemplate(hou.StringParmTemplate('instances_viewport_mode','Viewport Instances',1,default_value=('houdini',),
+        menu_items=('houdini','manual'),menu_labels=('Match Houdini Viewport','Manual'),
+        help='Share of point instances the live EEVEE viewport draws. Match Houdini Viewport uses the Houdini viewport\'s point instancing percentage (Display Options); Manual uses Viewport (%).'))
+    instancing.addParmTemplate(hou.IntParmTemplate('instances_viewport','Viewport (%)',1,default_value=(100,),min=1,max=100,min_is_strict=True,max_is_strict=True,
+        disable_when='{ instances_viewport_mode != manual }',
+        help='Share of each point instancer\'s instances drawn in the live viewport. A fixed random subset is drawn.'))
+    instancing.addParmTemplate(hou.IntParmTemplate('instances_navigate','While Navigating (%)',1,default_value=(10,),min=1,max=100,min_is_strict=True,max_is_strict=True,
+        help='Share of instances drawn while the camera or scene changes, for instancers with 1000 or more instances. Blender processes every instance on each redraw; the settled image draws the viewport share.'))
+    instancing.addParmTemplate(hou.IntParmTemplate('instances_render','Final Render (%)',1,default_value=(100,),min=1,max=100,min_is_strict=True,max_is_strict=True,
+        help='Share of each point instancer\'s instances drawn in renders to disk and MPlay.'))
+    group.append(instancing)
     for key, label in [('render','Film & Motion'), ('image_settings','Image Encoding'), ('view_settings','Output Color')]:
         folder = hou.FolderParmTemplate(key, label)
         for p in SCHEMA['groups'][key]: folder.addParmTemplate(parameter(key, p))
@@ -227,6 +239,12 @@ def configuration(node):
         config['texture_limit'] = {'size':int(node.evalParm('texture_limit')),
                                    'viewport':bool(node.evalParm('texture_limit_viewport')),
                                    'render':bool(node.evalParm('texture_limit_render'))}
+    # Older HIPs can still cook before their HDA definition is upgraded.
+    if node.parm('instances_viewport_mode'):
+        config['instancing'] = {'viewport_mode':node.evalParm('instances_viewport_mode'),
+                                'viewport':node.evalParm('instances_viewport'),
+                                'navigate':node.evalParm('instances_navigate'),
+                                'render':node.evalParm('instances_render')}
     config['disable_dof'] = bool(node.evalParm('disable_dof'))
     config['output_multilayer'] = bool(node.evalParm('output_multilayer'))
     config['preview_pass'] = node.evalParm('preview_pass')
