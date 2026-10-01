@@ -94,7 +94,7 @@ bool ViewRequest::operator==(const ViewRequest &o) const {
         depth == o.depth && ids == o.ids && aovs == o.aovs && frame == o.frame &&
         targetSamples == o.targetSamples && raytracing == o.raytracing && upAxis == o.upAxis &&
         config == o.config && navigationScale == o.navigationScale && textureLimit == o.textureLimit &&
-        limitSurface == o.limitSurface;
+        limitSurface == o.limitSurface && navigationInstances == o.navigationInstances;
 }
 
 // ---------------------------------------------------------------- Renderer
@@ -197,6 +197,7 @@ Renderer::Job Renderer::Plan(const ViewRequest &request, uint64_t serial) {
         std::lock_guard<std::mutex> lock(_mutex);
         changed = ChangedLocked(request);
     }
+    job.navigating = changed;
     if (changed) {
         // Interactive change: one quick sample, smaller while navigating.
         _stepSamples = 0;
@@ -423,7 +424,9 @@ std::shared_ptr<const Frame> Renderer::Execute(const Job &job) {
         {"up_axis", r.upAxis}, {"raytracing", r.raytracing}, {"config", r.config},
         {"final_render", job.purpose == "final"}, {"revision", job.serial}, {"transport", "shm"},
         {"texture_limit", job.purpose == "final" ? 0 : r.textureLimit},
-        {"subdivision_limit_surface", job.purpose == "final" || r.limitSurface}};
+        {"subdivision_limit_surface", job.purpose == "final" || r.limitSurface},
+        {"navigating", job.navigating && job.purpose != "final"},
+        {"navigation_instances", r.navigationInstances}};
     if (job.purpose == "final") request["camera_samples"] = r.cameraSamples;
     _connection.SetTimeout(job.purpose == "final" ? 7200 : 900);
     _connection.Send(std::move(request));

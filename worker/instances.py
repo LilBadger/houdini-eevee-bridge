@@ -8,6 +8,24 @@ from mathutils import Matrix
 from protocol import array
 from shader_utils import INSTANCE_PREFIX
 
+NAVIGATION_FRACTION='Navigation fraction'
+# Instancers with fewer instances always draw all of them.
+DENSE_INSTANCES=1000
+
+
+def navigation(session, navigating, percent):
+    """Blender processes every instance on each redraw, on the CPU: 116,000 bubble
+    instances took 120 ms per navigation frame. While the view changes, dense
+    instancers draw a fixed random subset; settled and final frames draw all."""
+    fraction = min(max(percent, 1), 100) / 100. if navigating else 1.
+    for obj in session.point_instances.values():
+        if int(obj.get('usd_instance_count', 0)) < DENSE_INSTANCES:
+            continue
+        node = obj.modifiers[0].node_group.nodes.get(NAVIGATION_FRACTION) if obj.modifiers else None
+        if node is not None and node.outputs[0].default_value != fraction:
+            node.outputs[0].default_value = fraction
+
+
 def remove(worker,key):
     obj=worker.point_instances.pop(key,None)
     if obj is None:return
@@ -131,6 +149,12 @@ def sync(worker,key,prototype,transforms,visible):
         source.transform_space='ORIGINAL';source.inputs['As Instance'].default_value=False
         inst=tree.nodes.new('GeometryNodeInstanceOnPoints')
         tree.links.new(inp.outputs['Geometry'],inst.inputs['Points']);tree.links.new(source.outputs['Geometry'],inst.inputs['Instance'])
+        # While navigating, dense instancers draw a fixed random subset (see navigation()).
+        rnd=tree.nodes.new('FunctionNodeRandomValue');rnd.data_type='FLOAT';rnd.inputs['Seed'].default_value=7
+        fraction=tree.nodes.new('ShaderNodeValue');fraction.name=NAVIGATION_FRACTION;fraction.outputs[0].default_value=1.
+        keep=tree.nodes.new('FunctionNodeCompare');keep.data_type='FLOAT';keep.operation='LESS_EQUAL'
+        tree.links.new(rnd.outputs['Value'],keep.inputs['A']);tree.links.new(fraction.outputs[0],keep.inputs['B'])
+        tree.links.new(keep.outputs['Result'],inst.inputs['Selection'])
         matrix=tree.nodes.new('GeometryNodeInputNamedAttribute');matrix.data_type='FLOAT4X4';matrix.inputs['Name'].default_value='usd_instance_transform'
         transform=tree.nodes.new('GeometryNodeSetInstanceTransform')
         tree.links.new(inst.outputs['Instances'],transform.inputs['Instances'])

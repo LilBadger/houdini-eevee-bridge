@@ -35,6 +35,7 @@ struct ViewRequest {
     int navigationScale = 2;
     int textureLimit = 0;                    // pixels; 0 = full resolution
     bool limitSurface = false;               // exact subdivision surfaces in the viewport
+    int navigationInstances = 10;            // % of dense point instances drawn while navigating
 
     bool operator==(const ViewRequest &other) const;
     bool operator!=(const ViewRequest &other) const { return !(*this == other); }
@@ -81,6 +82,7 @@ private:
         int scale = 1;
         bool allowPreview = false;
         double idleMs = 0.0;     // render thread idle before this job (trace)
+        bool navigating = false; // the view or scene changed since the last frame
     };
     using Clock = std::chrono::steady_clock;
 

@@ -781,6 +781,8 @@ class Session:
         else:
             limit = 0 if final else int(request.get('texture_limit', 0) or 0)
         self.worker.set_texture_limit(limit)
+        instance_nodes.navigation(self, not final and bool(request.get('navigating', request.get('purpose') == 'navigate')),
+                             int(request.get('navigation_instances', 10) or 10))
         with bpy.context.temp_override(window=self.worker.window, area=self.worker.eevee_area,
                                        region=self.worker.eevee_region):
             self.view_layer.depsgraph.update()

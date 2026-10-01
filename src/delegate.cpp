@@ -125,6 +125,7 @@ void EeveePass::_Execute(const HdRenderPassStateSharedPtr &pass, const TfTokenVe
         request.textureLimit = studio && *studio ? std::max(0, std::atoi(studio)) : 1024;
     }
     request.limitSurface = _owner->GetRenderSetting<int>(TfToken("eeveeSubdivisionAccuracy"), 0) == 1;
+    request.navigationInstances = std::clamp(_owner->GetRenderSetting<int>(TfToken("eeveeNavigationInstances"), 10), 1, 100);
     if (const HdCamera *camera = pass->GetCamera()) {
         // Lens values are in world units; depth of field is on when F-Stop > 0.
         request.camera = {{"fstop", camera->GetFStop()}, {"focus_distance", camera->GetFocusDistance()},
@@ -266,6 +267,7 @@ public:
                 {"Texture Size Limit (0 default 1024, 1 8192, 2 4096, 3 2048, 4 1024, 5 full)", TfToken("eeveeTextureLimit"), VtValue(0)},
                 {"Subdivision Surfaces (0 fast cage, 1 exact limit surface)", TfToken("eeveeSubdivisionAccuracy"), VtValue(0)},
                 {"Keep EEVEE Loaded When Switching Renderers", TfToken("eeveeKeepLoaded"), VtValue(false)},
+                {"Dense Instances While Navigating (%)", TfToken("eeveeNavigationInstances"), VtValue(10)},
                 {"EEVEE Stage Configuration", TfToken("eevee:config"), VtValue(std::string())}};
     }
     void SetRenderSetting(const TfToken &key, const VtValue &value) override {
