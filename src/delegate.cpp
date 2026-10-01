@@ -116,13 +116,13 @@ void EeveePass::_Execute(const HdRenderPassStateSharedPtr &pass, const TfTokenVe
     // Menu index: 0 full, 1 half, 2 third, 3 quarter resolution while navigating.
     request.navigationScale = std::clamp(_owner->GetRenderSetting<int>(TfToken("eeveeNavigationScale"), 1), 0, 3) + 1;
     request.frame = _owner->GetRenderSetting<double>(TfToken("houdini:frame"), 1.0);
-    // Menu index: 0 default (HDEEVEE_TEXTURE_LIMIT, else 2048), then 8192 ... 1024, 5 full resolution.
+    // Menu index: 0 default (HDEEVEE_TEXTURE_LIMIT, else 1024), then 8192 ... 1024, 5 full resolution.
     // EEVEE Render Settings' texture options, when present in eevee:config, take precedence.
     static const int kTextureLimits[] = {-1, 8192, 4096, 2048, 1024, 0};
     request.textureLimit = kTextureLimits[std::clamp(_owner->GetRenderSetting<int>(TfToken("eeveeTextureLimit"), 0), 0, 5)];
     if (request.textureLimit < 0) {
         const char *studio = std::getenv("HDEEVEE_TEXTURE_LIMIT");
-        request.textureLimit = studio && *studio ? std::max(0, std::atoi(studio)) : 2048;
+        request.textureLimit = studio && *studio ? std::max(0, std::atoi(studio)) : 1024;
     }
     request.limitSurface = _owner->GetRenderSetting<int>(TfToken("eeveeSubdivisionAccuracy"), 0) == 1;
     if (const HdCamera *camera = pass->GetCamera()) {
@@ -183,7 +183,7 @@ public:
     explicit EeveeDelegate(const HdRenderSettingsMap &settings)
         : HdRenderDelegate(settings), _registry(std::make_shared<HdResourceRegistry>()),
           _renderer(std::make_unique<Renderer>(&_state)) {
-        fprintf(stderr, "[EEVEE] Native Hydra delegate created (0.7.4)\n");
+        fprintf(stderr, "[EEVEE] Native Hydra delegate created (0.7.5)\n");
         auto it = settings.find(TfToken("eevee:config"));
         if (it != settings.end() && it->second.IsHolding<std::string>() && !it->second.UncheckedGet<std::string>().empty()) {
             const Json config = Json::parse(it->second.UncheckedGet<std::string>(), nullptr, false);
@@ -263,8 +263,9 @@ public:
                 {"EEVEE Ray Tracing", TfToken("eeveeRaytracing"), VtValue(true)},
                 {"Scene Up Axis (0=Y, 1=Z)", TfToken("eeveeUpAxis"), VtValue(0)},
                 {"Navigation Resolution (0 full, 1 half, 2 third, 3 quarter)", TfToken("eeveeNavigationScale"), VtValue(1)},
-                {"Texture Size Limit (0 default 2048, 1 8192, 2 4096, 3 2048, 4 1024, 5 full)", TfToken("eeveeTextureLimit"), VtValue(0)},
+                {"Texture Size Limit (0 default 1024, 1 8192, 2 4096, 3 2048, 4 1024, 5 full)", TfToken("eeveeTextureLimit"), VtValue(0)},
                 {"Subdivision Surfaces (0 fast cage, 1 exact limit surface)", TfToken("eeveeSubdivisionAccuracy"), VtValue(0)},
+                {"Keep EEVEE Loaded When Switching Renderers", TfToken("eeveeKeepLoaded"), VtValue(false)},
                 {"EEVEE Stage Configuration", TfToken("eevee:config"), VtValue(std::string())}};
     }
     void SetRenderSetting(const TfToken &key, const VtValue &value) override {
@@ -274,6 +275,18 @@ public:
             trace << Json({{"event", "delegate_setting"}, {"key", key.GetString()}, {"value", ValueJson(value)}}).dump() << '\n';
         }
         HdRenderDelegate::SetRenderSetting(key, value);
+        if (key == TfToken("eeveeKeepLoaded")) {
+            // Houdini's worker supervisor and the worker read this to keep the
+            // worker, its scene and compiled shaders while other renderers show.
+            const auto session = hde::environmentPath("HDEEVEE_SESSION_DIR");
+            const bool keep = value.IsHolding<bool>() ? value.UncheckedGet<bool>()
+                            : value.IsHolding<int>() && value.UncheckedGet<int>() != 0;
+            if (!session.empty()) {
+                std::ofstream out(session / "keep_loaded");
+                out << (keep ? "1" : "0");
+            }
+            return;
+        }
         if (key == TfToken("eevee:config")) {
             const std::string text = value.IsHolding<std::string>() ? value.UncheckedGet<std::string>() : std::string();
             const Json config = text.empty() ? Json() : Json::parse(text, nullptr, false);

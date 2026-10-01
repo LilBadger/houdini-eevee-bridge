@@ -184,9 +184,9 @@ def template_group():
         help='Reduce uniform subdivision to keep each mesh within this face budget. Does not remove base geometry. Zero disables this limit; dense meshes may require substantial GPU memory.'))
     group.append(geometry)
     textures=hou.FolderParmTemplate('textures','Textures')
-    textures.addParmTemplate(hou.StringParmTemplate('texture_limit','Texture Size Limit',1,default_value=('2048',),
+    textures.addParmTemplate(hou.StringParmTemplate('texture_limit','Texture Size Limit',1,default_value=('1024',),
         menu_items=('8192','4096','2048','1024','512'),menu_labels=('8192','4096','2048','1024','512'),
-        help='Largest texture side on the GPU, in pixels. Larger textures are scaled down keeping their aspect ratio; the files are not changed. A 4K texture at 2048 needs a quarter of the video memory.'))
+        help='Largest texture side on the GPU, in pixels. Larger textures are scaled down keeping their aspect ratio; the files are not changed. A 4K texture at 1024 needs a sixteenth of the video memory.'))
     textures.addParmTemplate(hou.ToggleParmTemplate('texture_limit_viewport','Limit in Viewport',default_value=True,
         help='Apply the limit in the live EEVEE viewport.'))
     textures.addParmTemplate(hou.ToggleParmTemplate('texture_limit_render','Limit in Final Render',default_value=False,

@@ -30,12 +30,21 @@ from protocol import (PROTOCOL, SUPPORTED, ProtocolError, read_frame, send_frame
                       remove_stale_segments)
 from session import Session
 
-VERSION = '0.7.4'
+VERSION = '0.7.5'
 # Houdini's supervisor (tools/hde_installation.py) sets this: once no viewport has
 # been connected for this many seconds, the worker exits so that all of its GPU
 # memory returns to the driver, for Karma XPU for example. The supervisor starts a
 # new worker when a viewport shows EEVEE again. 0 keeps the worker running.
 IDLE_EXIT_SECONDS = float(os.environ.get('HDEEVEE_IDLE_EXIT_SECONDS') or 0)
+
+
+def keep_loaded():
+    """The viewport option Keep EEVEE Loaded When Switching Renderers."""
+    session = os.environ.get('HDEEVEE_SESSION_DIR')
+    try:
+        return bool(session) and open(os.path.join(session, 'keep_loaded')).read().strip() == '1'
+    except OSError:
+        return False
 SETTING_GROUPS = ('eevee', 'eevee.ray_tracing_options', 'render', 'render.image_settings',
                   'view_settings', 'display_settings')
 
@@ -255,7 +264,8 @@ class Server:
         if self.worker.sessions:
             self.used, self.unused_since = True, None
             return False
-        if IDLE_EXIT_SECONDS <= 0 or not self.used:
+        if IDLE_EXIT_SECONDS <= 0 or not self.used or keep_loaded():
+            self.unused_since = None
             return False
         now = time.monotonic()
         if self.unused_since is None:
