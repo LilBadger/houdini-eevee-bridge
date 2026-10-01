@@ -13,7 +13,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.7.5'
+VERSION = '0.7.6'
 
 
 def settings(environment=None):

@@ -5,6 +5,7 @@ nested lists (protocol 1). No per-face or per-corner Python loops are used.
 Faces Blender cannot represent (fewer than three corners, or a corner repeating
 its neighbour) are skipped together with their face-varying/uniform data.
 """
+import math
 import bpy
 import numpy as np
 from mathutils import Matrix
@@ -90,6 +91,9 @@ def set_positions(mesh, points):
     # The position attribute is contiguous; MeshVertex.co goes through RNA per
     # element and is about 100x slower for millions of points.
     mesh.attributes['position'].data.foreach_set('vector', np.ascontiguousarray(points, dtype=np.float32).ravel())
+
+
+AUTO_SMOOTH_ANGLE = math.radians(60.)
 
 
 def set_flat(mesh, flat):
@@ -206,7 +210,14 @@ def sync(session, update):
             except ValueError as exc:
                 session.warn(key, str(exc) + '; using computed normals')
                 remove_attribute(mesh, 'custom_normal')
-        set_flat(mesh, not (has_normals or topology.smooth))
+        if has_normals or topology.smooth:
+            set_flat(mesh, False)
+            remove_attribute(mesh, 'sharp_edge')
+        else:
+            # Without authored normals Karma, like Houdini's Normal SOP, smooths
+            # edges flatter than 60 degrees and keeps sharper ones hard.
+            set_flat(mesh, False)
+            mesh.set_sharp_from_angle(angle=AUTO_SMOOTH_ANGLE)
     if names_changed and topology is not None:
         mark_present(session, key, mesh)
     if 'subsets' in update:

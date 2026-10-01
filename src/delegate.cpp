@@ -5,6 +5,7 @@
 #include <pxr/base/tf/registryManager.h>
 #include <pxr/base/tf/type.h>
 #include <pxr/imaging/hd/aov.h>
+#include <pxr/imaging/hd/extComputation.h>
 #include <pxr/imaging/hd/renderIndex.h>
 #include <pxr/imaging/hd/renderPass.h>
 #include <pxr/imaging/hd/renderPassState.h>
@@ -184,7 +185,7 @@ public:
     explicit EeveeDelegate(const HdRenderSettingsMap &settings)
         : HdRenderDelegate(settings), _registry(std::make_shared<HdResourceRegistry>()),
           _renderer(std::make_unique<Renderer>(&_state)) {
-        fprintf(stderr, "[EEVEE] Native Hydra delegate created (0.7.5)\n");
+        fprintf(stderr, "[EEVEE] Native Hydra delegate created (0.7.6)\n");
         auto it = settings.find(TfToken("eevee:config"));
         if (it != settings.end() && it->second.IsHolding<std::string>() && !it->second.UncheckedGet<std::string>().empty()) {
             const Json config = Json::parse(it->second.UncheckedGet<std::string>(), nullptr, false);
@@ -201,7 +202,7 @@ public:
     const TfTokenVector &GetSupportedSprimTypes() const override {
         static TfTokenVector t = {HdPrimTypeTokens->camera, HdPrimTypeTokens->material, HdPrimTypeTokens->rectLight,
             HdPrimTypeTokens->diskLight, HdPrimTypeTokens->distantLight, HdPrimTypeTokens->sphereLight,
-            HdPrimTypeTokens->cylinderLight, HdPrimTypeTokens->domeLight};
+            HdPrimTypeTokens->cylinderLight, HdPrimTypeTokens->domeLight, HdPrimTypeTokens->extComputation};
         return t;
     }
     const TfTokenVector &GetSupportedBprimTypes() const override {
@@ -227,6 +228,8 @@ public:
     HdSprim *CreateSprim(const TfToken &t, const SdfPath &id) override {
         if (t == HdPrimTypeTokens->camera) return new EeveeCamera(id, &_state);
         if (t == HdPrimTypeTokens->material) return new EeveeMaterial(id, &_state);
+        // UsdSkel skinning and other deformers: evaluated on the CPU by the prims using them.
+        if (t == HdPrimTypeTokens->extComputation) return new HdExtComputation(id);
         return new EeveeLight(id, t, &_state);
     }
     // Fallback prims have empty paths; their destructors queue nothing.

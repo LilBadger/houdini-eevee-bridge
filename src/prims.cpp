@@ -10,6 +10,7 @@
 #include <pxr/usd/sdf/assetPath.h>
 #include <pxr/usd/sdf/layer.h>
 #include <pxr/imaging/hd/changeTracker.h>
+#include <pxr/imaging/hd/extComputationUtils.h>
 #include <pxr/imaging/hd/geomSubsetSchema.h>
 #include <pxr/imaging/hd/materialBindingSchema.h>
 #include <pxr/imaging/hd/materialBindingsSchema.h>
@@ -211,7 +212,8 @@ bool SyncPrimvarsTo(HdSceneDelegate *d, const SdfPath &id, SentArrays &sent, std
     for (int i = HdInterpolationConstant; i <= HdInterpolationFaceVarying; ++i) {
         for (const auto &desc : d->GetPrimvarDescriptors(id, HdInterpolation(i))) {
             const std::string name = desc.name.GetString();
-            if (skip.count(name)) continue;
+            // UsdSkel's joint influences feed the skinning computation, not shading.
+            if (skip.count(name) || name.rfind("skel:", 0) == 0) continue;
             const VtValue value = d->Get(id, desc.name);
             BlobPtr blob;
             Json *target = &attributes;
@@ -287,6 +289,53 @@ Json CategoriesJson(HdSceneDelegate *d, const SdfPath &id) {
     Json result = Json::array();
     for (const TfToken &category : d->GetCategories(id)) result.push_back(category.GetString());
     return result;
+}
+
+// UsdSkel skinning (and other deformers) deliver points as ext computations,
+// which the render delegate evaluates on the CPU.
+HdExtComputationPrimvarDescriptorVector ComputedPrimvars(HdSceneDelegate *d, const SdfPath &id, const TfToken &name) {
+    HdExtComputationPrimvarDescriptorVector result;
+    for (const auto &descriptor : d->GetExtComputationPrimvarDescriptors(id, HdInterpolationVertex))
+        if (descriptor.name == name) result.push_back(descriptor);
+    return result;
+}
+
+// Karma object properties with Blender equivalents: holdout (matte) and render
+// visibility per ray type ("-primary": not seen by the camera, still casting shadows).
+void KarmaObjectProperties(HdSceneDelegate *d, const SdfPath &id, Json &json) {
+    bool holdout = false;
+    const VtValue h = d->Get(id, TfToken("karma:object:holdout"));
+    if (h.IsHolding<int>()) holdout = h.UncheckedGet<int>() != 0;
+    else if (h.IsHolding<bool>()) holdout = h.UncheckedGet<bool>();
+    else if (h.IsHolding<VtIntArray>() && !h.UncheckedGet<VtIntArray>().empty()) holdout = h.UncheckedGet<VtIntArray>()[0] != 0;
+    json["holdout"] = holdout;
+    std::string mask;
+    const VtValue v = d->Get(id, TfToken("karma:object:rendervisibility"));
+    if (v.IsHolding<std::string>()) mask = v.UncheckedGet<std::string>();
+    else if (v.IsHolding<TfToken>()) mask = v.UncheckedGet<TfToken>().GetString();
+    else if (v.IsHolding<VtStringArray>() && !v.UncheckedGet<VtStringArray>().empty()) mask = v.UncheckedGet<VtStringArray>()[0];
+    static const std::vector<std::pair<std::string, std::string>> kRays = {{"primary", "camera"}, {"shadow", "shadow"},
+        {"diffuse", "diffuse"}, {"reflect", "glossy"}, {"refract", "transmission"}, {"volume", "volume"}};
+    std::map<std::string, bool> rays;
+    for (const auto &[karma, blender] : kRays) rays[blender] = true;
+    std::vector<std::string> tokens;
+    std::string token;
+    for (char c : mask + " ") {
+        if (c == ' ' || c == ',' || c == '\t') { if (!token.empty()) tokens.push_back(token); token.clear(); }
+        else token += c;
+    }
+    // Unsigned names list the only ray types that see the object.
+    for (const auto &t : tokens)
+        if (t != "*" && t[0] != '+' && t[0] != '-') { for (auto &[name, on] : rays) on = false; break; }
+    for (const auto &t : tokens) {
+        if (t == "*") { for (auto &[name, on] : rays) on = true; continue; }
+        const bool on = t[0] != '-';
+        const std::string name = (t[0] == '+' || t[0] == '-') ? t.substr(1) : t;
+        for (const auto &[karma, blender] : kRays) if (karma == name) rays[blender] = on;
+    }
+    Json visibility = Json::object();
+    for (const auto &[name, on] : rays) visibility[name] = on;
+    json["ray_visibility"] = visibility;
 }
 
 const std::set<std::string> kMeshSkip = {"points", "normals", "velocities", "accelerations", "v", "accel"};
@@ -613,13 +662,27 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
         for (const auto &name : _primvars) _sent.Forget("pv:" + name);
     }
     if (force || (*bits & HdChangeTracker::DirtyPoints)) {
-        const VtValue points = GetPoints(d);
+        const auto computed = ComputedPrimvars(d, id, HdTokens->points);
+        VtValue points;
+        if (!computed.empty()) {
+            const auto values = HdExtComputationUtils::GetComputedPrimvarValues(computed, d);
+            const auto it = values.find(HdTokens->points);
+            if (it != values.end()) points = it->second;
+        }
+        if (points.IsEmpty()) points = GetPoints(d);
         BlobPtr blob = Vec3Blob(points);
         if (!blob) blob = CopyBlob(std::vector<float>{}, "f4", {0, 3});
         if (_sent.Changed("points", blob->hash) || force) change.json["points"] = change.Ref(blob);
         if (extent > 0.f) {
             HdTimeSampleArray<VtValue, 4> samples;
-            d->SamplePrimvar(id, HdTokens->points, -extent, extent, &samples);
+            if (!computed.empty()) {
+                HdExtComputationUtils::SampledValueStore<4> store;
+                HdExtComputationUtils::SampleComputedPrimvarValues<4>(computed, d, -extent, extent, 4, &store);
+                const auto it = store.find(HdTokens->points);
+                if (it != store.end()) samples = it->second;
+            } else {
+                d->SamplePrimvar(id, HdTokens->points, -extent, extent, &samples);
+            }
             Json values = Json::array();
             if (samples.count >= 2)
                 for (size_t i = 0; i < samples.count; ++i)
@@ -670,6 +733,7 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
     if (first || (*bits & HdChangeTracker::DirtyVisibility)) change.json["visible"] = d->GetVisible(id);
     if (first || (*bits & HdChangeTracker::DirtyMaterialId)) change.json["material"] = d->GetMaterialId(id).GetString();
     if (first || (*bits & HdChangeTracker::DirtyCategories)) change.json["categories"] = CategoriesJson(d, id);
+    if (first || (*bits & HdChangeTracker::DirtyPrimvar)) KarmaObjectProperties(d, id, change.json);
     _synced = true;
     if (change.json.size() > 2) _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;
@@ -696,6 +760,7 @@ void EeveeCurves::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"transform", MatrixJson(d->GetTransform(id))},
         {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()},
         {"categories", CategoriesJson(d, id)}};
+    KarmaObjectProperties(d, id, change.json);
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
     // Curves are re-sent whole, so every primvar is sent with them.
@@ -724,6 +789,7 @@ void EeveePoints::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"points", change.Ref(points)}, {"transform", MatrixJson(d->GetTransform(id))},
         {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()},
         {"categories", CategoriesJson(d, id)}};
+    KarmaObjectProperties(d, id, change.json);
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
     SentArrays sent;
