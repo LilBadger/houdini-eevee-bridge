@@ -9,6 +9,13 @@
 #include <pxr/base/gf/vec3d.h>
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec4f.h>
+#include <pxr/base/gf/vec4i.h>
+#include <pxr/base/gf/vec4h.h>
+#include <pxr/base/gf/vec4d.h>
+#include <pxr/base/gf/vec3i.h>
+#include <pxr/base/gf/vec2i.h>
+#include <pxr/base/gf/vec2h.h>
+#include <pxr/base/gf/half.h>
 #include <pxr/usd/sdf/assetPath.h>
 #include <pxr/usd/sdf/layer.h>
 #include <pxr/imaging/hd/changeTracker.h>
@@ -206,6 +213,47 @@ void QueueDelete(BridgeState *state, const SdfPath &id, const char *kind) {
 /// Send float, float2 and float3 primvars as "attributes" and "uvs". Unchanged
 /// arrays are skipped unless forced. Also reports displayColor as "color" and
 /// whether it varies over the prim ("color_varying"). Returns true if sent.
+namespace {
+double Component(float v, int) { return v; }
+double Component(double v, int) { return v; }
+double Component(int v, int) { return v; }
+double Component(bool v, int) { return v ? 1. : 0.; }
+double Component(GfHalf v, int) { return float(v); }
+template <class V> double Component(const V &v, int c) { return double(v[c]); }
+
+template <class T, int N>
+int CopyComponents(const VtValue &value, std::vector<float> &out) {
+    const auto &a = value.UncheckedGet<VtArray<T>>();
+    out.resize(a.size() * N);
+    for (size_t i = 0; i < a.size(); ++i)
+        for (int c = 0; c < N; ++c) out[i * N + c] = float(Component(a[i], c));
+    return N;
+}
+
+template <class T, int N>
+int CopyScalar(const VtValue &value, std::vector<float> &out) {
+    return CopyComponents<T, N>(VtValue(VtArray<T>(1, value.UncheckedGet<T>())), out);
+}
+} // namespace
+
+/// Flattens a numeric primvar (array or single value; float, double, half, int or bool
+/// scalars and vectors) to floats. Returns the components per element, 0 if unsupported.
+/// Houdini authors integer ids and masks, half colors and RGBA colors; all are shading data.
+int PrimvarComponents(const VtValue &value, std::vector<float> &out) {
+#define HDE_ARRAY(T, N) if (value.IsHolding<VtArray<T>>()) return CopyComponents<T, N>(value, out);
+#define HDE_SCALAR(T, N) if (value.IsHolding<T>()) return CopyScalar<T, N>(value, out);
+    HDE_ARRAY(float, 1) HDE_ARRAY(double, 1) HDE_ARRAY(GfHalf, 1) HDE_ARRAY(int, 1) HDE_ARRAY(bool, 1)
+    HDE_ARRAY(GfVec2f, 2) HDE_ARRAY(GfVec2d, 2) HDE_ARRAY(GfVec2h, 2) HDE_ARRAY(GfVec2i, 2)
+    HDE_ARRAY(GfVec3f, 3) HDE_ARRAY(GfVec3d, 3) HDE_ARRAY(GfVec3h, 3) HDE_ARRAY(GfVec3i, 3)
+    HDE_ARRAY(GfVec4f, 4) HDE_ARRAY(GfVec4d, 4) HDE_ARRAY(GfVec4h, 4) HDE_ARRAY(GfVec4i, 4)
+    HDE_SCALAR(float, 1) HDE_SCALAR(double, 1) HDE_SCALAR(GfHalf, 1) HDE_SCALAR(int, 1) HDE_SCALAR(bool, 1)
+    HDE_SCALAR(GfVec2f, 2) HDE_SCALAR(GfVec2d, 2) HDE_SCALAR(GfVec3f, 3) HDE_SCALAR(GfVec3d, 3)
+    HDE_SCALAR(GfVec3h, 3) HDE_SCALAR(GfVec4f, 4) HDE_SCALAR(GfVec4d, 4)
+#undef HDE_ARRAY
+#undef HDE_SCALAR
+    return 0;
+}
+
 bool SyncPrimvarsTo(HdSceneDelegate *d, const SdfPath &id, SentArrays &sent, std::set<std::string> &previous,
                     Change &change, bool force, const std::set<std::string> &skip) {
     Json uvs = Json::object(), attributes = Json::object();
@@ -223,7 +271,16 @@ bool SyncPrimvarsTo(HdSceneDelegate *d, const SdfPath &id, SentArrays &sent, std
             if ((blob = Vec2Blob(value))) target = &uvs;
             else if ((blob = FloatBlob(value))) type = "FLOAT";
             else if ((blob = Vec3Blob(value))) type = "FLOAT_VECTOR";
-            else continue;
+            else {
+                std::vector<float> flat;
+                const int components = PrimvarComponents(value, flat);
+                if (!components) continue;
+                const int64_t count = int64_t(flat.size() / components);
+                if (components == 1) blob = CopyBlob(flat, "f4", {count});
+                else blob = CopyBlob(flat, "f4", {count, components});
+                if (components == 2) target = &uvs;
+                else type = components == 1 ? "FLOAT" : components == 3 ? "FLOAT_VECTOR" : "FLOAT_COLOR";
+            }
             names.insert(name);
             // Interpolation is part of the identity: the same values on a
             // different domain produce different Blender data.
@@ -466,36 +523,11 @@ VtMatrix4dArray EeveeInstancer::Transforms(const SdfPath &prototype, int depth, 
     return result;
 }
 
+
 namespace {
-double Component(float v, int) { return v; }
-double Component(double v, int) { return v; }
-double Component(int v, int) { return v; }
-template <class V> double Component(const V &v, int c) { return v[c]; }
-
-template <class T, int N>
-int CopyComponents(const VtValue &value, std::vector<float> &out) {
-    const auto &a = value.UncheckedGet<VtArray<T>>();
-    out.resize(a.size() * N);
-    for (size_t i = 0; i < a.size(); ++i)
-        for (int c = 0; c < N; ++c) out[i * N + c] = float(Component(a[i], c));
-    return N;
-}
-
-/// Flattens a primvar array to floats. Returns the components per element, 0 if unsupported.
-int PrimvarComponents(const VtValue &value, std::vector<float> &out) {
-    if (value.IsHolding<VtFloatArray>()) return CopyComponents<float, 1>(value, out);
-    if (value.IsHolding<VtDoubleArray>()) return CopyComponents<double, 1>(value, out);
-    if (value.IsHolding<VtIntArray>()) return CopyComponents<int, 1>(value, out);
-    if (value.IsHolding<VtVec2fArray>()) return CopyComponents<GfVec2f, 2>(value, out);
-    if (value.IsHolding<VtVec3fArray>()) return CopyComponents<GfVec3f, 3>(value, out);
-    if (value.IsHolding<VtVec3dArray>()) return CopyComponents<GfVec3d, 3>(value, out);
-    if (value.IsHolding<VtVec4fArray>()) return CopyComponents<GfVec4f, 4>(value, out);
-    return 0;
-}
-
 // Instancer data that is not a shading primvar.
 const std::set<std::string> kInstanceSkip = {"velocities", "accelerations", "angularVelocities", "v", "accel", "w",
-                                             "ids", "invisibleIds", "protoIndices", "orientations", "scales", "positions"};
+                                             "ids", "invisibleIds", "protoIndices", "orientations", "orientationsf", "scales", "positions"};
 } // namespace
 
 // Like Transforms(), instances are ordered outermost-major. The primvars of the
@@ -822,6 +854,18 @@ void EeveeLight::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits) {
         auto v = ValueJson(d->GetLightParamValue(id, TfToken(key)));
         if (!v.is_null()) params[key] = v;
     }
+    // Renderer inputs such as Karma's are not Hydra light params; they are parameters
+    // of the light's shader network node.
+    const VtValue resource = d->GetMaterialResource(id);
+    if (resource.IsHolding<HdMaterialNetworkMap>())
+        for (const auto &[terminal, network] : resource.UncheckedGet<HdMaterialNetworkMap>().map)
+            for (const auto &node : network.nodes)
+                for (const char *key : {"karma:light:singlesided", "karma:light:renderlightgeo"}) {
+                    const auto it = node.parameters.find(TfToken(key));
+                    if (it == node.parameters.end() || params.contains(key)) continue;
+                    auto v = ValueJson(it->second);
+                    if (!v.is_null()) params[key] = v;
+                }
     // Light and shadow linking: the collection each link uses. Prims list the
     // collections that include them as categories (see CategoriesJson).
     for (const TfToken &key : {HdTokens->lightLink, HdTokens->shadowLink}) {

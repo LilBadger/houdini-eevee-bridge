@@ -16,7 +16,7 @@ from protocol import array
 DEFAULT_WIDTH = .01
 HANDLE_FREE = 0
 KNOTS_NORMAL = 0
-COLUMNS = {'FLOAT': None, 'FLOAT2': 2, 'FLOAT_VECTOR': 3}
+COLUMNS = {'FLOAT': None, 'FLOAT2': 2, 'FLOAT_VECTOR': 3, 'FLOAT_COLOR': 4}
 RESERVED = {'position', 'radius', 'handle_left', 'handle_right', 'handle_type_left', 'handle_type_right',
             'curve_type', 'nurbs_order', 'knots_mode', 'nurbs_weight', 'resolution', 'cyclic'}
 
@@ -180,7 +180,7 @@ def write(data, name, data_type, domain, values):
         data.attributes.remove(existing)
         existing = None
     attribute = existing or data.attributes.new(name, data_type, domain)
-    prop = 'value' if data_type in ('FLOAT', 'INT8', 'INT', 'BOOLEAN') else 'vector'
+    prop = 'value' if data_type in ('FLOAT', 'INT8', 'INT', 'BOOLEAN') else 'color' if data_type == 'FLOAT_COLOR' else 'vector'
     if data_type in ('INT8', 'INT'):
         values = np.asarray(values, dtype=np.int32)   # RNA integer arrays are 32-bit
     attribute.data.foreach_set(prop, np.ascontiguousarray(values).ravel())
@@ -238,10 +238,17 @@ def sync(session, update):
     write(data, 'cyclic', 'BOOLEAN', 'CURVE', np.full(len(wanted), curves_shape.cyclic))
     widths = update.get('widths')
     widths = array([DEFAULT_WIDTH] if widths is None or not len(widths) else widths, np.float32).reshape(-1)
-    interpolation = update.get('widths_interpolation') or ('constant' if len(widths) == 1 else 'vertex')
+    # A single width applies to every point, whatever interpolation it was authored with.
+    interpolation = 'constant' if len(widths) == 1 else update.get('widths_interpolation') or 'vertex'
     if interpolation == 'vertex' and len(indices) and len(widths) != len(points):
         widths = widths[indices]
-    domain, widths = to_domain(widths, interpolation, curves_shape, len(points), len(counts), key + ' widths')
+    try:
+        domain, widths = to_domain(widths, interpolation, curves_shape, len(points), len(counts), key + ' widths')
+    except ValueError as exc:
+        # Malformed widths must not cost the curves their other attributes.
+        session.warn(key, str(exc) + '; using the default width')
+        domain, widths = to_domain(np.array([DEFAULT_WIDTH], np.float32), 'constant', curves_shape, len(points),
+                                   len(counts), key + ' widths')
     radius = np.maximum(widths, 0) * .5
     if domain == 'CURVE':
         radius = np.repeat(radius, wanted)

@@ -12,7 +12,7 @@ import curves
 import instances as instance_nodes
 
 DEFAULT_WIDTH = 1.0   # USD/Hydra fallback when widths is not authored
-COLUMNS = {'FLOAT': None, 'FLOAT2': 2, 'FLOAT_VECTOR': 3}
+COLUMNS = {'FLOAT': None, 'FLOAT2': 2, 'FLOAT_VECTOR': 3, 'FLOAT_COLOR': 4}
 RESERVED = {'position', 'radius'}
 
 
@@ -32,7 +32,7 @@ def write(cloud, name, data_type, values):
         cloud.attributes.remove(existing)
         existing = None
     attribute = existing or cloud.attributes.new(name, data_type, 'POINT')
-    prop = 'value' if data_type == 'FLOAT' else 'vector'
+    prop = 'value' if data_type == 'FLOAT' else 'color' if data_type == 'FLOAT_COLOR' else 'vector'
     attribute.data.foreach_set(prop, np.ascontiguousarray(values, dtype=np.float32).ravel())
 
 
@@ -52,8 +52,15 @@ def sync(session, update):
         cloud.attributes['position'].data.foreach_set('vector', points.ravel())
         widths = update.get('widths')
         widths = array([DEFAULT_WIDTH] if widths is None or not len(widths) else widths, np.float32)
-        interpolation = update.get('widths_interpolation') or ('constant' if len(widths) == 1 else 'vertex')
-        write(cloud, 'radius', 'FLOAT', np.maximum(per_point(widths, interpolation, count, key + ' widths'), 0) * .5)
+        # A single width applies to every point, whatever interpolation it was authored with.
+        interpolation = 'constant' if len(widths) == 1 else update.get('widths_interpolation') or 'vertex'
+        try:
+            radius = np.maximum(per_point(widths, interpolation, count, key + ' widths'), 0) * .5
+        except ValueError as exc:
+            # Malformed widths must not cost the points their other attributes.
+            session.warn(key, str(exc) + '; using the default width')
+            radius = np.full(count, DEFAULT_WIDTH * .5, np.float32)
+        write(cloud, 'radius', 'FLOAT', radius)
     exported = session.exported_attributes.setdefault(key, {})
     written = {}
     for group in ('uvs', 'attributes'):

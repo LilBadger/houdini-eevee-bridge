@@ -27,6 +27,9 @@ def apply(scene, config):
                 raise ValueError('Unknown EEVEE setting: ' + group + '.' + name)
             prop = owner.bl_rna.properties[name]
             if prop.type == 'BOOLEAN': value = bool(value)
+            # Strand curves ignore USD widths (hair-thin lines). EEVEE Render Settings
+            # nodes made before Cylinder became the default still store it.
+            if group == 'render' and name == 'hair_type' and value == 'STRAND': value = 'CYLINDER'
             if group == 'image_settings' and name == 'color_depth':
                 format = owner.file_format
                 choices = ('16','32') if format.startswith('OPEN_EXR') else ('8','16') if format in ('PNG','TIFF') else ('8',)

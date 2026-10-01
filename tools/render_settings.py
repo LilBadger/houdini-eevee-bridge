@@ -31,6 +31,9 @@ def render_command():
 # Defaults that differ from Blender's, to match Karma: USD curves are round
 # tubes of their widths, while Blender's default strands are thin lines.
 DEFAULTS = {('render', 'hair_type'): 'CYLINDER'}
+# Blender's Strand curve shape draws hair-thin lines that ignore USD curve widths, so
+# it can never match Karma; scenes that stored it render as Cylinder (render_config).
+HIDDEN_CHOICES = {('render', 'hair_type', 'STRAND')}
 
 
 def parm_name(group, name):
@@ -43,9 +46,9 @@ def parameter(group, p):
     if p['type'] == 'BOOLEAN':
         result = hou.ToggleParmTemplate(name, p['label'], default_value=default, **common)
     elif p['type'] == 'ENUM':
-        items = [i[0] for i in p['items']]
+        choices = [i for i in p['items'] if (group, p['name'], i[0]) not in HIDDEN_CHOICES]
         result = hou.StringParmTemplate(name, p['label'], 1, default_value=(str(default),),
-                 menu_items=items, menu_labels=[i[1] for i in p['items']], **common)
+                 menu_items=[i[0] for i in choices], menu_labels=[i[1] for i in choices], **common)
     elif group == 'view_settings' and p['name'] == 'view_transform':
         result = hou.StringParmTemplate(name, p['label'], 1, default_value=(VIEWS[0],), menu_items=VIEWS,
                  menu_type=hou.menuType.StringReplace, help=VIEW_HELP)
@@ -309,8 +312,20 @@ def author(python_node):
     # selected by Hydra; the USD Render ROP explicitly selects this same path.
 
 
+def cooked_stage(node):
+    """The node's stage. On a node that has not cooked, stage() cooks it and, when the
+    cook is slow (APEX rigs, large SOP imports), can return an expired stage handle."""
+    node.cook()
+    stage = node.stage()
+    try:
+        stage.GetPseudoRoot()
+    except Exception:
+        stage = node.stage()
+    return stage
+
+
 def render(node, method='execute'):
-    camera = node.stage().GetPrimAtPath(node.evalParm('camera'))
+    camera = cooked_stage(node).GetPrimAtPath(node.evalParm('camera'))
     if not camera or not camera.IsA(UsdGeom.Camera):
         raise hou.Error('Choose a camera on the connected Stage before rendering.')
     if method != 'renderpreview':

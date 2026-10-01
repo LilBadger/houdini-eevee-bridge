@@ -49,6 +49,10 @@ def sync(worker, configuration):
     shaders=[]
     for definition in definitions:
         params=definition.get('parameters',{})
+        # As in Karma, a Stage dome is the camera background only with Render Light
+        # Geometry (karma:light:renderlightgeo) on; it lights the scene either way.
+        hidden=(config['source']=='stage' and definition['id'] in worker.domes
+                and not params.get('karma:light:renderlightgeo',False))
         color=params.get('color',[1,1,1])
         intensity=params.get('intensity',1.)*2.**params.get('exposure',0.)*multiplier
         background=tree.nodes.new('ShaderNodeBackground'); background.label=definition['id']
@@ -71,7 +75,15 @@ def sync(worker, configuration):
             color=vector(tree,'MULTIPLY',color,blackbody.outputs['Color'])
         color=vector(tree,'MULTIPLY',color,config['color'])
         feed(tree,background.inputs['Color'],color)
-        shaders.append(background.outputs[0])
+        shader=background.outputs[0]
+        if hidden:
+            path=tree.nodes.new('ShaderNodeLightPath')
+            black=tree.nodes.new('ShaderNodeBackground'); black.inputs['Strength'].default_value=0.
+            mix=tree.nodes.new('ShaderNodeMixShader')
+            feed(tree,mix.inputs['Fac'],path.outputs['Is Camera Ray'])
+            feed(tree,mix.inputs[1],shader); feed(tree,mix.inputs[2],black.outputs[0])
+            shader=mix.outputs[0]
+        shaders.append(shader)
     if not shaders:
         black=tree.nodes.new('ShaderNodeBackground'); black.inputs['Strength'].default_value=0.
         shaders=[black.outputs[0]]

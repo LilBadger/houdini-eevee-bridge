@@ -52,8 +52,10 @@ def sync(session):
         obj = session.objects.get(key)
         if obj is None or obj.type != 'LIGHT':
             continue
-        assign(obj.light_linking, 'receiver_collection', collections.get(light_token))
-        assign(obj.light_linking, 'blocker_collection', collections.get(shadow_token))
+        for light in (obj, session.light_backs.get(key)):
+            if light is not None:
+                assign(light.light_linking, 'receiver_collection', collections.get(light_token))
+                assign(light.light_linking, 'blocker_collection', collections.get(shadow_token))
 
 
 def clear(session):
