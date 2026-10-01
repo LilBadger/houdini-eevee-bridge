@@ -349,7 +349,35 @@ def default_prefix(wanted):
     return base/(VERSION+'-h'+wanted)
 
 
+def version_tuple(text):
+    try:
+        return tuple(int(part) for part in str(text).split('.'))
+    except ValueError:
+        return ()
+
+
+def newer_installs():
+    """Installed EEVEE Bridge versions newer than this one, as {version: folder}."""
+    base = default_prefix('0').parent
+    found = {}
+    for entry in (base.iterdir() if base.is_dir() else ()):
+        try:
+            installed = json.loads((entry/'installation.json').read_text(encoding='utf-8')).get('bridge_version')
+        except (OSError, ValueError, TypeError):
+            continue
+        if version_tuple(installed) > version_tuple(VERSION):
+            found[installed] = entry
+    return found
+
+
 def install(args):
+    # An older setup would otherwise install itself and remove the newer version.
+    newer = newer_installs()
+    if newer and not args.allow_downgrade:
+        latest = max(newer, key=version_tuple)
+        raise RuntimeError('EEVEE Bridge '+latest+' is installed, which is newer than this setup ('+VERSION+'). '
+                           'Nothing was changed. Run the '+latest+' setup instead, or rerun with --allow-downgrade '
+                           'to go back to '+VERSION+'.')
     hfs = find_houdini(args.houdini)
     wanted = version(hfs)
     blender = find_blender(args.blender)
@@ -524,6 +552,7 @@ def main():
     parser.add_argument('--uninstall-all',action='store_true',help='Remove every installed version, its Houdini package registration, logs and caches')
     parser.add_argument('--remove-old',action='store_true',help='After a successful install, delete the previously installed versions')
     parser.add_argument('--reinstall',action='store_true',help='Replace an existing install of this version (Houdini must be closed)')
+    parser.add_argument('--allow-downgrade',action='store_true',help='Install even when a newer EEVEE Bridge version is installed')
     parser.add_argument('--yes',action='store_true',help='Do not ask before removing files')
     parser.add_argument('--rollback',nargs='?',const='previous',metavar='VERSION',
                         help='Restore the registration the last install replaced, or a replaced VERSION such as 0.5.0-h22.0.368')
