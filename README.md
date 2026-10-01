@@ -69,9 +69,9 @@ bash install.sh
 
 If a release includes a prebuilt `houdini-eevee-<version>-linux-x86_64.zip`, run `bash install.sh` in its extracted folder instead. It uses the prebuilt plugin on the Houdini build it names, and on other builds works like the Windows installer below.
 
-**Windows, any Houdini 22.0 build.** Close Houdini, then download and run `houdini-eevee-0.7.5-windows-x86_64-setup.exe` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases). It installs for your user without administrator rights and removes older versions once the new one has passed its checks. Settings › Apps uninstalls it. Windows may warn that the publisher is unknown, because the setup is not code-signed; choose *More info › Run anyway*.
+**Windows, any Houdini 22.0 build.** Close Houdini, then download and run `houdini-eevee-0.7.6-windows-x86_64-setup.exe` from [Releases](https://github.com/badgerz42/houdini-eevee-bridge/releases). It installs for your user without administrator rights and removes older versions once the new one has passed its checks. Settings › Apps uninstalls it. Windows may warn that the publisher is unknown, because the setup is not code-signed; choose *More info › Run anyway*.
 
-Alternatively, extract `houdini-eevee-0.7.5-windows-x86_64.zip` and run `install.cmd` in it; `uninstall.cmd` removes every installed version.
+Alternatively, extract `houdini-eevee-0.7.6-windows-x86_64.zip` and run `install.cmd` in it; `uninstall.cmd` removes every installed version.
 
 Prebuilt plugins are included for Houdini 22.0.368 and 22.0.429. On another 22.0 build, the installer compiles the plugin if the [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) with *Desktop development with C++* are installed. Without them, it tries the prebuilt plugin and registers it only if a test render through it in your Houdini succeeds. The same command works in the source zip or a clone of this repository.
 
@@ -126,7 +126,11 @@ In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame
 ## Features
 
 ### Geometry
-- **Meshes.** Supports authored normals, UVs, float and vector primvars, display color and opacity, left-handed orientation and degenerate faces. Display color can vary per point, face or corner.
+- **Meshes.** Supports authored normals, UVs, float and vector primvars, display color and opacity, left-handed orientation and degenerate faces. Display color can vary per point, face or corner. Without authored normals, edges flatter than 60 degrees are smoothed, as in Karma.
+- **Purposes and visibility.** Final renders draw default and render purpose geometry, not proxy or guide; the viewport follows Houdini's purpose display options. Invisible prims are hidden.
+- **Skinned geometry.** UsdSkel characters, crowds and agents are skinned on the CPU, including motion blur.
+- **NURBS.** NURBS patches and curves are approximated with meshes and curves.
+- **Karma object settings.** *Holdout* makes an object a matte, and *Render Visibility* (for example `-primary`: hidden from the camera, still casting shadows) sets EEVEE's camera, shadow, diffuse, glossy, transmission and volume visibility.
 - **Per-face materials.** GeomSubsets bound to different materials render with each subset's material.
 - **Implicit shapes.** Sphere, Cube, Cone, Cylinder, Capsule and Plane prims are converted to meshes.
 - **Subdivision.** Supports Catmull-Clark and bilinear subdivision with creases, corners, and boundary and face-varying interpolation rules. EEVEE Render Settings sets separate viewport and render levels, plus a face budget per mesh.
@@ -187,7 +191,7 @@ Standard Surface and Principled BSDF are different shading models, so materials 
 - **Heavy instancing.** Very large instance counts limit EEVEE's own frame rate, because Blender processes every instance on each draw.
 - **Displacement detail.** EEVEE does not dice surfaces the way Karma does, so displacement detail is limited by the mesh's density or subdivision level. Bump mapping adds the finer detail.
 - **Light shapes.** IES profiles and light textures are approximated (see [Lights and environment](#lights-and-environment)). Cones on rect and cylinder lights are ignored, and a cylinder light is drawn as a rect light.
-- **Unshaded prims.** Prims without a material use their display color with a plain Principled BSDF. Karma's own fallback material is darker.
+- **Unshaded prims.** Prims without a material use their display color and display opacity with a plain Principled BSDF. Karma's own fallback material is darker.
 - **Several viewports share one worker.** Each viewport has its own Blender scene, but they take turns on the GPU. On one GPU, a worker per viewport was slower overall (two viewports: about 58 instead of 80 combined frames per second) and needs about 1 GB more VRAM each, so it isn't offered.
 
 ## Development

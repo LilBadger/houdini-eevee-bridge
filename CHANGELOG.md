@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.6
+
+Houdini and USD features that rendered wrong or not at all, found with new EEVEE-versus-Karma test scenes.
+
+- **Final renders draw the right purposes.** Proxy geometry rendered and render-purpose geometry was missing: Houdini's USD Render ROP passes `--gpu` to husk, whose GPU path then ignores `--purpose` and uses the viewport's purposes. The EEVEE render command no longer passes `--gpu`; renders now draw default and render purpose geometry, as Karma does.
+- **UsdSkel.** Skinned meshes (characters, crowds, agents) rendered nothing: their points come from Hydra computations, which the plugin did not evaluate. They are now skinned on the CPU, including motion blur samples.
+- **NURBS patches and curves** render, approximated with meshes and curves.
+- **Karma holdout and render visibility.** *Holdout* objects become mattes, and *Render Visibility* masks (`-primary`, `+primary -shadow`, …) set which rays see an object: a camera-invisible object still casts its shadow.
+- **Display opacity** on prims without a material is used, as in Karma.
+- **Smooth shading without normals.** Polygon meshes without authored normals were shaded flat. Edges flatter than 60 degrees are now smoothed and sharper ones kept, matching Karma and Houdini's Normal SOP.
+
 ## 0.7.5
 
 - **Smoother EEVEE navigation.** While the camera moved, the viewport started full-resolution refinements between camera updates; each took 60 to 170 ms and could not be interrupted, so the camera updates in between were dropped. Refinement now starts once the camera has been still for 75 ms (`HDEEVEE_REFINE_DELAY_MS`). In a production scene at 1280x720, orbiting went from 16 to 45 new EEVEE frames per second, and the converged image still arrives about 0.2 s after the camera stops.
