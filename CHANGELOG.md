@@ -6,6 +6,7 @@
 - **Identical materials are built once.** Copies of an asset carry identical materials (99 materials but 60 distinct definitions in a production scene); they now share one Blender material, copied when one of them is edited. Texture lookups no longer scan every loaded image. Building that scene in Blender went from 2.45 to 2.1 s, with a pixel-identical image.
 - **Keep EEVEE Loaded When Switching Renderers.** A new viewport option, off by default. When on, the Blender worker keeps running with its scene and compiled shaders while Houdini VK, Karma or Storm show the scene, so switching back to EEVEE is instant instead of reloading the scene and rebuilding its materials (about 7 s in that scene). EEVEE's video memory stays in use meanwhile.
 - **Texture Size Limit defaults to 1024** in EEVEE Render Settings and in the viewport's default, instead of 2048, which suits 8 GB graphics cards. A 4K texture at 1024 needs a sixteenth of its full-size video memory. Existing EEVEE Render Settings nodes keep their setting.
+- **The setup no longer fails when a virus scanner checks the new files.** Moving the installed files into place failed with "Access is denied" while a scanner (Bitdefender here) still had the new plugin DLL open. The installer now waits up to 30 seconds for the files to be released, and copies them if they stay locked.
 - `HDEEVEE_TRACE` is written in batches, since opening the file for every frame slowed the frames it measured, and records the render thread's idle time and a timestamp per frame.
 
 ## 0.7.4

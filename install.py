@@ -320,6 +320,29 @@ def remove_installs(args, keep=None):
     print('Removed.'+(' Restart Houdini.' if keep is None else ''))
 
 
+def move_into_place(staging, prefix, seconds=30.):
+    """Rename the finished staging folder to the install folder. On Windows a virus
+    scanner checking the files just written (the plugin DLL, Python modules) can
+    hold them open for a moment, and renaming their folder then fails with
+    "Access is denied". Retry for a while, then copy instead."""
+    import time
+    deadline = time.monotonic() + seconds
+    delay = .25
+    while True:
+        try:
+            staging.rename(prefix)
+            return
+        except PermissionError as exc:
+            if time.monotonic() >= deadline:
+                print('Could not move the new files into place (' + str(exc) + '); copying them instead.', flush=True)
+                break
+            print('Waiting for another program (likely a virus scanner) to release the new files...', flush=True)
+            time.sleep(delay)
+            delay = min(delay * 2, 4.)
+    shutil.copytree(staging, prefix)
+    shutil.rmtree(staging, ignore_errors=True)
+
+
 def default_prefix(wanted):
     base = (Path(os.environ.get('LOCALAPPDATA',Path.home()))/'HoudiniEEVEE' if os.name=='nt'
             else Path(os.environ.get('XDG_DATA_HOME',Path.home()/'.local/share'))/'houdini-eevee')
@@ -383,7 +406,7 @@ def install(args):
     prefix.parent.mkdir(parents=True,exist_ok=True)
     env = houdini_environment(hfs)
     env.update(HDEEVEE_AUTO_WORKER='0', HDEEVEE_DEMO='0', HDEEVEE_AUTO_SELECT='0')
-    with tempfile.TemporaryDirectory(prefix='.eevee-install-',dir=prefix.parent) as temp:
+    with tempfile.TemporaryDirectory(prefix='.eevee-install-',dir=prefix.parent,ignore_cleanup_errors=True) as temp:
         staging = Path(temp)/'payload'
         staging.mkdir()
         # Explicit allowlist: no personal scenes, textures, caches or machine config.
@@ -434,7 +457,7 @@ def install(args):
         elif os.environ.get('HDEEVEE_PYTHON_DEPS'):
             configuration['python_deps'] = str(Path(os.environ['HDEEVEE_PYTHON_DEPS']).resolve())
         (staging/'installation.json').write_text(json.dumps(configuration,indent=2),encoding='utf-8')
-        staging.rename(prefix)
+        move_into_place(staging, prefix)
     try:
         if not args.no_gpu_check:
             doctor_env = houdini_environment(hfs)
