@@ -1,6 +1,8 @@
 #include "prims.h"
 #include <pxr/base/arch/hash.h>
 #include <pxr/base/gf/quatd.h>
+#include <pxr/base/gf/quath.h>
+#include <pxr/base/gf/vec3h.h>
 #include <pxr/base/gf/quatf.h>
 #include <pxr/base/gf/vec2d.h>
 #include <pxr/base/gf/vec2f.h>
@@ -431,6 +433,7 @@ VtMatrix4dArray EeveeInstancer::Transforms(const SdfPath &prototype, int depth, 
     auto vectorAt = [](const VtValue &v, int i, const GfVec3d &fallback) {
         if (v.IsHolding<VtVec3fArray>()) { auto &a = v.UncheckedGet<VtVec3fArray>(); if (i >= 0 && size_t(i) < a.size()) return GfVec3d(a[i]); }
         if (v.IsHolding<VtVec3dArray>()) { auto &a = v.UncheckedGet<VtVec3dArray>(); if (i >= 0 && size_t(i) < a.size()) return a[i]; }
+        if (v.IsHolding<VtVec3hArray>()) { auto &a = v.UncheckedGet<VtVec3hArray>(); if (i >= 0 && size_t(i) < a.size()) return GfVec3d(a[i]); }
         return fallback;
     };
     VtMatrix4dArray result;
@@ -442,6 +445,9 @@ VtMatrix4dArray EeveeInstancer::Transforms(const SdfPath &prototype, int depth, 
         if (rotations.IsHolding<VtVec4fArray>()) { auto &a = rotations.UncheckedGet<VtVec4fArray>(); if (index >= 0 && size_t(index) < a.size()) rotation = GfQuatd(a[index][0], a[index][1], a[index][2], a[index][3]); }
         if (rotations.IsHolding<VtQuatfArray>()) { auto &a = rotations.UncheckedGet<VtQuatfArray>(); if (index >= 0 && size_t(index) < a.size()) rotation = GfQuatd(a[index]); }
         if (rotations.IsHolding<VtQuatdArray>()) { auto &a = rotations.UncheckedGet<VtQuatdArray>(); if (index >= 0 && size_t(index) < a.size()) rotation = a[index]; }
+        // UsdGeomPointInstancer orientations are half-precision quaternions (quath),
+        // as Houdini writes them; they were ignored, leaving every instance unrotated.
+        if (rotations.IsHolding<VtQuathArray>()) { auto &a = rotations.UncheckedGet<VtQuathArray>(); if (index >= 0 && size_t(index) < a.size()) rotation = GfQuatd(a[index]); }
         transform = GfMatrix4d(1).SetRotate(rotation) * transform;
         transform = GfMatrix4d(1).SetScale(vectorAt(scales, index, GfVec3d(1))) * transform;
         if (matrices.IsHolding<VtMatrix4dArray>()) { auto &a = matrices.UncheckedGet<VtMatrix4dArray>(); if (index >= 0 && size_t(index) < a.size()) transform = a[index] * transform; }

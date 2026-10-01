@@ -4,6 +4,7 @@
 
 Houdini and USD features that rendered wrong or not at all, found with new EEVEE-versus-Karma test scenes.
 
+- **Point instance orientations.** Point instancers store orientations as half-precision quaternions (`quath`), as Houdini writes them; EEVEE ignored them and drew every instance unrotated (the water drops on the cans in a production scene). Half-precision orientations, scales and positions are now read, and instances match Karma.
 - **Final renders draw the right purposes.** Proxy geometry rendered and render-purpose geometry was missing: Houdini's USD Render ROP passes `--gpu` to husk, whose GPU path then ignores `--purpose` and uses the viewport's purposes. The EEVEE render command no longer passes `--gpu`; renders now draw default and render purpose geometry, as Karma does.
 - **UsdSkel.** Skinned meshes (characters, crowds, agents) rendered nothing: their points come from Hydra computations, which the plugin did not evaluate. They are now skinned on the CPU, including motion blur samples.
 - **NURBS patches and curves** render, approximated with meshes and curves.
