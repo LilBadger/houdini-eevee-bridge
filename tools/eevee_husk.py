@@ -33,6 +33,11 @@ def relay(stream, log):
 
 def main(arguments=None):
     arguments = sys.argv[1:] if arguments is None else arguments
+    # Houdini's USD Render ROP passes --gpu. Husk's GPU path then ignores --purpose
+    # and syncs the viewport's purposes (geometry and proxy), so proxy geometry
+    # rendered and render-purpose geometry was missing. EEVEE reads its frames back
+    # itself and needs no GPU presentation from husk.
+    arguments = [a for a in arguments if a != '--gpu']
     mplay = output_override(arguments) == 'ip'
     session = new_session('husk')
     manifest = session/'outputs.jsonl'
