@@ -31,6 +31,9 @@ def render_command():
 # Defaults that differ from Blender's, to match Karma: USD curves are round
 # tubes of their widths, while Blender's default strands are thin lines.
 DEFAULTS = {('render', 'hair_type'): 'CYLINDER'}
+# Blender's Strand curve shape draws hair-thin lines that ignore USD curve widths, so
+# it can never match Karma; scenes that stored it render as Cylinder (render_config).
+HIDDEN_CHOICES = {('render', 'hair_type', 'STRAND')}
 
 
 def parm_name(group, name):
@@ -43,9 +46,9 @@ def parameter(group, p):
     if p['type'] == 'BOOLEAN':
         result = hou.ToggleParmTemplate(name, p['label'], default_value=default, **common)
     elif p['type'] == 'ENUM':
-        items = [i[0] for i in p['items']]
+        choices = [i for i in p['items'] if (group, p['name'], i[0]) not in HIDDEN_CHOICES]
         result = hou.StringParmTemplate(name, p['label'], 1, default_value=(str(default),),
-                 menu_items=items, menu_labels=[i[1] for i in p['items']], **common)
+                 menu_items=[i[0] for i in choices], menu_labels=[i[1] for i in choices], **common)
     elif group == 'view_settings' and p['name'] == 'view_transform':
         result = hou.StringParmTemplate(name, p['label'], 1, default_value=(VIEWS[0],), menu_items=VIEWS,
                  menu_type=hou.menuType.StringReplace, help=VIEW_HELP)

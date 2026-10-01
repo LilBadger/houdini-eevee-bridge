@@ -141,7 +141,7 @@ def write_attribute(mesh, name, data_type, domain, values):
         mesh.attributes.remove(existing)
         existing = None
     attribute = existing or mesh.attributes.new(name, data_type, domain)
-    prop = 'value' if data_type == 'FLOAT' else 'vector'
+    prop = 'value' if data_type == 'FLOAT' else 'color' if data_type == 'FLOAT_COLOR' else 'vector'
     attribute.data.foreach_set(prop, np.ascontiguousarray(values, dtype=np.float32).ravel())
     return attribute
 
@@ -292,7 +292,7 @@ def sync_primvars(session, key, mesh, topology, update, rebuilt):
         write_attribute(mesh, name, 'FLOAT2', 'CORNER', corners)
     for name, definition in attributes.items():
         data_type = definition.get('type', 'FLOAT')
-        columns = 3 if data_type == 'FLOAT_VECTOR' else None
+        columns = {'FLOAT_VECTOR': 3, 'FLOAT_COLOR': 4}.get(data_type)
         values = array(definition['values'], np.float32, columns)
         if not len(values):
             continue
