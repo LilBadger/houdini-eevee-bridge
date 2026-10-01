@@ -513,6 +513,23 @@ class Session:
             self.links_dirty = False
         return errors
 
+    RAYS = (('camera', 'visible_camera'), ('shadow', 'visible_shadow'), ('diffuse', 'visible_diffuse'),
+            ('glossy', 'visible_glossy'), ('transmission', 'visible_transmission'), ('volume', 'visible_volume_scatter'))
+
+    def object_properties(self, change):
+        """Karma holdout and render visibility (see KarmaObjectProperties in the delegate)."""
+        obj = self.objects.get(change['id'])
+        if obj is None:
+            return
+        if 'holdout' in change and obj.is_holdout != bool(change['holdout']):
+            obj.is_holdout = bool(change['holdout'])
+        rays = change.get('ray_visibility')
+        if isinstance(rays, dict):
+            for name, attribute in self.RAYS:
+                value = bool(rays.get(name, True))
+                if getattr(obj, attribute) != value:
+                    setattr(obj, attribute, value)
+
     def apply_change(self, change):
         kind = change['kind']
         if kind in ('mesh', 'curves', 'points', 'light', 'volume'):
@@ -531,12 +548,15 @@ class Session:
             self.material(change)
         elif kind == 'mesh':
             meshes.sync(self, change)
+            self.object_properties(change)
             self.dirty_geometry = True
         elif kind == 'curves':
             curves.sync(self, change)
+            self.object_properties(change)
             self.dirty_geometry = True
         elif kind == 'points':
             points.sync(self, change)
+            self.object_properties(change)
             self.dirty_geometry = True
         elif kind == 'light':
             self.light(change)

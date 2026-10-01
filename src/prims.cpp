@@ -300,6 +300,44 @@ HdExtComputationPrimvarDescriptorVector ComputedPrimvars(HdSceneDelegate *d, con
     return result;
 }
 
+// Karma object properties with Blender equivalents: holdout (matte) and render
+// visibility per ray type ("-primary": not seen by the camera, still casting shadows).
+void KarmaObjectProperties(HdSceneDelegate *d, const SdfPath &id, Json &json) {
+    bool holdout = false;
+    const VtValue h = d->Get(id, TfToken("karma:object:holdout"));
+    if (h.IsHolding<int>()) holdout = h.UncheckedGet<int>() != 0;
+    else if (h.IsHolding<bool>()) holdout = h.UncheckedGet<bool>();
+    else if (h.IsHolding<VtIntArray>() && !h.UncheckedGet<VtIntArray>().empty()) holdout = h.UncheckedGet<VtIntArray>()[0] != 0;
+    json["holdout"] = holdout;
+    std::string mask;
+    const VtValue v = d->Get(id, TfToken("karma:object:rendervisibility"));
+    if (v.IsHolding<std::string>()) mask = v.UncheckedGet<std::string>();
+    else if (v.IsHolding<TfToken>()) mask = v.UncheckedGet<TfToken>().GetString();
+    else if (v.IsHolding<VtStringArray>() && !v.UncheckedGet<VtStringArray>().empty()) mask = v.UncheckedGet<VtStringArray>()[0];
+    static const std::vector<std::pair<std::string, std::string>> kRays = {{"primary", "camera"}, {"shadow", "shadow"},
+        {"diffuse", "diffuse"}, {"reflect", "glossy"}, {"refract", "transmission"}, {"volume", "volume"}};
+    std::map<std::string, bool> rays;
+    for (const auto &[karma, blender] : kRays) rays[blender] = true;
+    std::vector<std::string> tokens;
+    std::string token;
+    for (char c : mask + " ") {
+        if (c == ' ' || c == ',' || c == '\t') { if (!token.empty()) tokens.push_back(token); token.clear(); }
+        else token += c;
+    }
+    // Unsigned names list the only ray types that see the object.
+    for (const auto &t : tokens)
+        if (t != "*" && t[0] != '+' && t[0] != '-') { for (auto &[name, on] : rays) on = false; break; }
+    for (const auto &t : tokens) {
+        if (t == "*") { for (auto &[name, on] : rays) on = true; continue; }
+        const bool on = t[0] != '-';
+        const std::string name = (t[0] == '+' || t[0] == '-') ? t.substr(1) : t;
+        for (const auto &[karma, blender] : kRays) if (karma == name) rays[blender] = on;
+    }
+    Json visibility = Json::object();
+    for (const auto &[name, on] : rays) visibility[name] = on;
+    json["ray_visibility"] = visibility;
+}
+
 const std::set<std::string> kMeshSkip = {"points", "normals", "velocities", "accelerations", "v", "accel"};
 const std::set<std::string> kPointsSkip = {"points", "widths", "normals", "velocities", "accelerations", "v", "accel"};
 
@@ -695,6 +733,7 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
     if (first || (*bits & HdChangeTracker::DirtyVisibility)) change.json["visible"] = d->GetVisible(id);
     if (first || (*bits & HdChangeTracker::DirtyMaterialId)) change.json["material"] = d->GetMaterialId(id).GetString();
     if (first || (*bits & HdChangeTracker::DirtyCategories)) change.json["categories"] = CategoriesJson(d, id);
+    if (first || (*bits & HdChangeTracker::DirtyPrimvar)) KarmaObjectProperties(d, id, change.json);
     _synced = true;
     if (change.json.size() > 2) _state->Queue(std::move(change));
     *bits = HdChangeTracker::Clean;
@@ -721,6 +760,7 @@ void EeveeCurves::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"transform", MatrixJson(d->GetTransform(id))},
         {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()},
         {"categories", CategoriesJson(d, id)}};
+    KarmaObjectProperties(d, id, change.json);
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
     // Curves are re-sent whole, so every primvar is sent with them.
@@ -749,6 +789,7 @@ void EeveePoints::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, co
         {"points", change.Ref(points)}, {"transform", MatrixJson(d->GetTransform(id))},
         {"visible", d->GetVisible(id)}, {"material", d->GetMaterialId(id).GetString()},
         {"categories", CategoriesJson(d, id)}};
+    KarmaObjectProperties(d, id, change.json);
     if (BlobPtr widths = FloatBlob(d->Get(id, HdTokens->widths))) change.json["widths"] = change.Ref(widths);
     change.json["widths_interpolation"] = PrimvarInterpolation(d, id, HdTokens->widths);
     SentArrays sent;
