@@ -5,6 +5,7 @@
 #include <pxr/imaging/hd/tokens.h>
 #include <pxr/imaging/hdsi/implicitSurfaceSceneIndex.h>
 #include <pxr/imaging/hdsi/lightLinkingSceneIndex.h>
+#include <pxr/imaging/hdsi/nurbsApproximatingSceneIndex.h>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -13,6 +14,7 @@ namespace {
 const char *const kRendererDisplayName = "EEVEE Bridge (Prototype)";
 const TfToken kImplicitSurfacesPlugin("HdEevee_ImplicitSurfaceSceneIndexPlugin");
 const TfToken kLightLinkingPlugin("HdEevee_LightLinkingSceneIndexPlugin");
+const TfToken kNurbsPlugin("HdEevee_NurbsApproximatingSceneIndexPlugin");
 } // namespace
 
 /// USD implicit gprims (Sphere, Cube, Cone, Cylinder, Capsule, Plane) have no
@@ -22,6 +24,16 @@ protected:
     HdSceneIndexBaseRefPtr _AppendSceneIndex(const HdSceneIndexBaseRefPtr &input,
                                              const HdContainerDataSourceHandle &args) override {
         return HdsiImplicitSurfaceSceneIndex::New(input, args);
+    }
+};
+
+/// USD NURBS patches and curves have no EEVEE equivalent; approximate them with
+/// meshes and basis curves.
+class HdEevee_NurbsApproximatingSceneIndexPlugin final : public HdSceneIndexPlugin {
+protected:
+    HdSceneIndexBaseRefPtr _AppendSceneIndex(const HdSceneIndexBaseRefPtr &input,
+                                             const HdContainerDataSourceHandle &) override {
+        return HdsiNurbsApproximatingSceneIndex::New(input);
     }
 };
 
@@ -39,6 +51,7 @@ protected:
 TF_REGISTRY_FUNCTION(TfType) {
     HdSceneIndexPluginRegistry::Define<HdEevee_ImplicitSurfaceSceneIndexPlugin>();
     HdSceneIndexPluginRegistry::Define<HdEevee_LightLinkingSceneIndexPlugin>();
+    HdSceneIndexPluginRegistry::Define<HdEevee_NurbsApproximatingSceneIndexPlugin>();
 }
 
 TF_REGISTRY_FUNCTION(HdSceneIndexPlugin) {
@@ -50,6 +63,9 @@ TF_REGISTRY_FUNCTION(HdSceneIndexPlugin) {
         HdPrimTypeTokens->capsule, toMesh, HdPrimTypeTokens->plane, toMesh);
     HdSceneIndexPluginRegistry::GetInstance().RegisterSceneIndexForRenderer(
         kRendererDisplayName, kImplicitSurfacesPlugin, args, 0,
+        HdSceneIndexPluginRegistry::InsertionOrderAtStart);
+    HdSceneIndexPluginRegistry::GetInstance().RegisterSceneIndexForRenderer(
+        kRendererDisplayName, kNurbsPlugin, nullptr, 0,
         HdSceneIndexPluginRegistry::InsertionOrderAtStart);
 
     // Phase 1: after implicit shapes have become meshes, so they are geometry too.

@@ -10,6 +10,10 @@
         "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
         "priority": 0, "displayName": "EEVEE implicit surfaces to meshes"
       },
+      "HdEevee_NurbsApproximatingSceneIndexPlugin": {
+        "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
+        "priority": 0, "displayName": "EEVEE NURBS to meshes and curves"
+      },
       "HdEevee_LightLinkingSceneIndexPlugin": {
         "bases": ["HdSceneIndexPlugin"], "loadWithRenderer": "EEVEE Bridge (Prototype)",
         "priority": 0, "displayName": "EEVEE light and shadow linking"
