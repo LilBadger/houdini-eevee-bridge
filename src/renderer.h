@@ -80,6 +80,7 @@ private:
         int samples = 1;
         int scale = 1;
         bool allowPreview = false;
+        double idleMs = 0.0;     // render thread idle before this job (trace)
     };
     using Clock = std::chrono::steady_clock;
 
@@ -120,6 +121,11 @@ private:
     ViewRequest _failed;
     uint64_t _failedVersion = 0;
     Clock::time_point _retryAt{};
+    Clock::time_point _lastJobEnd{};
+    Clock::time_point _lastViewChange{};   // camera last moved (Post)
+    std::chrono::milliseconds _refineDelay{75};  // HDEEVEE_REFINE_DELAY_MS
+    std::string _trace;          // HDEEVEE_TRACE lines not yet written
+    void FlushTrace();
 
     // Render-thread state.
     Connection _connection;
