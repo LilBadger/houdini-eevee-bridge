@@ -1,6 +1,8 @@
 """USD instancing: Blender objects sharing a prototype's data, or Geometry Nodes
 instances with full matrices when there are many. Per-instance primvars become
 instance attributes or object custom properties (see shader_utils.primvar)."""
+import os
+
 import bpy
 import numpy as np
 from mathutils import Matrix
@@ -13,14 +15,35 @@ NAVIGATION_FRACTION='Navigation fraction'
 DENSE_INSTANCES=1000
 
 
-def navigation(session, navigating, percent):
-    """Blender processes every instance on each redraw, on the CPU: 116,000 bubble
-    instances took 120 ms per navigation frame. While the view changes, dense
-    instancers draw a fixed random subset; settled and final frames draw all."""
-    fraction = min(max(percent, 1), 100) / 100. if navigating else 1.
+def houdini_percent():
+    """The Houdini viewport's point instancing percentage, written by Houdini's
+    worker supervisor (tools/hde_installation.py); 100 without one."""
+    session = os.environ.get('HDEEVEE_SESSION_DIR')
+    try:
+        return float(open(os.path.join(session, 'houdini_instancing')).read())
+    except (OSError, TypeError, ValueError):
+        return 100.
+
+
+def navigation(session, navigating, percent, final=False):
+    """Draw a fixed random share of each point instancer. EEVEE Render Settings ›
+    Instancing sets the viewport share (or follows the Houdini viewport's point
+    instancing percentage) and the final render share. Blender processes every
+    instance on each redraw, on the CPU: 116,000 bubble instances took 120 ms per
+    navigation frame, so while the view changes dense instancers draw at most the
+    navigation share."""
+    settings = session.config.get('instancing') if isinstance(session.config, dict) else None
+    settings = settings if isinstance(settings, dict) else {}
+    if final:
+        base, moving = float(settings.get('render', 100)), None
+    else:
+        base = houdini_percent() if settings.get('viewport_mode', 'houdini') == 'houdini' else float(settings.get('viewport', 100))
+        moving = float(settings.get('navigate', percent)) if navigating else None
     for obj in session.point_instances.values():
-        if int(obj.get('usd_instance_count', 0)) < DENSE_INSTANCES:
-            continue
+        share = base
+        if moving is not None and int(obj.get('usd_instance_count', 0)) >= DENSE_INSTANCES:
+            share = min(share, moving)
+        fraction = min(max(share, 1.), 100.) / 100.
         node = obj.modifiers[0].node_group.nodes.get(NAVIGATION_FRACTION) if obj.modifiers else None
         if node is not None and node.outputs[0].default_value != fraction:
             node.outputs[0].default_value = fraction
