@@ -142,8 +142,11 @@ class Session:
             bpy.data.objects.remove(obj, do_unlink=True)
             if data is not None and data.users == 0:
                 self.remove_data(data)
+        retired = []
         for key, mat in list(self.materials.items()):
-            self.worker.materials.retire(self.material_digest.get(key), mat)
+            if not any(m == mat for m in retired):
+                retired.append(mat)
+                self.worker.materials.retire(self.material_digest.get(key), mat)
         for image in list(bpy.data.images):
             if image.get('hde_ramp') and not image.users:
                 bpy.data.images.remove(image)
@@ -236,8 +239,17 @@ class Session:
             self.materialx_defs[key] = update['materialx_network']
         else:
             self.materialx_defs.pop(key, None)
+        if mat is not None and self.shares(key, mat):
+            # Identical materials share one Blender material; an edit gets its own.
+            del self.materials[key]
+            self.material_digest.pop(key, None)
+            mat = None
         if mat is None:
-            mat = self.worker.materials.take(digest)
+            # Copies of an asset carry identical materials: build (and let EEVEE
+            # compile) each definition once, then reuse it in this scene or later.
+            same = next((k for k, d in self.material_digest.items()
+                         if d == digest and k != key and k in self.materials), None)
+            mat = self.materials[same] if same is not None else self.worker.materials.take(digest)
             if mat is not None:
                 self.materials[key] = mat
                 self.material_digest[key] = digest
@@ -310,6 +322,9 @@ class Session:
         self.dirty_geometry = True
         self.rebind(key)
 
+    def shares(self, key, mat):
+        return any(m == mat for k, m in self.materials.items() if k != key)
+
     def delete_material(self, key):
         self.materialx_defs.pop(key, None)
         self.material_warnings.pop(key, None)
@@ -321,7 +336,9 @@ class Session:
             obj = self.objects.get(obj_key)
             if obj is not None and obj.data is not None and hasattr(obj.data, 'materials'):
                 obj.data.materials.clear()
-        self.worker.materials.retire(self.material_digest.pop(key, None), mat)
+        digest = self.material_digest.pop(key, None)
+        if not self.shares(key, mat):
+            self.worker.materials.retire(digest, mat)
 
     def bind(self, key, material_id):
         previous = self.bindings.get(key)
