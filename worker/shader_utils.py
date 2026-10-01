@@ -13,6 +13,10 @@ class Channels(tuple):
 # visible difference in a texture. HDEEVEE_FULL_PRECISION_TEXTURES=1 keeps 32-bit.
 HALF_PRECISION = os.environ.get('HDEEVEE_FULL_PRECISION_TEXTURES') != '1'
 
+# (file, color space, half) -> image. A production scene asks for a few hundred
+# textures; scanning every Blender image for each one took a third of a second.
+_images = {}
+
 
 def image_file(filename, color_space='auto', half=True):
     """Load a texture without changing the color space of another material's image.
@@ -31,9 +35,15 @@ def image_file(filename, color_space='auto', half=True):
                'lin_ap1_scene':'ACEScg', 'lin_ap0_scene':'ACES2065-1',
                'srgb_texture':'sRGB', 'srgb_rec709_scene':'sRGB', 'sRGB':'sRGB'}
     wanted = aliases.get(color_space,color_space)
-    for image in bpy.data.images:
-        if image.get('hde_file') == filename and image.get('hde_color_space') == wanted and image.get('hde_half', True) == half:
-            return image
+    key = (filename, wanted or 'auto', half)
+    image = _images.get(key)
+    if image is not None:
+        try:
+            if image.get('hde_file') == filename:
+                return image
+        except ReferenceError:
+            pass
+        del _images[key]
     try:
         image = bpy.data.images.load(first, check_existing=False)
     except RuntimeError as exc:
@@ -52,6 +62,7 @@ def image_file(filename, color_space='auto', half=True):
                 if number not in {tile.number for tile in image.tiles}: image.tiles.new(number)
         image.use_half_precision = half and HALF_PRECISION
         image['hde_file'], image['hde_color_space'], image['hde_half'] = filename, wanted or 'auto', half
+        _images[key] = image
         return image
     except Exception:
         bpy.data.images.remove(image)

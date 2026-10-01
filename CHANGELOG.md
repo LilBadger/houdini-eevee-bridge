@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.5
+
+- **Smoother EEVEE navigation.** While the camera moved, the viewport started full-resolution refinements between camera updates; each took 60 to 170 ms and could not be interrupted, so the camera updates in between were dropped. Refinement now starts once the camera has been still for 75 ms (`HDEEVEE_REFINE_DELAY_MS`). In a production scene at 1280x720, orbiting went from 16 to 45 new EEVEE frames per second, and the converged image still arrives about 0.2 s after the camera stops.
+- **Identical materials are built once.** Copies of an asset carry identical materials (99 materials but 60 distinct definitions in a production scene); they now share one Blender material, copied when one of them is edited. Texture lookups no longer scan every loaded image. Building that scene in Blender went from 2.45 to 2.1 s, with a pixel-identical image.
+- **Keep EEVEE Loaded When Switching Renderers.** A new viewport option, off by default. When on, the Blender worker keeps running with its scene and compiled shaders while Houdini VK, Karma or Storm show the scene, so switching back to EEVEE is instant instead of reloading the scene and rebuilding its materials (about 7 s in that scene). EEVEE's video memory stays in use meanwhile.
+- **Texture Size Limit defaults to 1024** in EEVEE Render Settings and in the viewport's default, instead of 2048, which suits 8 GB graphics cards. A 4K texture at 1024 needs a sixteenth of its full-size video memory. Existing EEVEE Render Settings nodes keep their setting.
+- `HDEEVEE_TRACE` is written in batches, since opening the file for every frame slowed the frames it measured, and records the render thread's idle time and a timestamp per frame.
+
 ## 0.7.4
 
 - **Switching from Houdini VK to EEVEE frees Houdini's viewport memory.** Houdini keeps its own viewport renderer alive behind EEVEE with the whole scene loaded, textures at full size, and ignores scene changes while it is hidden. In a production scene that was 10.5 GB of video memory plus 6 GB spilled into system memory, which left EEVEE under 1 GB of real video memory and could crash Houdini. When a viewport switches from Houdini VK or GL to EEVEE, the bridge now shows Houdini's renderer an empty LOP network for a moment (a temporary node in `/obj`), so it drops the scene, then switches to EEVEE on the viewport's network: Houdini went from 10.5 GB to 2 GB and EEVEE loaded entirely into video memory. Switching back to Houdini VK loads its scene again as usual. The temporary node marks the scene as modified. `HDEEVEE_RELEASE_NATIVE_VIEWPORT=0` turns this off.

@@ -100,8 +100,17 @@ bool ViewRequest::operator==(const ViewRequest &o) const {
 // ---------------------------------------------------------------- Renderer
 Renderer::Renderer(BridgeState *state) : _state(state), _final(state->FinalRender()) {
     if (const char *budget = std::getenv("HDEEVEE_REFINE_BUDGET_MS")) _budgetMs = std::max(10.0, std::atof(budget));
+    if (const char *delay = std::getenv("HDEEVEE_REFINE_DELAY_MS"))
+        _refineDelay = std::chrono::milliseconds(std::max(0, std::atoi(delay)));
     SetStatus("idle", "");
     if (!_final) _thread = std::thread([this] { Run(); });
+}
+
+void Renderer::FlushTrace() {
+    if (_trace.empty()) return;
+    std::ofstream out(hde::environmentPath("HDEEVEE_TRACE"), std::ios::app);
+    out << _trace;
+    _trace.clear();
 }
 
 Renderer::~Renderer() {
@@ -115,12 +124,15 @@ Renderer::~Renderer() {
     _connection.Interrupt();
     if (_thread.joinable()) _thread.join();
     _connection.Close();
+    FlushTrace();
 }
 
 void Renderer::Post(const ViewRequest &request) {
     {
         std::lock_guard<std::mutex> lock(_mutex);
         if (!_hasRequest || _latest != request) {
+            if (_hasRequest && !(_latest.view == request.view && _latest.projection == request.projection))
+                _lastViewChange = Clock::now();
             _latest = request;
             _hasRequest = true;
             ++_latestSerial;
@@ -139,7 +151,11 @@ bool Renderer::NeedsWorkLocked() const {
     if (Clock::now() < _retryAt) return false;
     const bool failed = _failedValid && _failed == _latest && _failedVersion == _state->Version();
     if (failed) return false;
-    return ChangedLocked(_latest) || !_complete;
+    if (ChangedLocked(_latest)) return true;
+    // Refine only once the camera has stopped: a full-resolution refinement
+    // cannot be interrupted, and starting one between two navigation ticks
+    // would drop the camera updates that arrive while it renders.
+    return !_complete && Clock::now() >= _lastViewChange + _refineDelay;
 }
 
 void Renderer::Snapshot(std::shared_ptr<const Frame> *frame, bool *converged) const {
@@ -212,7 +228,12 @@ void Renderer::Run() {
         uint64_t serial = 0, version = 0;
         {
             std::unique_lock<std::mutex> lock(_mutex);
-            _wake.wait_for(lock, std::chrono::milliseconds(250), [&] { return _stopping || NeedsWorkLocked(); });
+            auto timeout = std::chrono::milliseconds(250);
+            const auto settled = _lastViewChange + _refineDelay;
+            if (!_complete && Clock::now() < settled)
+                timeout = std::min(timeout, std::chrono::duration_cast<std::chrono::milliseconds>(settled - Clock::now()) +
+                                            std::chrono::milliseconds(1));
+            _wake.wait_for(lock, timeout, [&] { return _stopping || NeedsWorkLocked(); });
             if (_stopping) return;
             if (!NeedsWorkLocked()) continue;
             request = _latest;
@@ -220,7 +241,8 @@ void Renderer::Run() {
             version = _state->Version();
             _busy = true;
         }
-        const Job job = Plan(request, serial);
+        Job job = Plan(request, serial);
+        if (_lastJobEnd != Clock::time_point{}) job.idleMs = Milliseconds(Clock::now() - _lastJobEnd);
         std::shared_ptr<const Frame> frame;
         std::string error;
         bool workerError = false;
@@ -232,6 +254,7 @@ void Renderer::Run() {
         } catch (const std::exception &exc) {
             error = exc.what();
         }
+        _lastJobEnd = Clock::now();
         bool stopping;
         {
             std::lock_guard<std::mutex> lock(_mutex);
@@ -320,7 +343,7 @@ std::shared_ptr<const Frame> Renderer::RenderFinal(const ViewRequest &request) {
 void Renderer::Connect() {
     if (_connection.IsOpen()) return;
     _connection.Open(30);
-    _connection.Send({{"op", "hello"}, {"owner_pid", hde::processId()}, {"client", "hdEevee 0.7.4"}});
+    _connection.Send({{"op", "hello"}, {"owner_pid", hde::processId()}, {"client", "hdEevee 0.7.5"}});
     const Json reply = _connection.Receive(nullptr);
     if (!reply.value("ok", false))
         throw WorkerError(reply.value("error", std::string("EEVEE worker rejected the connection")));
@@ -428,11 +451,15 @@ std::shared_ptr<const Frame> Renderer::Execute(const Job &job) {
         Json trace = reply;
         trace["bridge_ms"] = elapsed;
         trace["upload_ms"] = uploadMs;
+        trace["idle_ms"] = job.idleMs;
+        trace["wall"] = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
         trace["job"] = {{"purpose", job.purpose}, {"samples", job.samples}, {"scale", job.scale}};
         trace["view"] = MatrixJson(r.view);
         trace["projection"] = MatrixJson(r.projection);
-        std::ofstream out(hde::environmentPath("HDEEVEE_TRACE"), std::ios::app);
-        out << trace.dump() << '\n';
+        // Buffered: opening the file per frame (and a virus scanner checking each
+        // write) would slow the frames being measured.
+        _trace += trace.dump() + '\n';
+        if (_trace.size() > (1u << 20)) FlushTrace();
     }
     return frame;
 }

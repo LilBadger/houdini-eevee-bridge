@@ -116,6 +116,14 @@ def activate():
                 state['switching'] = False
             state['releasing'][name] = (viewer, network, renderer, empty)
 
+    def keep_loaded():
+        # The viewport option Keep EEVEE Loaded When Switching Renderers, written by
+        # the render delegate: keep the worker, its scene and compiled shaders.
+        try:
+            return (Path(os.environ['HDEEVEE_SESSION_DIR']) / 'keep_loaded').read_text().strip() == '1'
+        except (KeyError, OSError):
+            return False
+
     def stop_unused_worker(leaving):
         """Stop the worker at once when the viewport `leaving` switches away from EEVEE
         and no other viewport shows it. Called from the RendererChanged viewer event: a
@@ -123,7 +131,7 @@ def activate():
         not hold its memory meanwhile. The event arrives before the viewer reports its new
         renderer, so the direction comes from the renderer last seen on it."""
         worker = state['worker']
-        if state['switching'] or not worker or idle_exit <= 0 or not is_running(worker):
+        if state['switching'] or not worker or idle_exit <= 0 or not is_running(worker) or keep_loaded():
             return
         if 'eevee' not in state['renderers'].get(leaving.name(), '').lower():
             return
@@ -180,7 +188,7 @@ def activate():
         # Houdini VK/GL or leaves the LOP scene, so the worker cannot see that EEVEE is
         # gone. Stop it here. A viewport showing EEVEE again starts a new worker, and the
         # background renderer reconnects and sends its scene again.
-        if viewers or not worker or not is_running(worker) or idle_exit <= 0:
+        if viewers or not worker or not is_running(worker) or idle_exit <= 0 or keep_loaded():
             state['unseen_since'] = None
         else:
             state['unseen_since'] = state['unseen_since'] or now
