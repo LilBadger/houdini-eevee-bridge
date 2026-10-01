@@ -854,6 +854,18 @@ void EeveeLight::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits) {
         auto v = ValueJson(d->GetLightParamValue(id, TfToken(key)));
         if (!v.is_null()) params[key] = v;
     }
+    // Renderer inputs such as Karma's are not Hydra light params; they are parameters
+    // of the light's shader network node.
+    const VtValue resource = d->GetMaterialResource(id);
+    if (resource.IsHolding<HdMaterialNetworkMap>())
+        for (const auto &[terminal, network] : resource.UncheckedGet<HdMaterialNetworkMap>().map)
+            for (const auto &node : network.nodes)
+                for (const char *key : {"karma:light:singlesided", "karma:light:renderlightgeo"}) {
+                    const auto it = node.parameters.find(TfToken(key));
+                    if (it == node.parameters.end() || params.contains(key)) continue;
+                    auto v = ValueJson(it->second);
+                    if (!v.is_null()) params[key] = v;
+                }
     // Light and shadow linking: the collection each link uses. Prims list the
     // collections that include them as categories (see CategoriesJson).
     for (const TfToken &key : {HdTokens->lightLink, HdTokens->shadowLink}) {

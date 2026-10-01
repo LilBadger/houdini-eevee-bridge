@@ -153,11 +153,11 @@ In this shot, EEVEE itself needs 60–70 ms to draw one reduced-resolution frame
 Standard Surface and Principled BSDF are different shading models, so materials look close to Karma but not identical. Unsupported shader nodes render magenta and are named in the worker log. VEX and compiled Karma shaders cannot run in EEVEE; use MaterialX equivalents or baked textures instead.
 
 ### Lights and environment
-- **Lights.** Rect, disk, sphere, distant and cylinder lights, with intensity, exposure, color temperature, normalization and diffuse and specular multipliers. Brightness matches Karma, including distant lights, whose intensity is irradiance when normalized and otherwise the radiance of the sun's disc.
+- **Lights.** Rect, disk, sphere, distant and cylinder lights, with intensity, exposure, color temperature, normalization and diffuse and specular multipliers. Rect and disk lights with Karma's *Single Sided* off emit from both faces. Brightness matches Karma, including distant lights, whose intensity is irradiance when normalized and otherwise the radiance of the sun's disc.
 - **Spot lights.** Sphere and disk lights with a UsdLux cone angle and softness become EEVEE spot lights.
 - **Light and shadow linking.** A light's light-link and shadow-link collections decide which objects it lights and which cast its shadows.
 - **IES profiles and light textures.** EEVEE cannot draw either, so both are approximated and named in the log: an IES profile becomes the spot cone that fits it, and a textured light (other than a dome) takes the texture's average color.
-- **World.** Dome lights drive EEVEE's world: lat-long HDRIs, rotation, tint and exposure. Multiple domes add together. EEVEE Render Settings can override the environment with an HDRI or a color, or turn it off.
+- **World.** Dome lights drive EEVEE's world: lat-long HDRIs, rotation, tint and exposure. Multiple domes add together. As in Karma, a dome is the camera background only with *Render Light Geometry* on. EEVEE Render Settings can override the environment with an HDRI or a color, or turn it off.
 
 ### Cameras and motion
 - **Cameras.** Perspective and orthographic cameras with lens shift, pixel aspect and clipping. Depth of field works in the viewport and in renders.

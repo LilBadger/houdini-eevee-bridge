@@ -91,6 +91,7 @@ class Session:
         self.visibility = {}
         self.prim_ids = {}
         self.domes = {}
+        self.light_backs = {}            # two-sided area lights: the twin facing backwards
         self.environment_signature = None
         self.material_warnings = {}
         self.geometry_warnings = {}
@@ -138,6 +139,9 @@ class Session:
         self.instances.clear()
         self.instance_state.clear()
         self.instance_primvars.clear()
+        for obj in self.light_backs.values():
+            bpy.data.objects.remove(obj, do_unlink=True)
+        self.light_backs.clear()
         for obj in list(self.objects.values()):
             data = obj.data
             bpy.data.objects.remove(obj, do_unlink=True)
@@ -336,7 +340,10 @@ class Session:
         for obj_key in self.bound.get(key, ()):
             obj = self.objects.get(obj_key)
             if obj is not None and obj.data is not None and hasattr(obj.data, 'materials'):
-                obj.data.materials.clear()
+                slots = obj.data.materials
+                for index, slot in enumerate(slots):
+                    if slot == mat:
+                        slots[index] = None   # in place: face material indices stay valid
         digest = self.material_digest.pop(key, None)
         if not self.shares(key, mat):
             self.worker.materials.retire(digest, mat)
@@ -371,9 +378,15 @@ class Session:
         slots = obj.data.materials
         if list(slots) == wanted:
             return
-        slots.clear()
-        for mat in wanted:
-            slots.append(mat)
+        # Replace slots in place: clearing them resets every face's material
+        # index, which would drop GeomSubset assignments made before.
+        for index, mat in enumerate(wanted):
+            if index >= len(slots):
+                slots.append(mat)
+            elif slots[index] != mat:
+                slots[index] = mat
+        while len(slots) > len(wanted):
+            slots.pop()
 
     def rebind(self, material_key):
         for obj_key in list(self.bound.get(material_key, ())):
@@ -494,6 +507,32 @@ class Session:
         if obj.hide_render != hidden:
             obj.hide_render = hidden
             obj.hide_set(hidden, view_layer=self.view_layer)
+        sided = params.get('karma:light:singlesided')
+        self.light_back(key, obj, light.type == 'AREA' and sided is not None and not sided)
+
+    def light_back(self, key, obj, two_sided):
+        """Houdini lights are two-sided unless Single Sided is on, and Karma emits from
+        both faces when karma:light:singlesided is false. EEVEE area lights emit from
+        the front only, so a twin sharing the light data faces the other way."""
+        back = self.light_backs.get(key)
+        if not two_sided:
+            if back is not None:
+                bpy.data.objects.remove(self.light_backs.pop(key), do_unlink=True)
+                self.links_dirty = True
+            return
+        if back is None:
+            back = bpy.data.objects.new(key + ' (back)', obj.data)
+            self.scene.collection.objects.link(back)
+            back.parent = obj   # follows the light's transform and motion samples
+            back.matrix_parent_inverse = Matrix.Identity(4)
+            back.matrix_basis = Matrix.Rotation(math.pi, 4, 'X')
+            self.light_backs[key] = back
+            self.links_dirty = True
+        if back.data != obj.data:
+            back.data = obj.data
+        if back.hide_render != obj.hide_render:
+            back.hide_render = obj.hide_render
+            back.hide_set(obj.hide_render, view_layer=self.view_layer)
 
     # ------------------------------------------------------------------ update
     def update(self, changes):
@@ -602,6 +641,9 @@ class Session:
         for instance in self.instances.pop(key, []):
             self.picks.release(instance)
             bpy.data.objects.remove(instance, do_unlink=True)
+        back = self.light_backs.pop(key, None)
+        if back is not None:
+            bpy.data.objects.remove(back, do_unlink=True)
         obj = self.objects.pop(key, None)
         if obj is not None:
             self.picks.release(obj)

@@ -312,8 +312,20 @@ def author(python_node):
     # selected by Hydra; the USD Render ROP explicitly selects this same path.
 
 
+def cooked_stage(node):
+    """The node's stage. On a node that has not cooked, stage() cooks it and, when the
+    cook is slow (APEX rigs, large SOP imports), can return an expired stage handle."""
+    node.cook()
+    stage = node.stage()
+    try:
+        stage.GetPseudoRoot()
+    except Exception:
+        stage = node.stage()
+    return stage
+
+
 def render(node, method='execute'):
-    camera = node.stage().GetPrimAtPath(node.evalParm('camera'))
+    camera = cooked_stage(node).GetPrimAtPath(node.evalParm('camera'))
     if not camera or not camera.IsA(UsdGeom.Camera):
         raise hou.Error('Choose a camera on the connected Stage before rendering.')
     if method != 'renderpreview':
