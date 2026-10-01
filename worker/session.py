@@ -78,6 +78,7 @@ class Session:
         self.subsets = {}
         self.display = {}
         self.display_colors = {}
+        self.display_alpha = set()       # prims whose displayOpacity is below 1
         self.categories = {}
         self.light_links = {}
         self.links_dirty = False
@@ -153,7 +154,7 @@ class Session:
         for name in ('objects', 'materials', 'material_digest', 'materialx_defs', 'bindings', 'bound',
                      'subset_bindings', 'subsets', 'display', 'display_colors', 'categories', 'light_links',
                      'topology', 'visibility', 'prim_ids', 'fields', 'volume_defs', 'motion_defs', 'domes',
-                     'material_warnings', 'geometry_warnings', 'exported_attributes'):
+                     'material_warnings', 'geometry_warnings', 'exported_attributes', 'display_alpha'):
             getattr(self, name).clear()
         self.picks.reset()
         light_links.clear(self)
@@ -378,9 +379,20 @@ class Session:
         for obj_key in list(self.bound.get(material_key, ())):
             self.assign_material(obj_key)
 
-    def display_material(self, key, color, varying=False):
-        """Material for prims without a bound material, from USD displayColor."""
-        if varying:
+    def display_material(self, key, color, varying=False, alpha=False):
+        """Material for prims without a bound material, from USD displayColor and,
+        when it is below 1, displayOpacity (as in Karma)."""
+        if alpha:
+            material_key = '__hde_display_attribute_alpha'
+            if material_key not in self.materials:
+                self.material({'id': material_key, 'graph': {
+                    'nodes': [{'id': 'color', 'type': 'hde:primvar', 'name': 'displayColor'},
+                              {'id': 'opacity', 'type': 'hde:primvar', 'name': 'displayOpacity'},
+                              {'id': 'bsdf', 'type': 'ShaderNodeBsdfPrincipled', 'inputs': {'Roughness': 0.4}},
+                              {'id': 'output', 'type': 'ShaderNodeOutputMaterial'}],
+                    'links': [['color', 'Color', 'bsdf', 'Base Color'], ['opacity', 'Fac', 'bsdf', 'Alpha'],
+                              ['bsdf', 'BSDF', 'output', 'Surface']]}})
+        elif varying:
             # Shared by every prim whose displayColor varies per point, face or corner.
             material_key = '__hde_display_attribute'
             if material_key not in self.materials:
@@ -400,13 +412,20 @@ class Session:
         prim's latest change; its displayColor is kept for later rebinding."""
         if 'color' in update:
             self.display_colors[key] = (update['color'], update.get('color_varying', False))
+        opacity = (update.get('attributes') or {}).get('displayOpacity')
+        if isinstance(opacity, dict):
+            values = np.asarray(opacity.get('values', []), np.float32)
+            if values.size and float(values.min()) < 0.999:
+                self.display_alpha.add(key)
+            else:
+                self.display_alpha.discard(key)
         if self.bindings.get(key):
             return
         color, varying = self.display_colors.get(key, (None, False))
         # Per-instance displayColor needs the attribute-reading material.
         varying = varying or 'displayColor' in self.instance_primvars.get(key, {})
         if color is not None or varying:
-            self.display_material(key, color, varying)
+            self.display_material(key, color, varying, key in self.display_alpha)
 
     # ------------------------------------------------------------------ lights
     def light(self, update):
@@ -598,6 +617,7 @@ class Session:
         for name in ('topology', 'visibility', 'prim_ids', 'volume_defs', 'motion_defs', 'geometry_warnings',
                      'subsets', 'display', 'display_colors', 'instance_primvars'):
             getattr(self, name).pop(key, None)
+        self.display_alpha.discard(key)
         if self.categories.pop(key, None) is not None or self.light_links.pop(key, None) is not None:
             self.links_dirty = True
         self.dirty_geometry = True
