@@ -10,6 +10,7 @@
 #include <pxr/usd/sdf/assetPath.h>
 #include <pxr/usd/sdf/layer.h>
 #include <pxr/imaging/hd/changeTracker.h>
+#include <pxr/imaging/hd/extComputationUtils.h>
 #include <pxr/imaging/hd/geomSubsetSchema.h>
 #include <pxr/imaging/hd/materialBindingSchema.h>
 #include <pxr/imaging/hd/materialBindingsSchema.h>
@@ -211,7 +212,8 @@ bool SyncPrimvarsTo(HdSceneDelegate *d, const SdfPath &id, SentArrays &sent, std
     for (int i = HdInterpolationConstant; i <= HdInterpolationFaceVarying; ++i) {
         for (const auto &desc : d->GetPrimvarDescriptors(id, HdInterpolation(i))) {
             const std::string name = desc.name.GetString();
-            if (skip.count(name)) continue;
+            // UsdSkel's joint influences feed the skinning computation, not shading.
+            if (skip.count(name) || name.rfind("skel:", 0) == 0) continue;
             const VtValue value = d->Get(id, desc.name);
             BlobPtr blob;
             Json *target = &attributes;
@@ -286,6 +288,15 @@ std::vector<std::pair<SdfPath, VtIntArray>> FaceSubsets(HdSceneDelegate *d, cons
 Json CategoriesJson(HdSceneDelegate *d, const SdfPath &id) {
     Json result = Json::array();
     for (const TfToken &category : d->GetCategories(id)) result.push_back(category.GetString());
+    return result;
+}
+
+// UsdSkel skinning (and other deformers) deliver points as ext computations,
+// which the render delegate evaluates on the CPU.
+HdExtComputationPrimvarDescriptorVector ComputedPrimvars(HdSceneDelegate *d, const SdfPath &id, const TfToken &name) {
+    HdExtComputationPrimvarDescriptorVector result;
+    for (const auto &descriptor : d->GetExtComputationPrimvarDescriptors(id, HdInterpolationVertex))
+        if (descriptor.name == name) result.push_back(descriptor);
     return result;
 }
 
@@ -613,13 +624,27 @@ void EeveeMesh::Sync(HdSceneDelegate *d, HdRenderParam*, HdDirtyBits *bits, cons
         for (const auto &name : _primvars) _sent.Forget("pv:" + name);
     }
     if (force || (*bits & HdChangeTracker::DirtyPoints)) {
-        const VtValue points = GetPoints(d);
+        const auto computed = ComputedPrimvars(d, id, HdTokens->points);
+        VtValue points;
+        if (!computed.empty()) {
+            const auto values = HdExtComputationUtils::GetComputedPrimvarValues(computed, d);
+            const auto it = values.find(HdTokens->points);
+            if (it != values.end()) points = it->second;
+        }
+        if (points.IsEmpty()) points = GetPoints(d);
         BlobPtr blob = Vec3Blob(points);
         if (!blob) blob = CopyBlob(std::vector<float>{}, "f4", {0, 3});
         if (_sent.Changed("points", blob->hash) || force) change.json["points"] = change.Ref(blob);
         if (extent > 0.f) {
             HdTimeSampleArray<VtValue, 4> samples;
-            d->SamplePrimvar(id, HdTokens->points, -extent, extent, &samples);
+            if (!computed.empty()) {
+                HdExtComputationUtils::SampledValueStore<4> store;
+                HdExtComputationUtils::SampleComputedPrimvarValues<4>(computed, d, -extent, extent, 4, &store);
+                const auto it = store.find(HdTokens->points);
+                if (it != store.end()) samples = it->second;
+            } else {
+                d->SamplePrimvar(id, HdTokens->points, -extent, extent, &samples);
+            }
             Json values = Json::array();
             if (samples.count >= 2)
                 for (size_t i = 0; i < samples.count; ++i)

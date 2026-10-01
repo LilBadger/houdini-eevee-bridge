@@ -12,7 +12,7 @@ add_library(hdEevee SHARED
 target_include_directories(hdEevee PRIVATE third_party)
 target_link_libraries(hdEevee PRIVATE Houdini Houdini::Dep::pxr_hd Houdini::Dep::pxr_hf Houdini::Dep::pxr_tf
     Houdini::Dep::pxr_gf Houdini::Dep::pxr_vt Houdini::Dep::pxr_sdf Houdini::Dep::pxr_plug
-    Houdini::Dep::pxr_work Houdini::Dep::pxr_arch Houdini::Dep::pxr_hdsi)
+    Houdini::Dep::pxr_work Houdini::Dep::pxr_arch Houdini::Dep::pxr_hdsi Houdini::Dep::pxr_trace)
 if(UNIX AND NOT APPLE)
     target_link_libraries(hdEevee PRIVATE rt)
 endif()

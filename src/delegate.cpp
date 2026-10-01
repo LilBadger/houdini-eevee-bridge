@@ -5,6 +5,7 @@
 #include <pxr/base/tf/registryManager.h>
 #include <pxr/base/tf/type.h>
 #include <pxr/imaging/hd/aov.h>
+#include <pxr/imaging/hd/extComputation.h>
 #include <pxr/imaging/hd/renderIndex.h>
 #include <pxr/imaging/hd/renderPass.h>
 #include <pxr/imaging/hd/renderPassState.h>
@@ -201,7 +202,7 @@ public:
     const TfTokenVector &GetSupportedSprimTypes() const override {
         static TfTokenVector t = {HdPrimTypeTokens->camera, HdPrimTypeTokens->material, HdPrimTypeTokens->rectLight,
             HdPrimTypeTokens->diskLight, HdPrimTypeTokens->distantLight, HdPrimTypeTokens->sphereLight,
-            HdPrimTypeTokens->cylinderLight, HdPrimTypeTokens->domeLight};
+            HdPrimTypeTokens->cylinderLight, HdPrimTypeTokens->domeLight, HdPrimTypeTokens->extComputation};
         return t;
     }
     const TfTokenVector &GetSupportedBprimTypes() const override {
@@ -227,6 +228,8 @@ public:
     HdSprim *CreateSprim(const TfToken &t, const SdfPath &id) override {
         if (t == HdPrimTypeTokens->camera) return new EeveeCamera(id, &_state);
         if (t == HdPrimTypeTokens->material) return new EeveeMaterial(id, &_state);
+        // UsdSkel skinning and other deformers: evaluated on the CPU by the prims using them.
+        if (t == HdPrimTypeTokens->extComputation) return new HdExtComputation(id);
         return new EeveeLight(id, t, &_state);
     }
     // Fallback prims have empty paths; their destructors queue nothing.
